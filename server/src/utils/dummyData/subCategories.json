@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Mobile Phones",
+    "category": "64b5a4c9e4c7f5b2a1e9d123" 
+  },
+  {
+    "name": "Laptops",
+    "category": "64b5a4c9e4c7f5b2a1e9d123" 
+  },
+  {
+    "name": "Men's Clothing",
+    "category": "64b5a4c9e4c7f5b2a1e9d124"
+  },
+  {
+    "name": "Women's Clothing",
+    "category": "64b5a4c9e4c7f5b2a1e9d124"
+  },
+  {
+    "name": "Fiction Books",
+    "category": "64b5a4c9e4c7f5b2a1e9d125"
+  },
+  {
+    "name": "Non-Fiction Books",
+    "category": "64b5a4c9e4c7f5b2a1e9d125"
+  },
+  {
+    "name": "Kitchen Appliances",
+    "category": "64b5a4c9e4c7f5b2a1e9d126"
+  },
+  {
+    "name": "Fitness Equipment",
+    "category": "64b5a4c9e4c7f5b2a1e9d127"
+  },
+  {
+    "name": "Action Figures",
+    "category": "64b5a4c9e4c7f5b2a1e9d128"
+  },
+  {
+    "name": "Video Games",
+    "category": "64b5a4c9e4c7f5b2a1e9d129"
+  }
+]

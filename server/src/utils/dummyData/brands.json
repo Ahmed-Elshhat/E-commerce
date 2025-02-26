@@ -1,0 +1,42 @@
+[
+  {
+    "name": "Apple",
+    "image": "apple.jpg"
+  },
+  {
+    "name": "Samsung",
+    "image": "samsung.jpg"
+  },
+  {
+    "name": "Nike",
+    "image": "nike.jpg"
+  },
+  {
+    "name": "Adidas",
+    "image": "adidas.jpg"
+  },
+  {
+    "name": "Sony",
+    "image": "sony.jpg"
+  },
+  {
+    "name": "Dell",
+    "image": "dell.jpg"
+  },
+  {
+    "name": "HP",
+    "image": "hp.jpg"
+  },
+  {
+    "name": "LG",
+    "image": "lg.jpg"
+  },
+  {
+    "name": "Puma",
+    "image": "puma.jpg"
+  },
+  {
+    "name": "Asus",
+    "image": "asus.jpg"
+  }
+]
