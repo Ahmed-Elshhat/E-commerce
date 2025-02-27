@@ -11,13 +11,7 @@ import ForgotPassword from "./pages/Auth/ForgotPassword/ForgotPassword";
 import VerifyPassResetCode from "./pages/Auth/VerifyPassResetCode/VerifyPassResetCode";
 import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword";
 import Header from "./components/Header/Header";
-import Cookie from "cookie-universal";
-import { useEffect } from "react";
 function App() {
-  useEffect(() => {
-    const cookie = Cookie();
-    cookie.set("ECT", "ok");
-  });
   return (
     <div className="App">
       <Routes>
