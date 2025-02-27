@@ -105,14 +105,17 @@
 
       .signin-google-btn {
         width: 100%;
+        text-decoration: none;
+        text-align: center;
         padding: 14px;
         border: none;
         border-radius: 6px;
-        background-color: rgb(240, 87, 10);
-        background-color: rgb(240, 10, 71);
-        background-color: rgb(246, 27, 27);
         background-color: rgb(24, 24, 187);
         color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
       }
 
       .signup {

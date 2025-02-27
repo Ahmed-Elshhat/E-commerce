@@ -227,9 +227,9 @@ function Login() {
             <span>Or</span>
           </div>
 
-          <button className="signin-google-btn">
+          <a href="http://localhost:8000/api/v1/auth/google" className="signin-google-btn">
             <FaGoogle /> Sign in with Google
-          </button>
+          </a>
 
           <div className="signup">
             <p>Don't have an account?</p>
