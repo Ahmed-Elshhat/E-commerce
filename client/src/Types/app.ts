@@ -19,3 +19,10 @@ export type RequireAuthUser = {
   addresses: [];
   id: string;
 };
+
+// Login
+
+export type LoginFormState = {
+  email: string;
+  password: string;
+};
