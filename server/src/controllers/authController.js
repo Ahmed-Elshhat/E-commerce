@@ -60,17 +60,12 @@ exports.googleCallback = asyncHandler(async (req, res) => {
   const user = req.user;
   const token = createToken(user.id);
 
-  res.cookie("ECT", token, /* {
-    // httpOnly: false,
-    // secure: false,
-    // sameSite: "strict",
-    // path: "/",
-    httpOnly: false,  // احفظ الكوكيز بطريقة آمنة
-    secure: false,   // `false` لأنك تستخدم `localhost` (اجعلها `true` عند نشر الـ Backend)
-    sameSite: "none", // يجب أن تكون "None" لدعم الكوكيز بين النطاقات
+  res.cookie("ECT", token, {
+    httpOnly: false,
+    secure: false,
+    sameSite: "strict",
     path: "/",
-  } */); 
-
+  });
 
   req.logout((err) => {
     if (err) {
@@ -78,8 +73,7 @@ exports.googleCallback = asyncHandler(async (req, res) => {
     }
     req.session.destroy(() => {
       res.clearCookie("connect.sid");
-      // res.redirect("http://localhost:3000");
-      res.redirect("https://idyllic-marshmallow-df4195.netlify.app/");
+      res.redirect("http://localhost:3000");
     });
   });
 });

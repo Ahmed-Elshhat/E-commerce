@@ -9,11 +9,11 @@ const compression = require("compression");
 const rateLimit = require("express-rate-limit");
 const hpp = require("hpp");
 const passport = require("passport");
-const session = require("express-session")
+const session = require("express-session");
 const { swaggerUi, specs } = require("../swagger");
 
 dotenv.config({ path: "config.env" });
-require("./config/passport")
+require("./config/passport");
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
@@ -26,21 +26,20 @@ dbConnection();
 const app = express();
 const port = process.env.PORT || 8000;
 
-app.use(
-  cors({
-    origin: "https://idyllic-marshmallow-df4195.netlify.app",
-    credentials: true, 
-    methods: ["GET", "POST", "PUT", "DELETE"], 
-    allowedHeaders: ["Content-Type", "Authorization"], 
-  })
-);
+// app.use(
+//   cors({
+//     origin: "https://idyllic-marshmallow-df4195.netlify.app",
+//     credentials: true,
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     allowedHeaders: ["Content-Type", "Authorization"],
+//   })
+// );
 
-  // app.use(cors());
-  // app.options("*", cors());
+app.use(cors());
+app.options("*", cors());
 
 // compress all responses
 app.use(compression());
-  
 
 // Middleware
 // parse application/x-www-form-urlencoded
@@ -106,7 +105,6 @@ app.use(passport.session());
 
 // Serve Swagger documentation
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
 
 // Mount Routes
 mountRoutes(app);
