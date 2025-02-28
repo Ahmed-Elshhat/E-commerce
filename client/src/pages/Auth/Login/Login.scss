@@ -1,37 +1,36 @@
-
-
 .login {
   background-color: #eee;
-  height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100vh;
   @media (max-width: 500px) {
     background-color: white;
   }
   .login-box {
     background-color: white;
     width: 500px;
-    border-radius: 6px;
     padding: 20px 30px;
+    border-radius: 6px;
     h2 {
       color: #155dfc;
-      text-align: center;
       font-size: 30px;
+      text-align: center;
     }
 
     form {
       label {
-        color: #333;
         display: block;
+        color: #333;
       }
+
       input {
         width: 100%;
         height: 40px;
+        padding: 5px 10px;
+        border: 1px solid rgb(198, 192, 192);
         border-radius: 5px;
         outline: none;
-        border: 1px solid rgb(198, 192, 192);
-        padding: 5px 10px;
         &:focus {
           border: 2px solid blue;
         }
@@ -40,6 +39,7 @@
           color: rgb(134, 134, 134);
         }
       }
+
       .email {
         input {
           margin-bottom: 15px;
@@ -48,15 +48,15 @@
 
       .password {
         .password-cover {
-          width: 100%;
           position: relative;
+          width: 100%;
           button {
+            background-color: white;
             position: absolute;
             right: 10px;
             top: 9px;
-            background-color: white;
-            border: none;
             font-size: 20px;
+            border: none;
             svg {
               fill: rgb(134, 134, 134);
             }
@@ -94,58 +94,58 @@
       }
 
       .signin-btn {
+        background-color: rgb(0, 132, 255);
+        color: white;
         width: 100%;
         padding: 14px;
         border: none;
         border-radius: 6px;
-        background-color: rgb(0, 132, 255);
-        color: white;
-        cursor: pointer;
         transition: 0.3s;
+        cursor: pointer;
         &:hover {
           background-color: rgb(0, 98, 255);
         }
       }
 
       .or-divider {
-        text-align: center;
-        margin-bottom: 6px;
         color: rgb(134, 134, 134);
+        margin-bottom: 6px;
+        text-align: center;
         .line {
+          background-color: #ccc;
           width: 100%;
           height: 1px;
-          background-color: #ccc;
           margin: 20px 0 5px;
         }
       }
 
       .signin-google-btn {
-        width: 100%;
-        height: 45px;
-        text-decoration: none;
-        text-align: center;
-        padding: 14px;
-        border: none;
-        border-radius: 6px;
         background-color: rgb(24, 24, 187);
         color: white;
         display: flex;
         justify-content: center;
         align-items: center;
         gap: 10px;
+        width: 100%;
+        height: 45px;
+        padding: 14px;
+        text-align: center;
+        text-decoration: none;
+        border: none;
+        border-radius: 6px;
       }
 
       .signup {
-        text-align: center;
         margin-top: 20px;
+        text-align: center;
         p {
-          display: inline-block;
           color: rgb(134, 134, 134);
+          display: inline-block;
         }
         a {
-          text-decoration: none;
           color: rgb(11, 145, 228);
           margin: 0 5px;
+          text-decoration: none;
         }
       }
     }
