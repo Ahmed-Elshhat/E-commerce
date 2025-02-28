@@ -12,8 +12,8 @@ function Login() {
     email: "",
     password: "",
   });
-  const [showPassword, setShowPassword] = useState<boolean>(false);
   const cookies = Cookie();
+  const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const location = useLocation();
@@ -99,12 +99,12 @@ function Login() {
   return (
     <div className="login">
       <div className="login-box">
-        <h2>Sign in</h2>
+        <h2>Login</h2>
         <form onSubmit={handleSubmit}>
           <div className="email">
             <label htmlFor="email">Email</label>
             <input
-              type="text"
+              type="email"
               name="email"
               id="email"
               placeholder="Email"
@@ -171,7 +171,7 @@ function Login() {
             </div>
           </div>
 
-          <button className="signin-btn">Sign in</button>
+          <button className="signin-btn">Login</button>
 
           <div className="or-divider">
             <div className="line"></div>
