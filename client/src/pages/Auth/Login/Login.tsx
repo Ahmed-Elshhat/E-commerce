@@ -1,137 +1,6 @@
-// import { useState } from "react";
-// import { Link, useNavigate } from "react-router-dom";
-// import { FaUser, FaLock, FaGoogle, FaEye, FaEyeSlash } from "react-icons/fa";
-// import axios from "axios";
-// import { BASE_URL, LOGIN } from "../../../Api/Api";
-// import Cookie from "cookie-universal";
-
-// function Login() {
-//   const [form, setForm] = useState({
-//     email: "",
-//     password: "",
-//   });
-//   const [showPassword, setShowPassword] = useState<boolean>(false);
-//   const navigate = useNavigate();
-//   const cookies = Cookie();
-
-//   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-//     setForm({ ...form, [e.target.name]: e.target.value });
-//   };
-
-//   const togglePasswordVisibility = () => {
-//     setShowPassword(!showPassword);
-//   };
-
-//   const handleSubmit = async (e: React.FormEvent) => {
-//     e.preventDefault();
-//     try {
-//       const res = await axios.post(`${BASE_URL}${LOGIN}`, form);
-//       if (res.status === 200) {
-//         const token = res.data.token;
-//         cookies.set("ECT", token);
-//         navigate("/", { replace: true });
-//       }
-//     } catch (error) {
-//       console.error(error);
-//     }
-//   };
-
-//   return (
-//     <div className="min-h-screen flex flex-col justify-center bg-white">
-//       <div className="w-full max-w-md mx-auto h-full flex flex-col justify-center px-8 py-20 bg-white sm:bg-gray-100 sm:rounded-2xl sm:shadow-lg">
-//         <h2 className="text-3xl font-bold text-center text-gray-800 mb-10">
-//           Welcome Back 👋
-//         </h2>
-
-//         <form onSubmit={handleSubmit} className="flex flex-col gap-y-10">
-//           {/* Email Input */}
-//           <div className="relative">
-//             <FaUser className="absolute left-3 top-4 text-gray-500" />
-//             <input
-//               type="email"
-//               placeholder="Email"
-//               name="email"
-//               value={form.email}
-//               onChange={handleChange}
-//               required
-//               className="w-full px-10 py-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg"
-//             />
-//           </div>
-
-//           {/* Password Input */}
-//           <div className="relative">
-//             <FaLock className="absolute left-3 top-4 text-gray-500" />
-//             <input
-//               type={showPassword ? "text" : "password"}
-//               placeholder="Password"
-//               name="password"
-//               value={form.password}
-//               onChange={handleChange}
-//               required
-//               className="w-full px-10 py-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 text-lg pr-12"
-//             />
-//             <button
-//               type="button"
-//               onClick={togglePasswordVisibility}
-//               className="absolute right-3 top-4 text-gray-500 focus:outline-none cursor-pointer text-xl"
-//             >
-//               {showPassword ? <FaEyeSlash /> : <FaEye />}
-//             </button>
-//           </div>
-
-//           {/* Forgot Password */}
-//           <div className="text-center">
-//             <Link to="/forgot-password" className="text-blue-500 hover:underline text-lg">
-//               Forgot Password?
-//             </Link>
-//           </div>
-
-//           {/* Submit Button */}
-//           <button
-//             type="submit"
-//             className="w-full py-4 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition cursor-pointer text-lg"
-//           >
-//             Login
-//           </button>
-//         </form>
-
-//         {/* OR Divider */}
-//         <div className="relative text-center my-10">
-//           <span className="absolute inset-x-0 top-1/2 bg-white px-2 text-lg text-gray-500">
-//             OR
-//           </span>
-//           <div className="h-px bg-gray-300"></div>
-//         </div>
-
-//         {/* Google Login Button */}
-//         <a
-//           href="http://localhost:8000/api/v1/auth/google"
-//           className="no-underline"
-//         >
-//           <button className="w-full flex items-center justify-center gap-3 py-4 text-gray-700 bg-white border rounded-lg shadow-sm hover:bg-gray-100 transition cursor-pointer text-lg">
-//             <FaGoogle className="text-red-500" />
-//             <span>Continue with Google</span>
-//           </button>
-//         </a>
-
-//         {/* Signup Link */}
-//         <p className="text-lg text-center text-gray-600 mt-10">
-//           Don't have an account?{" "}
-//           <Link to="/signup" className="text-blue-500 hover:underline">
-//             Sign up
-//           </Link>
-//         </p>
-//       </div>
-//     </div>
-//   );
-
-// }
-
-// export default Login;
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./Login.scss";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Cookie from "cookie-universal";
 import axios from "axios";
 import { BASE_URL, LOGIN } from "../../../Api/Api";
@@ -144,11 +13,46 @@ function Login() {
     password: "",
   });
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const navigate = useNavigate();
   const cookies = Cookie();
+  const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
+  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const location = useLocation();
+  const redirectToReferrer = location.state?.path || "/";
+
+  useEffect(() => {
+    if (isSubmitted) {
+      validateForm();
+    }
+  }, [form]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const validateForm = () => {
+    const newErrors: { msg: string; path?: string }[] = [];
+    const emailRegex = /^[^\s@]+@[^\s@]+\.(com)$/;
+
+    if (!form.email.trim()) {
+      newErrors.push({ msg: "Email is required", path: "email" });
+    } else if (!emailRegex.test(form.email)) {
+      newErrors.push({
+        msg: "Invalid email format (user@example.com)",
+        path: "email",
+      });
+    }
+
+    if (!form.password.trim()) {
+      newErrors.push({ msg: "Password is required", path: "password" });
+    } else if (form.password.length < 6) {
+      newErrors.push({
+        msg: "Password must be at least 6 characters",
+        path: "password",
+      });
+    }
+
+    setErrors(newErrors);
+    return newErrors.length === 0;
   };
 
   const togglePasswordVisibility = () => {
@@ -157,15 +61,38 @@ function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrors([]);
+    setIsSubmitted(true);
+
+    if (!validateForm()) return;
+
     try {
       const res = await axios.post(`${BASE_URL}${LOGIN}`, form);
       if (res.status === 200) {
         const token = res.data.token;
         cookies.set("ECT", token);
-        navigate("/", { replace: true });
+        window.location.href = redirectToReferrer;
       }
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response) {
+        if (err.response.data?.message) {
+          setErrors([{ msg: err.response.data.message }]);
+        } else if (err.response.data?.errors) {
+          setErrors(
+            err.response.data.errors.map(
+              (error: { msg: string; path: string }) => ({
+                msg: error.msg,
+                path: error.path,
+              })
+            )
+          );
+        }
+      } else {
+        console.error("Unexpected error:", err);
+        setErrors([
+          { msg: "An unexpected error occurred. Please try again later." },
+        ]);
+      }
     }
   };
 
@@ -177,14 +104,19 @@ function Login() {
           <div className="email">
             <label htmlFor="email">Email</label>
             <input
-              type="email"
+              type="text"
               name="email"
               id="email"
-              required
               placeholder="Email"
               value={form.email}
               onChange={handleChange}
             />
+            {errors.some((error) => error.path === "email" && isSubmitted) && (
+              <p className="error-text">
+                <span className="error-star">*</span>{" "}
+                {errors.find((error) => error.path === "email")?.msg}
+              </p>
+            )}
           </div>
 
           <div className="password">
@@ -194,7 +126,6 @@ function Login() {
                 type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
-                required
                 placeholder="Password"
                 value={form.password}
                 onChange={handleChange}
@@ -207,7 +138,27 @@ function Login() {
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+            {errors.some(
+              (error) => error.path === "password" && isSubmitted
+            ) && (
+              <p className="error-text">
+                <span className="error-star">*</span>{" "}
+                {errors.find((error) => error.path === "password")?.msg}
+              </p>
+            )}
           </div>
+
+          {errors.some((error) => !error.path && isSubmitted) && (
+            <div className="error-box">
+              {errors
+                .filter((error) => !error.path)
+                .map((error, index) => (
+                  <p key={index} className="error-text">
+                    <span className="error-star">*</span> {error.msg}
+                  </p>
+                ))}
+            </div>
+          )}
 
           <div className="remember-me-and-forgot-pass">
             <div className="remember-me">
@@ -227,7 +178,10 @@ function Login() {
             <span>Or</span>
           </div>
 
-          <a href="http://localhost:8000/api/v1/auth/google" className="signin-google-btn">
+          <a
+            href="http://localhost:8000/api/v1/auth/google"
+            className="signin-google-btn"
+          >
             <FaGoogle /> Sign in with Google
           </a>
 

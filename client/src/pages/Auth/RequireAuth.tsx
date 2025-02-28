@@ -4,14 +4,14 @@ import Cookie from "cookie-universal";
 import { GET_ME, USERS } from "../../Api/Api";
 import Loading from "../../components/Loading/Loading";
 import { Axios } from "../../Api/axios";
-import { RequireAuthProps, RequireAuthUser } from "../../Types/app";
+import { RequireAuthProps, UserSchema } from "../../Types/app";
 
 
 
 
 function RequireAuth({ allowedRole }: RequireAuthProps) {
   // User
-  const [user, setUser] = useState<RequireAuthUser | null>(null);
+  const [user, setUser] = useState<UserSchema | null>(null);
 
   // Token & Cookie
   const cookie = Cookie();

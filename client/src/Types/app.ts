@@ -9,7 +9,21 @@ export type RequireAuthProps = {
   allowedRole: string[];
 };
 
-export type RequireAuthUser = {
+// Login Page
+export type LoginFormState = {
+  email: string;
+  password: string;
+};
+
+// Redirect Page
+export type RedirectPageProps = {
+  message: string;
+  dir: string;
+  pageName: string;
+};
+
+// User Schema
+export type UserSchema = {
   name: string;
   email: string;
   role: string;
@@ -18,11 +32,4 @@ export type RequireAuthUser = {
   updatedAt: Date;
   addresses: [];
   id: string;
-};
-
-// Login
-
-export type LoginFormState = {
-  email: string;
-  password: string;
 };

@@ -90,6 +90,7 @@
         border-radius: 6px;
         background-color: rgb(0, 132, 255);
         color: white;
+        cursor: pointer;
       }
 
       .or-divider {
@@ -132,5 +133,15 @@
         }
       }
     }
+  }
+
+  .error-text {
+    color: red;
+    font-size: 14px;
+  }
+  
+  .error-star {
+    color: red;
+    font-weight: bold;
   }
 }
