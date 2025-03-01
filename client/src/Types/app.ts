@@ -33,3 +33,9 @@ export type UserSchema = {
   addresses: [];
   id: string;
 };
+
+// Reset Password
+export type ResetPasswordFormState = {
+  password: string;
+  confirmPassword: string;
+};
