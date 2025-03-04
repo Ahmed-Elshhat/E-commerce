@@ -242,6 +242,7 @@ exports.deleteProduct = factory.deleteOne(Product);
 exports.productSearch = asyncHandler(async (req, res) => {
   const { s } = req.query;
   if (!s) return res.json([]);
+  
   const categories = await Category.find({
     name: { $regex: s, $options: "i" },
   });
@@ -261,7 +262,9 @@ exports.productSearch = asyncHandler(async (req, res) => {
     ],
   };
 
-  let apiFeatures = new ApiFeatures(Product.find(filterObj), req.query).sort();
+  let apiFeatures = new ApiFeatures(Product.find(filterObj), req.query)
+    .sort()
+    .filter();
 
   const filteredCount = await apiFeatures.mongooseQuery
     .clone()

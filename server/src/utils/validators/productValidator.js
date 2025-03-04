@@ -1,4 +1,4 @@
-const { check, body } = require("express-validator");
+const { check, body, query } = require("express-validator");
 const slugify = require("slugify");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const Category = require("../../models/categoryModel");
@@ -163,5 +163,15 @@ exports.updateProductValidator = [
 exports.deleteProductValidator = [
   validateExactFields([], ["id"]),
   check("id").isMongoId().withMessage("Invalid ID formate"),
+  validatorMiddleware,
+];
+
+exports.productSearchValidator = [
+  validateExactFields([], [], ["s"]),
+  query("s")
+    .notEmpty()
+    .withMessage("search must not be empty")
+    .isLength({ max: 40 })
+    .withMessage("Search text is too long, Must be under 40 characters."),
   validatorMiddleware,
 ];
