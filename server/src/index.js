@@ -27,7 +27,6 @@ const app = express();
 // const port = process.env.PORT || 8000;
 const port = 8000 || process.env.PORT;
 
-
 // app.use(
 //   cors({
 //     origin: "https://idyllic-marshmallow-df4195.netlify.app",
