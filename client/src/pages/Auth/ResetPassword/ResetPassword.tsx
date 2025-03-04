@@ -131,7 +131,7 @@ function ResetPassword() {
 
   return (
     <>
-      {loading && <Loading />}
+      {loading && <Loading transparent={true} />}
       <div className="reset-pass">
         <div className="reset-pass-box">
           <h2>Reset Password</h2>

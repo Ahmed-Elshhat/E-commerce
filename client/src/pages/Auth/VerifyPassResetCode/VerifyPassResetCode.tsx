@@ -155,7 +155,7 @@ function VerifyPassResetCode() {
 
   return (
     <>
-      {loading && <Loading />}
+      {loading && <Loading transparent={true} />}
       <div className="verify-reset-code">
         <div className="verify-reset-code-box">
           <h2>Verify Reset Code</h2>

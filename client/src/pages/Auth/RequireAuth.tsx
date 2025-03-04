@@ -35,7 +35,7 @@ function RequireAuth({ allowedRole }: RequireAuthProps) {
   }, []);
   return token ? (
     user === null ? (
-      <Loading />
+      <Loading transparent={false} />
     ) : allowedRole.includes(user.role) ? (
       <Outlet />
     ) : (

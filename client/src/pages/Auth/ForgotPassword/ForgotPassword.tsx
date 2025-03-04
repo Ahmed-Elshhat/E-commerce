@@ -85,7 +85,7 @@ function ForgotPassword() {
 
   return (
     <>
-      {loading && <Loading />}
+      {loading && <Loading transparent={true} />}
       <div className="forgot-password">
         <div className="forgot-pass-box">
             <h2>Find Your Account</h2>
