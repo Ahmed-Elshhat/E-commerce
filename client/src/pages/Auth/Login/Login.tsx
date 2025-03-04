@@ -130,10 +130,7 @@ function Login() {
                 value={form.password}
                 onChange={handleChange}
               />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-              >
+              <button type="button" onClick={togglePasswordVisibility}>
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
@@ -177,10 +174,7 @@ function Login() {
             <span>Or</span>
           </div>
 
-          <a
-            href="http://localhost:8000/api/v1/auth/google"
-            className="signin-google-btn"
-          >
+          <a href={`${BASE_URL}/auth/google`} className="signin-google-btn">
             <FaGoogle /> Sign in with Google
           </a>
 
