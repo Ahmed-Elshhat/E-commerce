@@ -14,7 +14,7 @@ export default function RedirectPage({
   };
 
   return (
-    <div className="container">
+    <div className="redirect-container">
       <h1>{message}</h1>
       <button onClick={handleRedirect} className="redirect-button">
         Go To {pageName} Page

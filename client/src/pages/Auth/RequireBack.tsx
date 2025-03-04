@@ -2,7 +2,7 @@ import Cookie from "cookie-universal";
 import { Outlet } from "react-router-dom";
 import RedirectPage from "../../components/RedirectPage/RedirectPage";
 import { useEffect, useState } from "react";
-import { GET_ME, USERS } from "../../Api/Api";
+import { GET_ME } from "../../Api/Api";
 import { Axios } from "../../Api/axios";
 function RequireBack() {
   const cookie = Cookie();
@@ -11,7 +11,7 @@ function RequireBack() {
 
   useEffect(() => {
     if (token) {
-      Axios.get(`${USERS}${GET_ME}`)
+      Axios.get(`${GET_ME}`)
         .then(() => {
           setIsValidToken(true);
           window.history.back();

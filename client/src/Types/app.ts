@@ -39,3 +39,10 @@ export type ResetPasswordFormState = {
   password: string;
   confirmPassword: string;
 };
+
+// getUser Context
+export type  initialStateGetUser = {
+  loading: boolean,
+  data: UserSchema | null,
+  error: string,
+}

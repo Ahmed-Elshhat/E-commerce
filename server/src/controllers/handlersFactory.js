@@ -35,10 +35,10 @@ exports.updateOne = (Model, populationOpt) =>
 
 exports.createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
-    console.log("Before:",req.body)
+    console.log("Before:", req.body);
     let body =
       modelName === "users" ? { ...req.body, role: "employee" } : req.body;
-      console.log("After:",body)
+    console.log("After:", body);
     const newDoc = await Model.create(body);
     res.status(201).json({ data: newDoc });
   });

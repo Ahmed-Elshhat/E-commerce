@@ -8,6 +8,9 @@ const sharp = require("sharp");
 const factory = require("./handlersFactory");
 const Product = require("../models/productModel");
 const { uploadMixOfImages } = require("../middlewares/uploadImageMiddleware");
+const Category = require("../models/categoryModel");
+const Brand = require("../models/brandModel");
+const ApiFeatures = require("../utils/apiFeatures");
 
 exports.uploadProductImages = uploadMixOfImages([
   {
@@ -232,3 +235,43 @@ exports.updateProduct = factory.updateOne(Product, "reviews");
 // @route    PUT /api/v1/products/:id
 // @access    Private
 exports.deleteProduct = factory.deleteOne(Product);
+
+// @desc    Search for products
+// @route    GET /api/v1/products/productSearch
+// @access    protected
+exports.productSearch = asyncHandler(async (req, res) => {
+  const { s } = req.query;
+  if (!s) return res.json([]);
+  const categories = await Category.find({
+    name: { $regex: s, $options: "i" },
+  });
+
+  const brands = await Brand.find({
+    name: { $regex: s, $options: "i" },
+  });
+
+  const categoryIds = categories.map((cat) => cat._id);
+  const brandIds = brands.map((brand) => brand._id);
+
+  const filterObj = {
+    $or: [
+      { title: { $regex: s, $options: "i" } },
+      { category: { $in: categoryIds } },
+      { brand: { $in: brandIds } },
+    ],
+  };
+
+  let apiFeatures = new ApiFeatures(Product.find(filterObj), req.query).sort();
+
+  const filteredCount = await apiFeatures.mongooseQuery
+    .clone()
+    .countDocuments();
+  apiFeatures.Paginate(filteredCount);
+
+  const { mongooseQuery, paginationResults } = apiFeatures;
+  const products = await mongooseQuery
+    .populate("category", "name")
+    .populate("brand", "name");
+
+  res.json({ results: products.length, paginationResults, products });
+});

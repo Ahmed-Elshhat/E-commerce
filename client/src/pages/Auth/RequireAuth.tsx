@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
 import Cookie from "cookie-universal";
-import { GET_ME, USERS } from "../../Api/Api";
+import { GET_ME } from "../../Api/Api";
 import Loading from "../../components/Loading/Loading";
 import { Axios } from "../../Api/axios";
 import { RequireAuthProps, UserSchema } from "../../Types/app";
@@ -22,7 +22,7 @@ function RequireAuth({ allowedRole }: RequireAuthProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    Axios.get(`${USERS}${GET_ME}`)
+    Axios.get(`${GET_ME}`)
       .then((res) => {
         setUser(res.data.user);
       })

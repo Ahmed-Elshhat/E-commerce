@@ -2,7 +2,7 @@ export const BASE_URL: string = "http://localhost:8000/api/v1";
 
 // users
 export const USERS: string = "/users";
-export const GET_ME : string = "/getOne";
+export const GET_ME : string = "/users/getOne";
 
 // auth
 export const LOGIN: string = "/auth/login";

@@ -10,6 +10,7 @@ const {
 } = require("../utils/validators/productValidator");
 
 const {
+  productSearch,
   getProducts,
   getProduct,
   createProduct,
@@ -20,12 +21,13 @@ const {
 } = require("../controllers/productController");
 
 const AuthService = require("../controllers/authController");
-const reviewsRoute = require('./reviewRoute');
+const reviewsRoute = require("./reviewRoute");
 
 // POST   /products/jkshjhsdjh2332n/reviews
 // GET    /products/jkshjhsdjh2332n/reviews
 // GET    /products/jkshjhsdjh2332n/reviews/87487sfww3
-router.use('/:productId/reviews', reviewsRoute);
+router.use("/:productId/reviews", reviewsRoute);
+router.get("/productSearch", productSearch);
 
 router
   .route("")
