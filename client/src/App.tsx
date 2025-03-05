@@ -13,19 +13,17 @@ import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword";
 import Header from "./components/Header/Header";
 import Cart from "./pages/Cart/Cart";
 import { useEffect } from "react";
-import { useAppDispatch, useAppSelector } from "./Redux/app/hooks";
+import { useAppDispatch } from "./Redux/app/hooks";
 import { fetchUsers } from "./Redux/feature/userSlice/userSlice";
-import Loading from "./components/Loading/Loading";
+import SearchResults from "./pages/SearchResults/SearchResults";
 function App() {
   const dispatch = useAppDispatch();
-  const { loading } = useAppSelector((state) => state.user);
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
   return (
     <div className="App">
-      {loading && <Loading transparent={false} />}
       <Routes>
         <Route
           path="/"
@@ -56,6 +54,8 @@ function App() {
         <Route element={<RequireAuth allowedRole={["user"]} />}>
           <Route path="/cart" element={<Cart />} />
         </Route>
+
+        <Route path="/search-results" element={<SearchResults />} />
       </Routes>
     </div>
   );
