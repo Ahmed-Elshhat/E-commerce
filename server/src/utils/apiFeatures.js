@@ -7,7 +7,7 @@ class ApiFeatures {
   filter() {
     // 1) Filtering
     const queryStringObj = { ...this.queryString };
-    const excludesFields = ["page", "sort", "limit", "fields", "keyword"];
+    const excludesFields = ["page", "sort", "limit", "fields", "keyword", "s"];
     excludesFields.forEach((field) => delete queryStringObj[field]);
 
     // Apply Filtration using [gte, gt, lte, lt]

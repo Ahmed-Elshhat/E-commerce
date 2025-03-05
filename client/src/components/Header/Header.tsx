@@ -9,8 +9,9 @@ import { BsBox2 } from "react-icons/bs";
 import { useWindow } from "../../context/windowContext";
 import { AiOutlineSearch } from "react-icons/ai";
 import axios from "axios";
+import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 
-type searchResultsType = { id: number; name: string }[];
+type searchResultsType = { _id: number; title: string }[];
 
 function Header() {
   const [searchText, setSearchText] = useState<string>("");
@@ -21,9 +22,9 @@ function Header() {
   const { windowSize } = useWindow();
   const searchRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    handleSearchChange();
-  }, [searchText]);
+  // useEffect(() => {
+  //   handleSearchChange();
+  // }, [searchText]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -42,24 +43,37 @@ function Header() {
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
+    const value = e.target.value;
+    setSearchText(value);
+    handleSearchChange(value);
   };
 
   const handleFocusedInput = () => {
     if (!focused) setFocused(true);
-    handleSearchChange();
+    handleSearchChange(searchText);
+    const set = setTimeout(() => {
+      if(searchText.trim() === "") {
+        setSearchResults([])
+      }
+    }, 100);
   };
 
-  const handleSearchChange = async () => {
-    if (searchText.trim() === "") return;
+  const handleSearchChange = async (searchTxt) => {
+    if (searchTxt.trim() === "") {
+      setSearchResults([])
+      return
+    }
+
     try {
       const res = await axios.get(
-        `https://api.example.com/search?q=${searchText}`
+        `${BASE_URL}${PRODUCT_SEARCH}?s=${searchTxt}`
       );
       if (res.status === 200) {
-        setSearchResults(res.data);
+        console.log(res.data.products)
+        setSearchResults(res.data.products);
       }
     } catch (err) {
+      setSearchResults([])
       console.log(err);
     }
   };
@@ -95,7 +109,7 @@ function Header() {
                   }}
                 >
                   {searchResults.map((result) => (
-                    <li key={result.id}>{result.name}</li>
+                    <li key={result._id}>{result.title}</li>
                   ))}
                 </ul>
               </>
