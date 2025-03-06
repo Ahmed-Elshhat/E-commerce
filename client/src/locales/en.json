@@ -1,0 +1,21 @@
+{
+  "home": {
+    "title": "Welcome to Our Website",
+    "description": "We offer the best services.",
+    "change_language": "Switch to Arabic"
+  },
+  "login": {
+    "title": "Login",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "rememberMe": "Remember me",
+    "forgotPassword": "Forgot Password?",
+    "loginButton": "Login",
+    "or": "Or",
+    "loginWithGoogleButton": "Login with Google",
+    "Don'tHaveAnAccount": "Don't have an account?",
+    "signup": "Sign up"
+  }
+}

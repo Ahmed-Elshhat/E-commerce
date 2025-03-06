@@ -1,4 +1,5 @@
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/Auth/NotFound/NotFound";
 import Login from "./pages/Auth/Login/Login";
@@ -12,50 +13,82 @@ import VerifyPassResetCode from "./pages/Auth/VerifyPassResetCode/VerifyPassRese
 import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword";
 import Header from "./components/Header/Header";
 import Cart from "./pages/Cart/Cart";
-import { useEffect } from "react";
 import { useAppDispatch } from "./Redux/app/hooks";
 import { fetchUsers } from "./Redux/feature/userSlice/userSlice";
 import SearchResults from "./pages/SearchResults/SearchResults";
+import "./i18n";
+import LanguageWrapper from "./components/LanguageWrapper";
+
 function App() {
+  const [lang, setLang] = useState<string>("en");
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
+
+  useEffect(() => {
+    const localLang = localStorage.getItem("lang");
+    if (localLang) {
+      setLang(localLang);
+    } else {
+      setLang("en");
+    }
+  }, []);
+
   return (
     <div className="App">
       <Routes>
+        <Route path="/" element={<Navigate replace to={`/${lang}/`} />} />
+
         <Route
-          path="/"
+          path="/:lang/*"
           element={
-            <>
-              <Header />
-              <Home />
-            </>
+            <LanguageWrapper>
+              <>
+                <Routes>
+                  <Route
+                    path="/"
+                    element={
+                      <>
+                        <Header />
+                        <Home />
+                      </>
+                    }
+                  />
+                  <Route path="/forbidden" element={<Forbidden />} />
+                  <Route element={<RequireBack />}>
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route
+                      path="/forgot-password"
+                      element={<ForgotPassword />}
+                    />
+                    <Route
+                      path="/verify-reset-code"
+                      element={<VerifyPassResetCode />}
+                    />
+                    <Route path="/reset-password" element={<ResetPassword />} />
+                  </Route>
+                  <Route
+                    element={
+                      <RequireAuth allowedRole={["admin", "employee"]} />
+                    }
+                  >
+                    <Route path="/dashboard" element={<Dashboard />} />
+                  </Route>
+                  <Route element={<RequireAuth allowedRole={["user"]} />}>
+                    <Route path="/cart" element={<Cart />} />
+                  </Route>
+                  <Route path="/search-ئresults" element={<SearchResults />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </>
+            </LanguageWrapper>
           }
         />
-        <Route path="/forbidden" element={<Forbidden />} />
-        <Route path="*" element={<NotFound />} />
-        <Route element={<RequireBack />}>
-          <Route path="/login" element={<Login />}></Route>
-          <Route path="/signup" element={<Signup />}></Route>
-          <Route path="/forgot-password" element={<ForgotPassword />}></Route>
-          <Route
-            path="/verify-reset-code"
-            element={<VerifyPassResetCode />}
-          ></Route>
-          <Route path="/reset-password" element={<ResetPassword />}></Route>
-        </Route>
 
-        <Route element={<RequireAuth allowedRole={["admin", "employee"]} />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-        </Route>
-
-        <Route element={<RequireAuth allowedRole={["user"]} />}>
-          <Route path="/cart" element={<Cart />} />
-        </Route>
-
-        <Route path="/search-results" element={<SearchResults />} />
+        <Route path="/not-found" element={<NotFound />} />
       </Routes>
     </div>
   );

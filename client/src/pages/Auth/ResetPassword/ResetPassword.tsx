@@ -26,7 +26,7 @@ function ResetPassword() {
 
   useEffect(() => {
     if (!email || !resetCode) {
-      dispatch(clearData())
+      dispatch(clearData());
       navigate("/forgot-password", { replace: true });
       return;
     }
@@ -100,8 +100,13 @@ function ResetPassword() {
       if (res.status === 200) {
         setLoading(false);
         const token = res.data.token;
-        cookies.set("ECT", token);
-        dispatch(clearData())
+        cookies.set("ECT", token, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 90,
+          secure: false,
+          sameSite: "lax",
+        });
+        dispatch(clearData());
         window.location.href = "/";
       }
     } catch (err) {

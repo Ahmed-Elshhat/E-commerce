@@ -15,8 +15,8 @@ const fetchUsers = createAsyncThunk("user/fetchUsers", async () => {
     if (res.status === 200) {
       return res.data.user;
     }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (err) {
-    console.log(err);
     return null;
   }
 });

@@ -11,7 +11,6 @@ import { AiOutlineSearch } from "react-icons/ai";
 import axios, { CancelTokenSource } from "axios";
 import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 import Skeleton from "react-loading-skeleton";
-
 type searchResultsType = { _id: number; title: string }[];
 
 function Header() {

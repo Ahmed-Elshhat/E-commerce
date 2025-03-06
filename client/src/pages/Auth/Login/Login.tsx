@@ -6,6 +6,7 @@ import axios from "axios";
 import { BASE_URL, LOGIN } from "../../../Api/Api";
 import { LoginFormState } from "../../../Types/app";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
+import { useTranslation } from "react-i18next";
 
 function Login() {
   const [form, setForm] = useState<LoginFormState>({
@@ -17,6 +18,7 @@ function Login() {
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const redirectToReferrer = location.state?.path || "/";
 
   useEffect(() => {
@@ -70,7 +72,12 @@ function Login() {
       const res = await axios.post(`${BASE_URL}${LOGIN}`, form);
       if (res.status === 200) {
         const token = res.data.token;
-        cookies.set("ECT", token);
+        cookies.set("ECT", token, {
+          path: "/",
+          maxAge: 60 * 60 * 24 * 90,
+          secure: false,
+          sameSite: "lax",
+        });
         window.location.href = redirectToReferrer;
       }
     } catch (err) {
@@ -99,15 +106,15 @@ function Login() {
   return (
     <div className="login">
       <div className="login-box">
-        <h2>Login</h2>
+        <h2>{t("login.title")}</h2>
         <form onSubmit={handleSubmit}>
           <div className="email">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{t("login.emailLabel")}</label>
             <input
               type="email"
               name="email"
               id="email"
-              placeholder="Email"
+              placeholder={t("login.emailLabel")}
               value={form.email}
               onChange={handleChange}
             />
@@ -120,17 +127,28 @@ function Login() {
           </div>
 
           <div className="password">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">{t("login.passwordLabel")}</label>
             <div className="password-cover">
               <input
                 type={showPassword ? "text" : "password"}
                 name="password"
                 id="password"
-                placeholder="Password"
+                placeholder={t("login.passwordPlaceholder")}
                 value={form.password}
                 onChange={handleChange}
+                style={{
+                  paddingLeft: i18n.language === "ar" ? "35px" : "10px",
+                  paddingRight: i18n.language === "en" ? "35px" : "10px",
+                }}
               />
-              <button type="button" onClick={togglePasswordVisibility}>
+              <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                style={{
+                  left: i18n.language === "ar" ? "10px" : "",
+                  right: i18n.language === "en" ? "10px" : "",
+                }}
+              >
                 {showPassword ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
@@ -159,28 +177,28 @@ function Login() {
           <div className="remember-me-and-forgot-pass">
             <div className="remember-me">
               <input type="checkbox" id="remember" />
-              <label htmlFor="remember">Remember me</label>
+              <label htmlFor="remember">{t("login.rememberMe")}</label>
             </div>
 
             <div className="forgot-pass">
-              <Link to="/forgot-password">Forgot Password?</Link>
+              <Link to="/forgot-password">{t("login.forgotPassword")}</Link>
             </div>
           </div>
 
-          <button className="signin-btn">Login</button>
+          <button className="signin-btn">{t("login.loginButton")}</button>
 
           <div className="or-divider">
             <div className="line"></div>
-            <span>Or</span>
+            <span>{t("login.or")}</span>
           </div>
 
           <a href={`${BASE_URL}/auth/google`} className="signin-google-btn">
-            <FaGoogle /> Sign in with Google
+            <FaGoogle /> {t("login.loginWithGoogleButton")}
           </a>
 
           <div className="signup">
-            <p>Don't have an account?</p>
-            <Link to="/signup">Sign up</Link>
+            <p>{t("login.Don'tHaveAnAccount")}</p>
+            <Link to="/signup">{t("login.signup")}</Link>
           </div>
         </form>
       </div>
