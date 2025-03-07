@@ -11,6 +11,7 @@ import { AiOutlineSearch } from "react-icons/ai";
 import axios, { CancelTokenSource } from "axios";
 import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 import Skeleton from "react-loading-skeleton";
+import { useTranslation } from "react-i18next";
 type searchResultsType = { _id: number; title: string }[];
 
 function Header() {
@@ -26,6 +27,7 @@ function Header() {
   const [showUserName, setShowUserName] = useState<boolean>(false);
   const navigate = useNavigate();
   const userName = useRef<string>("");
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (data) {
@@ -144,7 +146,7 @@ function Header() {
     <header className="Header">
       <div className="container">
         <nav>
-          <div className="logo">Logo</div>
+          <div className="logo">{t("header.logo")}</div>
           <div className="search" ref={searchRef}>
             {windowSize >= 460 && (
               <>
@@ -155,15 +157,26 @@ function Header() {
                 >
                   <input
                     type="text"
-                    placeholder="search"
+                    placeholder={t("header.inputPlaceholder")}
                     value={searchText}
                     onChange={handleChange}
                     onFocus={handleFocusedInput}
                     onBlur={() => focused && setFocused(false)}
                     onKeyDown={handleKeyDown}
+                    style={{
+                      paddingLeft: i18n.language === "ar" ? "68px" : "20px",
+                      paddingRight: i18n.language === "en" ? "87px" : "20px",
+                    }}
                   />
-                  <button type="button" onClick={handleSearchButtonClick}>
-                    Search
+                  <button
+                    type="button"
+                    onClick={handleSearchButtonClick}
+                    style={{
+                      left: i18n.language === "ar" ? "0" : "",
+                      right: i18n.language === "en" ? "0" : "",
+                    }}
+                  >
+                    {t("header.searchButton")}
                   </button>
                 </form>
 
@@ -224,14 +237,22 @@ function Header() {
                           style={{ marginTop: "10px" }}
                         />
                       ) : (
-                        `Hi, ${userName.current}`
+                        `${t("header.hiButton.hi")}, ${userName.current}`
                       )}
                     </span>
                   </>
                 ) : (
                   <>
                     <LuUserRound />
-                    <span className="text">
+                    <span
+                      className="text"
+                      style={{
+                        fontSize:
+                          data === null && i18n.language === "ar"
+                            ? "16px"
+                            : "17px",
+                      }}
+                    >
                       {loading ? (
                         <Skeleton
                           width={50}
@@ -239,7 +260,7 @@ function Header() {
                           style={{ marginTop: "10px" }}
                         />
                       ) : (
-                        "Sign in"
+                        t("header.hiButton.signin")
                       )}
                     </span>
                   </>
@@ -254,24 +275,27 @@ function Header() {
               >
                 {data === null && (
                   <li className="login-option">
-                    <Link to="/login">Sign in</Link>
+                    <Link to="/login">{t("header.signinButton")}</Link>
                   </li>
                 )}
 
                 <li>
                   <LuUserRound />
-                  <Link to="/customer/account">My Account</Link>
+                  <Link to="/customer/account">
+                    {t("header.MyAccountButton")}
+                  </Link>
                 </li>
 
                 <li>
                   <BsBox2 />
-                  <Link to="/customer/order">Orders</Link>
+                  <Link to="/customer/order">{t("header.ordersButton")}</Link>
                 </li>
               </ul>
             </div>
 
             <Link to="/cart" className="cart">
-              <HiOutlineShoppingCart /> <span className="text">Cart</span>
+              <HiOutlineShoppingCart />{" "}
+              <span className="text">{t("header.cart")}</span>
             </Link>
           </div>
         </nav>

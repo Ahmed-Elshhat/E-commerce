@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/Auth/NotFound/NotFound";
@@ -13,33 +13,37 @@ import VerifyPassResetCode from "./pages/Auth/VerifyPassResetCode/VerifyPassRese
 import ResetPassword from "./pages/Auth/ResetPassword/ResetPassword";
 import Header from "./components/Header/Header";
 import Cart from "./pages/Cart/Cart";
-import { useAppDispatch } from "./Redux/app/hooks";
+import { useAppDispatch, useAppSelector } from "./Redux/app/hooks";
 import { fetchUsers } from "./Redux/feature/userSlice/userSlice";
 import SearchResults from "./pages/SearchResults/SearchResults";
 import "./i18n";
 import LanguageWrapper from "./components/LanguageWrapper";
+import { saveLang } from "./Redux/feature/languageSlice/languageSlice";
 
 function App() {
-  const [lang, setLang] = useState<string>("en");
+  const { lang } = useAppSelector((state) => state.language);
   const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const localLang = localStorage.getItem("lang");
+    if (localLang) {
+      dispatch(saveLang(localLang));
+    } else {
+      dispatch(saveLang("en"));
+    }
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(fetchUsers());
   }, [dispatch]);
 
-  useEffect(() => {
-    const localLang = localStorage.getItem("lang");
-    if (localLang) {
-      setLang(localLang);
-    } else {
-      setLang("en");
-    }
-  }, []);
-
   return (
     <div className="App">
       <Routes>
-        <Route path="/" element={<Navigate replace to={`/${lang}/`} />} />
+        <Route
+          path="/"
+          element={<Navigate replace to={`/${lang || "en"}/`} />}
+        />
 
         <Route
           path="/:lang/*"
@@ -80,7 +84,7 @@ function App() {
                   <Route element={<RequireAuth allowedRole={["user"]} />}>
                     <Route path="/cart" element={<Cart />} />
                   </Route>
-                  <Route path="/search-ئresults" element={<SearchResults />} />
+                  <Route path="/search-results" element={<SearchResults />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </>

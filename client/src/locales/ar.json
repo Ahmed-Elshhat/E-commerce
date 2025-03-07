@@ -17,5 +17,18 @@
     "loginWithGoogleButton": "تسجيل الدخول بجوجل",
     "Don'tHaveAnAccount": "ليس لديك حساب؟",
     "signup": "إنشاء حساب"
+  },
+  "header": {
+    "logo": "الشعار",
+    "searchButton": "بحث",
+    "inputPlaceholder": "بحث",
+    "hiButton": {
+      "hi": "اهلا",
+      "signin": "تسجيل الدخول"
+    },
+    "signinButton": "تسجيل الدخول",
+    "ordersButton": "طلباتي",
+    "MyAccountButton": "حسابي",
+    "cart": "العربة"
   }
 }

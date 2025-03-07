@@ -17,5 +17,18 @@
     "loginWithGoogleButton": "Login with Google",
     "Don'tHaveAnAccount": "Don't have an account?",
     "signup": "Sign up"
+  },
+  "header": {
+    "logo": "Logo",
+    "searchButton": "Search",
+    "inputPlaceholder": "search",
+    "hiButton": {
+      "hi": "Hi",
+      "signin": "Sign in"
+    },
+    "signinButton": "Sign in",
+    "MyAccountButton": "My Account",
+    "ordersButton": "Orders",
+    "cart": "Cart"
   }
 }

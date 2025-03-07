@@ -19,6 +19,7 @@ function Login() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const location = useLocation();
   const { t, i18n } = useTranslation();
+
   const redirectToReferrer = location.state?.path || "/";
 
   useEffect(() => {

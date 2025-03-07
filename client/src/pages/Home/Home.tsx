@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 function Home() {
-  const [lang, setLang] = useState<string>("en");
+  const [lang, setLang] = useState<string>("");
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
 
@@ -20,6 +20,7 @@ function Home() {
     const newLang = i18n.language === "en" ? "ar" : "en";
     i18n.changeLanguage(newLang);
     document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr"; // دعم RTL
+    setLang(newLang);
     localStorage.setItem("lang", newLang);
     navigate(`/${newLang}/`); // تحديث الـ Route بناءً على اللغة
   };

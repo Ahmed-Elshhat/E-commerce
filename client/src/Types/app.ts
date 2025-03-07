@@ -4,6 +4,10 @@ export type initialStateResetDataPass = {
   resetCode: string;
 };
 
+export type initialStateLang = {
+  lang: string;
+}
+
 // Require Auth
 export type RequireAuthProps = {
   allowedRole: string[];
