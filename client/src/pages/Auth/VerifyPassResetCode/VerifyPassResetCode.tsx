@@ -4,8 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../Redux/app/hooks";
 import { BASE_URL, FORGOT_PASSWORD, VERIFY_RESET_CODE } from "../../../Api/Api";
 import axios from "axios";
-import { clearData, saveResetCode } from "../../../Redux/feature/resetDataPassSlice/resetDataPassSlice";
+import {
+  clearData,
+  saveResetCode,
+} from "../../../Redux/feature/resetDataPassSlice/resetDataPassSlice";
 import Loading from "../../../components/Loading/Loading";
+import { useTranslation } from "react-i18next";
 
 function VerifyPassResetCode() {
   const [code, setCode] = useState<string[]>(["", "", "", "", "", ""]);
@@ -14,6 +18,8 @@ function VerifyPassResetCode() {
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const { lang } = useAppSelector((state) => state.language);
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { email, resetCode } = useAppSelector((state) => state.resetDataPass);
@@ -21,7 +27,7 @@ function VerifyPassResetCode() {
   useEffect(() => {
     if (!email || resetCode) {
       dispatch(clearData());
-      navigate("/forgot-password", { replace: true });
+      navigate(`/${lang}/forgot-password`, { replace: true });
       return;
     }
   }, []);
@@ -127,7 +133,7 @@ function VerifyPassResetCode() {
           console.log(res.data);
           setLoading(false);
           dispatch(saveResetCode(enteredCode));
-          navigate("/reset-password", { replace: true });
+          navigate(`/${lang}/reset-password`, { replace: true });
         }
       } catch (err) {
         setLoading(false);
@@ -158,8 +164,8 @@ function VerifyPassResetCode() {
       {loading && <Loading transparent={true} />}
       <div className="verify-reset-code">
         <div className="verify-reset-code-box">
-          <h2>Verify Reset Code</h2>
-          <p>Enter the 6-digit code sent to your email</p>
+          <h2>{t("verifyPassResetCode.title")}</h2>
+          <p>{t("verifyPassResetCode.instruction")}</p>
           <form onSubmit={handleSubmit}>
             <div className="inputs">
               <div className="inputs-box">
@@ -202,17 +208,17 @@ function VerifyPassResetCode() {
             )}
 
             <button type="submit" className="submit-btn">
-              Verify Code
+              {t("verifyPassResetCode.sendButton")}
             </button>
 
             <p className="resend-code">
               {timer > 0 ? (
                 <span className="display-timer">
-                  Resend Code in {formatTime(timer)}
+                  {t("verifyPassResetCode.displayTimer")} {formatTime(timer)}
                 </span>
               ) : (
                 <button onClick={handleResendCode} className="resend-code-btn">
-                  Resend Code
+                  {t("verifyPassResetCode.resendCodeButton")}
                 </button>
               )}
             </p>

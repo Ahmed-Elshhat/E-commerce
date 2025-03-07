@@ -4,14 +4,17 @@ import axios from "axios";
 import { BASE_URL, FORGOT_PASSWORD } from "../../../Api/Api";
 import { useNavigate } from "react-router-dom";
 import { saveEmail } from "../../../Redux/feature/resetDataPassSlice/resetDataPassSlice";
-import { useAppDispatch } from "../../../Redux/app/hooks";
+import { useAppDispatch, useAppSelector } from "../../../Redux/app/hooks";
 import Loading from "../../../components/Loading/Loading";
+import { useTranslation } from "react-i18next";
 
 function ForgotPassword() {
   const [email, setEmail] = useState<string>("");
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const { lang } = useAppSelector((state) => state.language);
+  const { t } = useTranslation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -58,7 +61,7 @@ function ForgotPassword() {
       if (res.status === 200) {
         setLoading(false);
         dispatch(saveEmail(email));
-        navigate("/verify-reset-code", { replace: true });
+        navigate(`/${lang}/verify-reset-code`, { replace: true });
       }
     } catch (err) {
       setLoading(false);
@@ -88,16 +91,16 @@ function ForgotPassword() {
       {loading && <Loading transparent={true} />}
       <div className="forgot-password">
         <div className="forgot-pass-box">
-            <h2>Find Your Account</h2>
-            <p>Enter your email send it to your account.</p>
+          <h2>{t("forgotPassword.title")}</h2>
+          <p>{t("forgotPassword.instruction")}</p>
           <form onSubmit={handleSubmit}>
             <div className="email">
-              <label htmlFor="email">Email</label>
+              <label htmlFor="email">{t("forgotPassword.emailLabel")}</label>
               <input
                 type="text"
                 name="email"
                 id="email"
-                placeholder="Email"
+                placeholder={t("forgotPassword.emailPlaceholder")}
                 value={email}
                 onChange={handleChange}
               />
@@ -124,7 +127,7 @@ function ForgotPassword() {
 
             <div className="btns">
               <button type="submit" className="submit-btn">
-                Send
+                {t("forgotPassword.sendButton")}
               </button>
             </div>
           </form>

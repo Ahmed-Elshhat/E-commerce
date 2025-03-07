@@ -30,5 +30,19 @@
     "ordersButton": "طلباتي",
     "MyAccountButton": "حسابي",
     "cart": "العربة"
+  },
+  "forgotPassword": {
+    "title": "ابحث عن حسابك",
+    "instruction": "أدخل بريدك الإلكتروني لاستعادة الوصول إلى حسابك.",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "البريد الإلكتروني",
+    "sendButton": "إرسال"
+  },
+  "verifyPassResetCode": {
+    "title": "تحقق من رمز إعادة التعيين",
+    "instruction": "أدخل الرمز المكون من 6 أرقام المرسل إلى بريدك الإلكتروني",
+    "sendButton": "تحقق من الرمز",
+    "displayTimer": "إعادة إرسال الرمز خلال",
+    "resendCodeButton": "إعادة إرسال الرمز"
   }
 }

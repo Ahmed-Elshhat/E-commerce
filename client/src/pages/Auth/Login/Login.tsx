@@ -7,6 +7,7 @@ import { BASE_URL, LOGIN } from "../../../Api/Api";
 import { LoginFormState } from "../../../Types/app";
 import { FaEye, FaEyeSlash, FaGoogle } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { useAppSelector } from "../../../Redux/app/hooks";
 
 function Login() {
   const [form, setForm] = useState<LoginFormState>({
@@ -17,6 +18,7 @@ function Login() {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const { lang } = useAppSelector((state) => state.language);
   const location = useLocation();
   const { t, i18n } = useTranslation();
 
@@ -182,7 +184,9 @@ function Login() {
             </div>
 
             <div className="forgot-pass">
-              <Link to="/forgot-password">{t("login.forgotPassword")}</Link>
+              <Link to={`/${lang}/forgot-password`}>
+                {t("login.forgotPassword")}
+              </Link>
             </div>
           </div>
 
@@ -199,7 +203,7 @@ function Login() {
 
           <div className="signup">
             <p>{t("login.Don'tHaveAnAccount")}</p>
-            <Link to="/signup">{t("login.signup")}</Link>
+            <Link to={`/${lang}/signup`}>{t("login.signup")}</Link>
           </div>
         </form>
       </div>

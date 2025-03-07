@@ -30,5 +30,19 @@
     "MyAccountButton": "My Account",
     "ordersButton": "Orders",
     "cart": "Cart"
+  },
+  "forgotPassword": {
+    "title": "Find Your Account",
+    "instruction": "Enter your email to restore access to your account.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email",
+    "sendButton": "Send"
+  },
+  "verifyPassResetCode": {
+    "title": "Verify Reset Code",
+    "instruction": "Enter the 6-digit code sent to your email",
+    "sendButton": "Verify Code",
+    "displayTimer": "Resend Code in",
+    "resendCodeButton": "Resend Code"
   }
 }

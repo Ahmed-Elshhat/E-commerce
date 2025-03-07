@@ -2,10 +2,13 @@ import "./Home.scss";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
+import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
+import { useAppDispatch } from "../../Redux/app/hooks";
 function Home() {
   const [lang, setLang] = useState<string>("");
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     const localLang = localStorage.getItem("lang");
@@ -21,6 +24,7 @@ function Home() {
     i18n.changeLanguage(newLang);
     document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr"; // دعم RTL
     setLang(newLang);
+    dispatch(saveLang(newLang));
     localStorage.setItem("lang", newLang);
     navigate(`/${newLang}/`); // تحديث الـ Route بناءً على اللغة
   };
