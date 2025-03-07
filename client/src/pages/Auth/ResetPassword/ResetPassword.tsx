@@ -9,6 +9,7 @@ import axios from "axios";
 import Loading from "../../../components/Loading/Loading";
 import { useNavigate } from "react-router-dom";
 import { clearData } from "../../../Redux/feature/resetDataPassSlice/resetDataPassSlice";
+import { useTranslation } from "react-i18next";
 
 function ResetPassword() {
   const [form, setForm] = useState<ResetPasswordFormState>({
@@ -20,17 +21,19 @@ function ResetPassword() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const { email, resetCode } = useAppSelector((state) => state.resetDataPass);
+  const { lang } = useAppSelector((state) => state.language);
   const dispatch = useAppDispatch();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const cookies = Cookie();
 
   useEffect(() => {
     if (!email || !resetCode) {
       dispatch(clearData());
-      navigate("/forgot-password", { replace: true });
+      navigate(`/${lang}/forgot-password`, { replace: true });
       return;
     }
-  }, [dispatch, email, navigate, resetCode]);
+  }, [dispatch, email, lang, navigate, resetCode]);
 
   useEffect(() => {
     if (isSubmitted) {
@@ -139,25 +142,35 @@ function ResetPassword() {
       {loading && <Loading transparent={true} />}
       <div className="reset-pass">
         <div className="reset-pass-box">
-          <h2>Reset Password</h2>
-          <p>Enter your new password below.</p>
+          <h2>{t("resetPassword.title")}</h2>
+          <p>{t("resetPassword.instruction")}</p>
 
           <form onSubmit={handleSubmit}>
             <div className="new-pass">
-              <label htmlFor="new-password">New Password</label>
+              <label htmlFor="new-password">
+                {t("resetPassword.passwordLabel")}
+              </label>
               <div className="input-cover">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
-                  placeholder="Password"
+                  placeholder={t("resetPassword.passwordPlaceholder")}
                   value={form.password}
                   onChange={handleChange}
+                  style={{
+                    paddingLeft: i18n.language === "ar" ? "35px" : "10px",
+                    paddingRight: i18n.language === "en" ? "35px" : "10px",
+                  }}
                 />
                 <button
                   type="button"
                   onClick={togglePasswordVisibility}
                   className="absolute right-3 top-4 text-gray-500 focus:outline-none cursor-pointer text-xl"
+                  style={{
+                    left: i18n.language === "ar" ? "10px" : "",
+                    right: i18n.language === "en" ? "10px" : "",
+                  }}
                 >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
@@ -173,17 +186,30 @@ function ResetPassword() {
             </div>
 
             <div className="confirm-password">
-              <label htmlFor="confirm-password">Confirm Password</label>
+              <label htmlFor="confirm-password">
+                {t("resetPassword.confirmPasswordLabel")}
+              </label>
               <div className="input-cover">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="confirmPassword"
                   id="confirm-password"
-                  placeholder="Confirm password"
+                  placeholder={t("resetPassword.confirmPasswordPlaceholder")}
                   value={form.confirmPassword}
                   onChange={handleChange}
+                  style={{
+                    paddingLeft: i18n.language === "ar" ? "35px" : "10px",
+                    paddingRight: i18n.language === "en" ? "35px" : "10px",
+                  }}
                 />
-                <button type="button" onClick={togglePasswordVisibility}>
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  style={{
+                    left: i18n.language === "ar" ? "10px" : "",
+                    right: i18n.language === "en" ? "10px" : "",
+                  }}
+                >
                   {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
@@ -213,7 +239,7 @@ function ResetPassword() {
             )}
 
             <button type="submit" className="submit-btn">
-              Reset Password
+              {t("resetPassword.resetButton")}
             </button>
           </form>
         </div>

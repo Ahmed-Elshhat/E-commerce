@@ -44,5 +44,15 @@
     "sendButton": "Verify Code",
     "displayTimer": "Resend Code in",
     "resendCodeButton": "Resend Code"
+  }, 
+  "resetPassword": {
+    "title": "Reset Password",
+    "instruction": "Enter your new password below.",
+    "passwordLabel": "New Password",
+    "passwordPlaceholder": "New Password",
+    "confirmPasswordLabel": "Confirm Password",
+    "confirmPasswordPlaceholder": "Confirm Password",
+    "resetButton": "Reset Password"
   }
 }
+

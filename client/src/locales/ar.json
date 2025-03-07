@@ -44,5 +44,14 @@
     "sendButton": "تحقق من الرمز",
     "displayTimer": "إعادة إرسال الرمز خلال",
     "resendCodeButton": "إعادة إرسال الرمز"
+  }, 
+  "resetPassword": {
+    "title": "إعادة تعيين كلمة المرور",
+    "instruction": "أدخل كلمة المرور الجديدة أدناه.",
+    "passwordLabel": "كلمة المرور الجديدة",
+    "passwordPlaceholder": "كلمة المرور الجديدة",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
+    "resetButton": "إعادة تعيين كلمة المرور"
   }
 }
