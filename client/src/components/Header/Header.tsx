@@ -12,22 +12,27 @@ import axios, { CancelTokenSource } from "axios";
 import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 import Skeleton from "react-loading-skeleton";
 import { useTranslation } from "react-i18next";
+import Cookie from "cookie-universal"
 type searchResultsType = { _id: number; title: string }[];
 
 function Header() {
   const [searchText, setSearchText] = useState<string>("");
   const [searchResults, setSearchResults] = useState<searchResultsType>([]);
   const { data, loading } = useAppSelector((state) => state.user);
+  const { lang } = useAppSelector((state) => state.language);
   const [focused, setFocused] = useState<boolean>(false);
   const [showOptions, setShowOptions] = useState<boolean>(false);
   const { windowSize } = useWindow();
   const searchRef = useRef<HTMLDivElement>(null);
+  const optionsRef = useRef<HTMLDivElement>(null);
   const cancelTokenRef = useRef<CancelTokenSource | null>(null);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const [showUserName, setShowUserName] = useState<boolean>(false);
   const navigate = useNavigate();
   const userName = useRef<string>("");
   const { t, i18n } = useTranslation();
+  const cookies = Cookie();
+
 
   useEffect(() => {
     if (data) {
@@ -46,6 +51,23 @@ function Header() {
     }
   }, [searchText]);
 
+  // useEffect(() => {
+  //   function handleClickOutside(event: MouseEvent) {
+  //     if (
+  //       searchRef.current &&
+  //       !searchRef.current.contains(event.target as Node)
+  //     ) {
+  //       setSearchResults([]);
+  //       setSelectedIndex(-1);
+  //     }
+  //   }
+
+  //   document.addEventListener("click", handleClickOutside);
+  //   return () => {
+  //     document.removeEventListener("click", handleClickOutside);
+  //   };
+  // }, []);
+
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -54,6 +76,13 @@ function Header() {
       ) {
         setSearchResults([]);
         setSelectedIndex(-1);
+      }
+
+      if (
+        optionsRef.current &&
+        !optionsRef.current.contains(event.target as Node)
+      ) {
+        setShowOptions(false);
       }
     }
 
@@ -109,10 +138,15 @@ function Header() {
     if (query !== "") {
       setSearchResults([]); // إخفاء النتائج
       setTimeout(() => {
-        navigate(`/search-results?s=${encodeURIComponent(query)}`);
+        navigate(`/${lang}/search-results?s=${encodeURIComponent(query)}`);
       }, 0);
     }
   };
+
+  const handleLogout = () => {
+    cookies.remove("ECT");
+    window.location.reload();
+  }
 
   const handleSearchChange = async (searchTxt: string) => {
     if (cancelTokenRef.current) {
@@ -195,7 +229,7 @@ function Header() {
                       }}
                       onClick={() =>
                         navigate(
-                          `/search-results?s=${encodeURIComponent(
+                          `/${lang}/search-results?s=${encodeURIComponent(
                             result.title
                           )}`
                         )
@@ -216,7 +250,7 @@ function Header() {
                 <AiOutlineSearch />
               </Link>
             )}
-            <div className="user-options">
+            <div className="user-options" ref={optionsRef}>
               <span
                 className="hi-btn"
                 style={{ background: showOptions ? "#ddd" : "white" }}
@@ -273,27 +307,37 @@ function Header() {
                 className="option-list"
                 style={{ display: showOptions ? "block" : "none" }}
               >
-                {data === null && (
+                {data === null && !loading && (
                   <li className="login-option">
-                    <Link to="/login">{t("header.signinButton")}</Link>
+                    <Link to={`/${lang}/login`}>
+                      {t("header.signinButton")}
+                    </Link>
                   </li>
                 )}
 
                 <li>
                   <LuUserRound />
-                  <Link to="/customer/account">
+                  <Link to={`/${lang}/customer/account`}>
                     {t("header.MyAccountButton")}
                   </Link>
                 </li>
 
                 <li>
                   <BsBox2 />
-                  <Link to="/customer/order">{t("header.ordersButton")}</Link>
+                  <Link to={`/${lang}/customer/order`}>
+                    {t("header.ordersButton")}
+                  </Link>
                 </li>
+
+                {data !== null && !loading && (
+                  <li className="logout-option">
+                    <button type="button" onClick={handleLogout}>{t("header.logoutButton")}</button>
+                  </li>
+                )}
               </ul>
             </div>
 
-            <Link to="/cart" className="cart">
+            <Link to={`/${lang}/cart`} className="cart">
               <HiOutlineShoppingCart />{" "}
               <span className="text">{t("header.cart")}</span>
             </Link>

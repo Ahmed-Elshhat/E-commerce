@@ -29,7 +29,8 @@
     "signinButton": "Sign in",
     "MyAccountButton": "My Account",
     "ordersButton": "Orders",
-    "cart": "Cart"
+    "cart": "Cart",
+    "logoutButton": "Logout"
   },
   "forgotPassword": {
     "title": "Find Your Account",

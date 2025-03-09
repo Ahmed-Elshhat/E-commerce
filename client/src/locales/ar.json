@@ -29,7 +29,8 @@
     "signinButton": "تسجيل الدخول",
     "ordersButton": "طلباتي",
     "MyAccountButton": "حسابي",
-    "cart": "العربة"
+    "cart": "العربة",
+    "logoutButton": "تسجيل الخروج"
   },
   "forgotPassword": {
     "title": "ابحث عن حسابك",
@@ -44,7 +45,7 @@
     "sendButton": "تحقق من الرمز",
     "displayTimer": "إعادة إرسال الرمز خلال",
     "resendCodeButton": "إعادة إرسال الرمز"
-  }, 
+  },
   "resetPassword": {
     "title": "إعادة تعيين كلمة المرور",
     "instruction": "أدخل كلمة المرور الجديدة أدناه.",

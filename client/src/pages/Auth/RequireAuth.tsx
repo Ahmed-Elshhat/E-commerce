@@ -40,11 +40,11 @@ function RequireAuth({ allowedRole }: RequireAuthProps) {
     ) : allowedRole.includes(user.role) ? (
       <Outlet />
     ) : (
-      <Navigate to={`${lang ?? "en"}/forbidden`} replace={true} />
+      <Navigate to={`/${lang ?? "en"}/forbidden`} replace={true} />
     )
   ) : (
     <Navigate
-      to={`${lang ?? "en"}/login`}
+      to={`/${lang ?? "en"}/login`}
       replace={true}
       state={{ path: location.pathname }}
     />
