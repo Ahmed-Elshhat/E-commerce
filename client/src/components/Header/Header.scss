@@ -1,5 +1,6 @@
 .Header {
   background-color: white;
+  box-shadow: -1px 3px 6px 0px #696868;
   .container {
     margin: 0 auto;
     padding: 0 15px;
@@ -19,6 +20,7 @@
         width: 60%;
 
         position: relative;
+
         form {
           position: relative;
           width: 100%;
@@ -51,6 +53,9 @@
         .search-results {
           background-color: white;
           position: absolute;
+          left: 0;
+          top: 100%;
+          z-index: 10;
           width: 100%;
           overflow-x: hidden;
           list-style: none;
@@ -145,6 +150,7 @@
             position: absolute;
             left: 50%;
             top: 100%;
+            z-index: 10;
             translate: -50% 0;
             width: 200px;
             padding: 20px;
@@ -185,20 +191,19 @@
             }
 
             .logout-option {
-              padding-top: 15px;
-              height: 31px;
-              border-top: 1px solid #d4d4e4;
               justify-content: center;
-              align-items: center;
+              height: 31px;
+              padding-top: 15px;
+              border-top: 1px solid #d4d4e4;
               button {
                 background: none;
+                color: blue;
                 border: none;
                 font-size: 15px;
+                font-weight: 600;
                 outline: none;
                 cursor: pointer;
-                color: blue;
                 letter-spacing: 0.5px;
-                font-weight: 600;
               }
             }
           }

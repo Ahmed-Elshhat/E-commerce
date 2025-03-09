@@ -9,6 +9,7 @@
 body {
   font-family: "Cairo", serif;
   position: relative;
+  background-color: #eee;
 }
 
 .container-box {

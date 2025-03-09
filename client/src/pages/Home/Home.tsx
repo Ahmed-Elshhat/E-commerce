@@ -1,9 +1,10 @@
 import "./Home.scss";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
 import { useAppDispatch } from "../../Redux/app/hooks";
+import Cards from "../../components/Cards/Cards";
 function Home() {
   const [lang, setLang] = useState<string>("");
   const { t, i18n } = useTranslation();
@@ -29,17 +30,15 @@ function Home() {
     navigate(`/${newLang}/`); // تحديث الـ Route بناءً على اللغة
   };
   return (
-    <div className="Home">
-      <div className="home-links">
-        <Link to={`/${lang}/login`}>Login</Link>
-        <Link to={`/${lang}/forgot-password`}>Forgot Password</Link>
-        <Link to={`/${lang}/verify-reset-code`}>Verify Reset Code</Link>
-        <Link to={`/${lang}/reset-password`}>Reset Password</Link>
+    <>
+      {/* <button onClick={toggleLanguage}>{t("home.change_language")}</button> */}
+      <div className="Home">
+        <div className="container">
+          
+          <Cards />
+        </div>
       </div>
-      <h1>{t("home.title")}</h1>
-      <p>{t("home.description")}</p>
-      <button onClick={toggleLanguage}>{t("home.change_language")}</button>
-    </div>
+    </>
   );
 }
 
