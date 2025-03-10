@@ -20,6 +20,7 @@ import LanguageWrapper from "./components/LanguageWrapper";
 import { saveLang } from "./Redux/feature/languageSlice/languageSlice";
 import Footer from "./components/Footer/Footer";
 import ShowProduct from "./pages/ShowProduct/ShowProduct";
+import Signup from "./pages/Auth/Signup/Signup";
 
 function App() {
   const { lang } = useAppSelector((state) => state.language);
@@ -66,7 +67,7 @@ function App() {
                   <Route path="/forbidden" element={<Forbidden />} />
                   <Route element={<RequireBack />}>
                     <Route path="/login" element={<Login />} />
-                    {/* <Route path="/signup" element={<Signup />} /> */}
+                    <Route path="/signup" element={<Signup />} />
                     <Route
                       path="/forgot-password"
                       element={<ForgotPassword />}
