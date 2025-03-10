@@ -48,7 +48,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // app.use(express.json({ limit: '20kb' }));
 
-app.use(express.static(path.join(__dirname, "uploads")));
+app.use(express.static(path.join(__dirname, "..", "uploads")));
 // // app.use("/uploads", express.static("uploads"));
 // app.use("/videos", express.static("videos"));
 // app.use("/images", express.static("images"));

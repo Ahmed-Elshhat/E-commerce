@@ -13,4 +13,5 @@ export const VERIFY_RESET_CODE: string = "/auth/verifyResetCode";
 export const RESET_PASSWORD: string = "/auth/resetPassword";
 
 // products
+export const PRODUCTS: string = "/products";
 export const PRODUCT_SEARCH: string = "/products/productSearch";
