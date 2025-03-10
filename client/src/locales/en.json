@@ -18,6 +18,22 @@
     "Don'tHaveAnAccount": "Don't have an account?",
     "signup": "Sign up"
   },
+  "signup": {
+    "title": "Signup",
+    "userNameLabel": "Username",
+    "userNamePlaceholder": "Username",
+    "emailLabel": "Email",
+    "emailPlaceholder": "Email",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Password",
+    "confirmPasswordLabel": "Password",
+    "confirmPasswordPlaceholder": "Password",
+    "signupButton": "Signup",
+    "or": "Or",
+    "signupWithGoogleButton": "Signup with Google",
+    "Don'tHaveAnAccount": "Don't have an account?",
+    "login": "Login"
+  },
   "header": {
     "logo": "Logo",
     "searchButton": "Search",

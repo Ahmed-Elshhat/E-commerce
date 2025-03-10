@@ -201,7 +201,7 @@ function Login() {
             <FaGoogle /> {t("login.loginWithGoogleButton")}
           </a>
 
-          <div className="signup">
+          <div className="signup-section">
             <p>{t("login.Don'tHaveAnAccount")}</p>
             <Link to={`/${lang}/signup`}>{t("login.signup")}</Link>
           </div>

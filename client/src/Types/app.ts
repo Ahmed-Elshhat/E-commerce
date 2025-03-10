@@ -6,11 +6,19 @@ export type initialStateResetDataPass = {
 
 export type initialStateLang = {
   lang: string;
-}
+};
 
 // Require Auth
 export type RequireAuthProps = {
   allowedRole: string[];
+};
+
+// Signup page
+export type SignupFormState = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 };
 
 // Login Page
@@ -45,8 +53,8 @@ export type ResetPasswordFormState = {
 };
 
 // getUser Context
-export type  initialStateGetUser = {
-  loading: boolean,
-  data: UserSchema | null,
-  error: string,
-}
+export type initialStateGetUser = {
+  loading: boolean;
+  data: UserSchema | null;
+  error: string;
+};
