@@ -3,7 +3,13 @@ import "./Cards.scss";
 
 type CardsProps = {
   products: {
-    id: number;
+    _id: number;
+    imageCover: string;
+    description: string;
+    price: number;
+    quantity: number;
+    sold: number;
+    priceAfterDiscount: number;
   }[];
 };
 
@@ -11,7 +17,7 @@ function Cards({ products }: CardsProps) {
   return (
     <div className="cards">
       {products.map((product) => (
-        <Card key={product.id} product={product} />
+        <Card key={product._id} product={product} />
       ))}
     </div>
   );

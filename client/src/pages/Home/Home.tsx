@@ -82,35 +82,45 @@ import { useAppDispatch } from "../../Redux/app/hooks";
 import Cards from "../../components/Cards/Cards";
 import axios from "axios";
 import { BASE_URL, PRODUCTS } from "../../Api/Api";
+import CardSkeleton from "../../components/Cards/Card/CardSkeleton/CardSkeleton";
 
 function Home() {
   const [lang, setLang] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState([]);
   const [pagination, setPagination] = useState<number>(1);
   const [numberOfPages, setNumberOfPages] = useState<number>(1);
-  const [startIndex, setStartIndex] = useState<number>(0); // بداية الشريحة المعروضة
+  const [startIndex, setStartIndex] = useState<number>(0);
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
   useEffect(() => {
+    console.log(lang)
     const localLang = localStorage.getItem("lang");
     setLang(localLang || "en");
   }, []);
 
   useEffect(() => {
     const getProducts = async () => {
-      const res = await axios.get(`${BASE_URL}${PRODUCTS}?page=${pagination}&limit=5`);
-      if (res.status === 200) {
-        setNumberOfPages(res.data.paginationResults.numberOfPages);
-        setProducts(res.data.data)
-        console.log(res.data.data)
+      setLoading(true);
+      try {
+        const res = await axios.get(
+          `${BASE_URL}${PRODUCTS}?page=${pagination}&limit=20`
+        );
+        if (res.status === 200) {
+          setLoading(false);
+          setNumberOfPages(res.data.paginationResults.numberOfPages);
+          setProducts(res.data.data);
+        }
+      } catch (err) {
+        console.error(err);
+        setLoading(false);
       }
     };
     getProducts();
-  }, []);
+  }, [pagination]);
 
-  // تحديث عرض الأرقام عند تغيير الصفحة
   useEffect(() => {
     if (pagination > startIndex + 10) {
       setStartIndex(startIndex + 1);
@@ -121,6 +131,7 @@ function Home() {
 
   const handlePaginationClick = (page: number) => {
     setPagination(page);
+    window.scrollTo(0, 0);
   };
 
   const toggleLanguage = () => {
@@ -138,26 +149,41 @@ function Home() {
       <button onClick={toggleLanguage}>{t("home.change_language")}</button>
       <div className="Home">
         <div className="container">
-          <Cards products={products} />
+          {!loading && products.length !== 0 ? (
+            <Cards products={products} />
+          ) : (
+            <CardSkeleton countOfCards={20} />
+          )}
+
           <div className="pagination">
             {startIndex > 0 && (
-              <button className="pagination-arrow" onClick={() => setStartIndex(startIndex - 1)}>
+              <button
+                className="pagination-arrow"
+                onClick={() => setStartIndex(startIndex - 1)}
+              >
                 {"<"}
               </button>
             )}
 
-            {[...Array(Math.min(10, numberOfPages - startIndex))].map((_, i) => (
-              <div
-                className={`pagination-item ${pagination === startIndex + i + 1 ? "active" : ""}`}
-                key={i}
-                onClick={() => handlePaginationClick(startIndex + i + 1)}
-              >
-                {startIndex + i + 1}
-              </div>
-            ))}
+            {[...Array(Math.min(10, numberOfPages - startIndex))].map(
+              (_, i) => (
+                <div
+                  className={`pagination-item ${
+                    pagination === startIndex + i + 1 ? "active" : ""
+                  }`}
+                  key={i}
+                  onClick={() => handlePaginationClick(startIndex + i + 1)}
+                >
+                  {startIndex + i + 1}
+                </div>
+              )
+            )}
 
             {startIndex + 10 < numberOfPages && (
-              <button className="pagination-arrow" onClick={() => setStartIndex(startIndex + 1)}>
+              <button
+                className="pagination-arrow"
+                onClick={() => setStartIndex(startIndex + 1)}
+              >
                 {">"}
               </button>
             )}
@@ -169,4 +195,3 @@ function Home() {
 }
 
 export default Home;
-

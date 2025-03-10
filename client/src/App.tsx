@@ -19,6 +19,8 @@ import SearchResults from "./pages/SearchResults/SearchResults";
 import "./i18n";
 import LanguageWrapper from "./components/LanguageWrapper";
 import { saveLang } from "./Redux/feature/languageSlice/languageSlice";
+import Footer from "./components/Footer/Footer";
+import ShowProduct from "./pages/ShowProduct/ShowProduct";
 
 function App() {
   const { lang } = useAppSelector((state) => state.language);
@@ -57,9 +59,11 @@ function App() {
                       <>
                         <Header />
                         <Home />
+                        <Footer />
                       </>
                     }
                   />
+                  <Route path="/show-product/:productId" element={<ShowProduct />} />
                   <Route path="/forbidden" element={<Forbidden />} />
                   <Route element={<RequireBack />}>
                     <Route path="/login" element={<Login />} />
