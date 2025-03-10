@@ -73,7 +73,7 @@ function Home() {
     <>
       <button onClick={toggleLanguage}>{t("home.change_language")}</button>
       <Link
-        to="en/kjadf"
+        to="/en/kjadf"
         style={{
           display: "block",
           backgroundColor: "blue",
@@ -87,7 +87,7 @@ function Home() {
         Not Found
       </Link>
       <Link
-        to="en/forbidden"
+        to="/en/forbidden"
         style={{
           display: "block",
           backgroundColor: "blue",
