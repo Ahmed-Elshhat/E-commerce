@@ -1,80 +1,5 @@
-// import "./Home.scss";
-// import { useNavigate } from "react-router-dom";
-// import { useTranslation } from "react-i18next";
-// import { useEffect, useState } from "react";
-// import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
-// import { useAppDispatch } from "../../Redux/app/hooks";
-// import Cards from "../../components/Cards/Cards";
-// import axios from "axios";
-// import { BASE_URL, PRODUCTS } from "../../Api/Api";
-// function Home() {
-//   const [lang, setLang] = useState<string>("");
-//   const [pagination, setPagination] = useState<number>(1);
-//   const [numberOfPages, setNumberOfPages] = useState<number>(1);
-//   const { t, i18n } = useTranslation();
-//   const navigate = useNavigate();
-//   const dispatch = useAppDispatch();
-
-//   useEffect(() => {
-//     const localLang = localStorage.getItem("lang");
-//     if (localLang) {
-//       setLang(localLang);
-//     } else {
-//       setLang("en");
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     const getProducts = async () => {
-//       const res = await axios.get(
-//         `${BASE_URL}${PRODUCTS}?page=${pagination}&limit=5`
-//       );
-//       if (res.status === 200) {
-//         setNumberOfPages(res.data.paginationResults.numberOfPages);
-//         console.log(res.data.paginationResults.numberOfPages);
-//       }
-//     };
-//     getProducts();
-//   }, [pagination]);
-
-//   const toggleLanguage = () => {
-//     const newLang = i18n.language === "en" ? "ar" : "en";
-//     i18n.changeLanguage(newLang);
-//     document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr"; // دعم RTL
-//     setLang(newLang);
-//     dispatch(saveLang(newLang));
-//     localStorage.setItem("lang", newLang);
-//     navigate(`/${newLang}/`); // تحديث الـ Route بناءً على اللغة
-//   };
-//   return (
-//     <>
-//       <button onClick={toggleLanguage}>{t("home.change_language")}</button>
-//       <div className="Home">
-//         <div className="container">
-//           <Cards />
-//           <div className="pagination">
-//             {[...Array(numberOfPages)].map((_, i) => (
-//               <div
-//                 className={`pagination-item ${
-//                   pagination === i + 1 ? "active" : ""
-//                 }`}
-//                 key={i}
-//                 onClick={() => setPagination(i + 1)}
-//               >
-//                 {i + 1}
-//               </div>
-//             ))}
-//           </div>
-//         </div>
-//       </div>
-//     </>
-//   );
-// }
-
-// export default Home;
-
 import "./Home.scss";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState } from "react";
 import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
@@ -96,7 +21,7 @@ function Home() {
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    console.log(lang)
+    console.log(lang);
     const localLang = localStorage.getItem("lang");
     setLang(localLang || "en");
   }, []);
@@ -147,6 +72,34 @@ function Home() {
   return (
     <>
       <button onClick={toggleLanguage}>{t("home.change_language")}</button>
+      <Link
+        to="en/kjadf"
+        style={{
+          display: "block",
+          backgroundColor: "blue",
+          padding: "5px 20px",
+          width: "fit-content",
+          color: "white",
+          borderRadius: "10px",
+          textDecoration: "none",
+        }}
+      >
+        Not Found
+      </Link>
+      <Link
+        to="en/forbidden"
+        style={{
+          display: "block",
+          backgroundColor: "blue",
+          padding: "5px 20px",
+          width: "fit-content",
+          color: "white",
+          borderRadius: "10px",
+          textDecoration: "none",
+        }}
+      >
+        forbidden
+      </Link>
       <div className="Home">
         <div className="container">
           {!loading && products.length !== 0 ? (
