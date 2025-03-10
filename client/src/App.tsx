@@ -3,7 +3,6 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home/Home";
 import NotFound from "./pages/Auth/NotFound/NotFound";
 import Login from "./pages/Auth/Login/Login";
-import Signup from "./pages/Auth/Signup/Signup";
 import Forbidden from "./pages/Auth/Forbidden/Forbidden";
 import RequireAuth from "./pages/Auth/RequireAuth";
 import RequireBack from "./pages/Auth/RequireBack";
@@ -67,7 +66,7 @@ function App() {
                   <Route path="/forbidden" element={<Forbidden />} />
                   <Route element={<RequireBack />}>
                     <Route path="/login" element={<Login />} />
-                    <Route path="/signup" element={<Signup />} />
+                    {/* <Route path="/signup" element={<Signup />} /> */}
                     <Route
                       path="/forgot-password"
                       element={<ForgotPassword />}
