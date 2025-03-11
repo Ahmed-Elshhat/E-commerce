@@ -3,6 +3,7 @@
   height: 80vh;
   .container {
     .cart-is-empty {
+      padding: 10px;
       background-color: white;
       display: flex;
       flex-direction: column;
@@ -13,7 +14,7 @@
       margin: 0 auto;
       margin-top: 50px;
       border-radius: 6px;
-      @media (max-width: 400px) {
+      @media (max-width: 472px) {
         h3 {
           font-size: 20px !important;
         }

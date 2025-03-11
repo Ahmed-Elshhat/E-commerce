@@ -74,7 +74,7 @@
   "cart" : {
     "cartIsEmpty": {
       "title": "Your Cart is Empty",
-      "message": "Start shopping by adding items to your cart.",
+      "message": "Add items to start shopping.",
       "continueShoppingButton": "Start Shopping"
     }
   }
