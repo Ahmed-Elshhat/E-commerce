@@ -17,6 +17,8 @@
       .logo {
         font-size: 30px;
         font-weight: bold;
+        text-decoration: none;
+        color: #155dfc;
       }
 
       .search {
@@ -212,7 +214,7 @@
           }
         }
 
-        .cart {
+        .shopping-cart {
           &:hover {
             color: blue;
           }

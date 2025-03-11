@@ -63,7 +63,10 @@ function App() {
                       </>
                     }
                   />
-                  <Route path="/show-product/:productId" element={<ShowProduct />} />
+                  <Route
+                    path="/show-product/:productId"
+                    element={<ShowProduct />}
+                  />
                   <Route path="/forbidden" element={<Forbidden />} />
                   <Route element={<RequireBack />}>
                     <Route path="/login" element={<Login />} />
@@ -86,7 +89,16 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                   </Route>
                   <Route element={<RequireAuth allowedRole={["user"]} />}>
-                    <Route path="/cart" element={<Cart />} />
+                    <Route
+                      path="/cart"
+                      element={
+                        <>
+                          <Header />
+                          <Cart />
+                          <Footer />
+                        </>
+                      }
+                    />
                   </Route>
                   <Route path="/search-results" element={<SearchResults />} />
                   <Route path="*" element={<NotFound />} />

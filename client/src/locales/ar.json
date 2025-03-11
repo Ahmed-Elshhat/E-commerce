@@ -68,5 +68,12 @@
     "confirmPasswordLabel": "تأكيد كلمة المرور",
     "confirmPasswordPlaceholder": "تأكيد كلمة المرور",
     "resetButton": "إعادة تعيين كلمة المرور"
+  },
+  "cart": {
+  "cartIsEmpty": {
+    "title": "عربة التسوق فارغة",
+    "message": "ابدأ التسوق بإضافة العناصر إلى عربتك.",
+    "continueShoppingButton": "ابدأ التسوق"
   }
 }
+} 

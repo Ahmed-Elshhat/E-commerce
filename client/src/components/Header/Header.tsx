@@ -12,7 +12,7 @@ import axios, { CancelTokenSource } from "axios";
 import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 import Skeleton from "react-loading-skeleton";
 import { useTranslation } from "react-i18next";
-import Cookie from "cookie-universal"
+import Cookie from "cookie-universal";
 type searchResultsType = { _id: number; title: string }[];
 
 function Header() {
@@ -32,7 +32,6 @@ function Header() {
   const userName = useRef<string>("");
   const { t, i18n } = useTranslation();
   const cookies = Cookie();
-
 
   useEffect(() => {
     if (data) {
@@ -146,7 +145,7 @@ function Header() {
   const handleLogout = () => {
     cookies.remove("ECT");
     window.location.reload();
-  }
+  };
 
   const handleSearchChange = async (searchTxt: string) => {
     if (cancelTokenRef.current) {
@@ -180,7 +179,9 @@ function Header() {
     <header className="Header">
       <div className="container">
         <nav>
-          <div className="logo">{t("header.logo")}</div>
+          <Link to="/" className="logo">
+            {t("header.logo")}
+          </Link>
           <div className="search" ref={searchRef}>
             {windowSize >= 460 && (
               <>
@@ -331,13 +332,15 @@ function Header() {
 
                 {data !== null && !loading && (
                   <li className="logout-option">
-                    <button type="button" onClick={handleLogout}>{t("header.logoutButton")}</button>
+                    <button type="button" onClick={handleLogout}>
+                      {t("header.logoutButton")}
+                    </button>
                   </li>
                 )}
               </ul>
             </div>
 
-            <Link to={`/${lang}/cart`} className="cart">
+            <Link to={`/${lang}/cart`} className="shopping-cart">
               <HiOutlineShoppingCart />{" "}
               <span className="text">{t("header.cart")}</span>
             </Link>

@@ -70,6 +70,13 @@
     "confirmPasswordLabel": "Confirm Password",
     "confirmPasswordPlaceholder": "Confirm Password",
     "resetButton": "Reset Password"
+  },
+  "cart" : {
+    "cartIsEmpty": {
+      "title": "Your Cart is Empty",
+      "message": "Start shopping by adding items to your cart.",
+      "continueShoppingButton": "Start Shopping"
+    }
   }
 }
 
