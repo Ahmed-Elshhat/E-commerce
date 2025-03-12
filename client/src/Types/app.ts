@@ -66,11 +66,14 @@ export type CartState = {
     user: string;
     totalCartPrice: number;
     cartItems: {
+      _id: string;
       color: string;
       price: number;
-      product: string;
       quantity: number;
-      _id: string;
+      product: {
+        title: string;
+        imageCover: string;
+      };
     }[];
   };
   numOfCartItems: number;
