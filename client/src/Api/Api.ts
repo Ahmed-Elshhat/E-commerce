@@ -1,5 +1,5 @@
-export const BASE_URL: string = "https://e-commerce2-tan.vercel.app/api/v1";
-// export const BASE_URL: string = "http://localhost:8000/api/v1";
+// export const BASE_URL: string = "https://e-commerce2-tan.vercel.app/api/v1";
+export const BASE_URL: string = "http://localhost:8000/api/v1";
 
 // users
 export const USERS: string = "/users";
@@ -16,3 +16,6 @@ export const RESET_PASSWORD: string = "/auth/resetPassword";
 // products
 export const PRODUCTS: string = "/products";
 export const PRODUCT_SEARCH: string = "/products/productSearch";
+
+// cart
+export const CART: string = "/cart";

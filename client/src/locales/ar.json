@@ -70,10 +70,22 @@
     "resetButton": "إعادة تعيين كلمة المرور"
   },
   "cart": {
-  "cartIsEmpty": {
-    "title": "عربة التسوق فارغة",
-    "message": "ابدأ التسوق بإضافة العناصر إلى عربتك.",
-    "continueShoppingButton": "ابدأ التسوق"
+    "cartIsEmpty": {
+      "title": "عربة التسوق فارغة",
+      "message": "ابدأ التسوق بإضافة العناصر إلى عربتك.",
+      "continueShoppingButton": "ابدأ التسوق"
+    },
+    "cartContent": {
+      "checkOut": {
+        "header": "ملخص سلة التسوق",
+        "title": "الاجمالي",
+        "currency": "جنيه",
+        "checkOutButton": "الاجمالي"
+      },
+      "carItems": {
+        "header": "سلة التسوق",
+        "removeButton": "إزالة"
+      }
+    }
   }
 }
-} 

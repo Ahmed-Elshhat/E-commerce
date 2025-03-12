@@ -1,7 +1,8 @@
 .cart {
   background-color: #eee;
-  height: 80vh;
-  .container {
+  min-height: calc(100vh - 106px);
+  margin-bottom: 50px;
+
     .cart-is-empty {
       padding: 10px;
       background-color: white;
@@ -19,7 +20,7 @@
           font-size: 20px !important;
         }
         p {
-          font-size: 16px !important; 
+          font-size: 16px !important;
           letter-spacing: 0px;
         }
       }
@@ -62,5 +63,151 @@
         }
       }
     }
-  }
+
+    .cart-content {
+      margin:0 auto;
+      margin-top: 30px;
+      display: flex;
+      justify-content: center;
+      max-width: 1200px;
+      gap: 20px;
+
+      .cart-items {
+        background-color: white;
+        border-radius: 5px;
+        flex: 1;
+        header {
+          padding: 5px 10px;
+          color: #313133;
+          font-weight: 600;
+          font-size: 20px;
+          border-bottom: 1px solid #ddd;
+        }
+
+        .items {
+          padding: 10px 20px;
+          .item {
+            &:not(:last-child) {
+              border-bottom: 1px solid #ddd;
+              margin-bottom: 10px;
+            }
+            .info {
+              display: flex;
+              justify-content: space-between;
+              align-items: flex-start;
+              .details {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                .image {
+                  img {
+                    width: 100px;
+                  }
+                }
+                .description {
+                  color: #313133;
+                  font-weight: 600;
+                  max-width: 500px;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                  word-wrap: nowrap;
+                }
+              }
+
+              .price {
+              }
+            }
+
+            .actions {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              .remove-btn {
+                svg {
+                  margin-bottom: -1px;
+                }
+                cursor: pointer;
+                background: none;
+                border: none;
+                color: red;
+              }
+
+              .increment-and-decrement {
+                display: flex;
+                align-items: center;
+                .decrement,
+                .increment {
+                  color: white;
+                  background-color: blue;
+                  border: none;
+                  border-radius: 5px;
+                  padding: 3px;
+                  cursor: pointer;
+                  font-size: 12px;
+                }
+                .quantity {
+                  margin: 0 5px;
+                  font-size: 22px;
+                  font-weight: bold;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .check-out {
+        border-radius: 5px;
+        background-color: white;
+        min-width: 220px;
+        height: fit-content;
+        position: sticky;
+        top: 80px;
+        padding: 5px 10px 15px;
+        header {
+          color: #313133;
+          font-weight: 500;
+          font-size: 15px;
+          margin-bottom: 5px;
+          border-bottom: 1px solid #f1f1f2;
+        }
+
+        .total-price-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 14px;
+          border-bottom: 1px solid #f1f1f2;
+          padding-bottom: 5px;
+
+          .title {
+            color: #313133;
+            font-weight: 700;
+            font-size: 14px;
+          }
+
+          .total-price {
+            color: #313133;
+            font-weight: 700;
+            font-size: 17px;
+          }
+        }
+
+        & > button {
+          width: 100%;
+          padding: 15px 10px;
+          border-radius: 5px;
+          border: none;
+          background-color: blue;
+          cursor: pointer;
+          color: white;
+          transition: 0.3s;
+          box-shadow: 0px 4px 7px 1px #7f7f81;
+          &:hover {
+            background-color: #0e0ee6;
+          }
+        }
+      }
+    }
+
 }

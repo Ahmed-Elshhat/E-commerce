@@ -58,3 +58,20 @@ export type initialStateGetUser = {
   data: UserSchema | null;
   error: string;
 };
+
+// Cart
+export type CartState = {
+  data: {
+    _id: string;
+    user: string;
+    totalCartPrice: number;
+    cartItems: {
+      color: string;
+      price: number;
+      product: string;
+      quantity: number;
+      _id: string;
+    }[];
+  };
+  numOfCartItems: number;
+};

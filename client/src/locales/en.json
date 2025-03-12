@@ -61,7 +61,7 @@
     "sendButton": "Verify Code",
     "displayTimer": "Resend Code in",
     "resendCodeButton": "Resend Code"
-  }, 
+  },
   "resetPassword": {
     "title": "Reset Password",
     "instruction": "Enter your new password below.",
@@ -71,12 +71,23 @@
     "confirmPasswordPlaceholder": "Confirm Password",
     "resetButton": "Reset Password"
   },
-  "cart" : {
+  "cart": {
     "cartIsEmpty": {
       "title": "Your Cart is Empty",
       "message": "Add items to start shopping.",
       "continueShoppingButton": "Start Shopping"
+    },
+    "cartContent": {
+      "currency": "EGP",
+      "checkOut": {
+        "header": "CART SUMMARY",
+        "title": "Subtotal",
+        "checkOutButton": "Checkout"
+      },
+      "cartItems": {
+        "header": "Cart",
+        "removeButton": "Remove"
+      }
     }
   }
 }
-

@@ -25,6 +25,10 @@ const cartSchema = mongoose.Schema({
   },
 });
 
+cartSchema.pre(/^find/, function (next) {
+  this.populate("cartItems.product");
+  next();
+});
 
 const CartModel = mongoose.model("Cart", cartSchema);
 
