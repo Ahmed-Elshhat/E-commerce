@@ -1,9 +1,9 @@
-// export const BASE_URL: string = "https://e-commerce2-tan.vercel.app/api/v1";
-export const BASE_URL: string = "http://localhost:8000/api/v1";
+export const BASE_URL: string = "https://e-commerce2-tan.vercel.app/api/v1";
+// export const BASE_URL: string = "http://localhost:8000/api/v1";
 
 // users
 export const USERS: string = "/users";
-export const GET_ME : string = "/users/getOne";
+export const GET_ME: string = "/users/getOne";
 
 // auth
 export const LOGIN: string = "/auth/login";
