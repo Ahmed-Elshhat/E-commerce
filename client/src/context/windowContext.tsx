@@ -13,7 +13,7 @@ type WindowContextType = {
 const WindowContext = createContext<WindowContextType | null>(null);
 
 function WindowProvider({ children }: { children: ReactNode }) {
-  const [windowSize, setWindowSize] = useState(window.innerWidth);
+  const [windowSize, setWindowSize] = useState<number>(window.innerWidth);
 
   useEffect(() => {
     function setWindowWidth() {

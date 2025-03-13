@@ -1,3 +1,6 @@
+@use "sass:color";
+
+
 $primary-color: #3498db;
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
@@ -14,7 +17,6 @@ $border-color: #ddd;
   width: 100%;
 
   .form-container {
-    
     padding: 30px;
     border-radius: 10px;
     max-width: 600px;
@@ -68,7 +70,7 @@ $border-color: #ddd;
         transition: background 0.3s;
 
         &:hover {
-          background-color: darken($primary-color, 10%);
+          background-color: color.adjust($primary-color, $lightness: -10%);
         }
       }
     }
@@ -113,7 +115,6 @@ $border-color: #ddd;
     width: 100%;
   }
 }
-
 
 .error-text {
   color: red;

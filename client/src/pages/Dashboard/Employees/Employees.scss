@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $primary-color: #3498db;
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
@@ -74,7 +76,6 @@ $border-color: #ddd;
         td {
           justify-content: center;
         }
-
       }
     }
   }
@@ -95,26 +96,25 @@ $border-color: #ddd;
     &-view {
       color: #3498db; // لون أزرق لزر العرض
       &:hover {
-        color: darken(#3498db, 10%);
+        color: color.adjust(#3498db, $lightness: -10%);
       }
     }
 
     &-edit {
       color: #f39c12; // لون أصفر لزر التعديل
       &:hover {
-        color: darken(#f39c12, 10%);
+        color: color.adjust(#f39c12, $lightness: -10%);
       }
     }
 
     &-delete {
       color: #e74c3c; // لون أحمر لزر الحذف
       &:hover {
-        color: darken(#e74c3c, 10%);
+        color: color.adjust(#e74c3c, $lightness: -10%);
       }
     }
   }
 }
-
 
 // 🔹 Responsive Design
 @media (max-width: 768px) {

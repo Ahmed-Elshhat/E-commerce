@@ -23,7 +23,7 @@ function Header() {
   const { lang } = useAppSelector((state) => state.language);
   const [focused, setFocused] = useState<boolean>(false);
   const [showOptions, setShowOptions] = useState<boolean>(false);
-  const { windowSize } = useWindow();
+  const { windowSize } = useWindow() || { windowSize: 1024 };
   const searchRef = useRef<HTMLDivElement>(null);
   const optionsRef = useRef<HTMLDivElement>(null);
   const cancelTokenRef = useRef<CancelTokenSource | null>(null);
@@ -178,7 +178,14 @@ function Header() {
   };
 
   return (
-    <header className="Header" style={{position: window.location.pathname.includes("dashboard") ? "relative" : "sticky"}}>
+    <header
+      className="Header"
+      style={{
+        position: window.location.pathname.includes("dashboard")
+          ? "relative"
+          : "sticky",
+      }}
+    >
       <div className="container">
         <nav>
           <Link to="/" className="logo">
