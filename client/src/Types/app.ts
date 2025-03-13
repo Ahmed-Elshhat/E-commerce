@@ -44,6 +44,15 @@ export type UserSchema = {
   updatedAt: Date;
   addresses: [];
   id: string;
+  _id: string;
+  startShift: number;
+  endShift: number;
+};
+
+// Category Schema
+export type CategorySchema = {
+  id: string;
+  name: string;
 };
 
 // Reset Password
