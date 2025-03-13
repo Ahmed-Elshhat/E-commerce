@@ -42,6 +42,7 @@
     },
     "signinButton": "تسجيل الدخول",
     "ordersButton": "طلباتي",
+    "dashboardButton": "لوحة التحكم",
     "MyAccountButton": "حسابي",
     "cart": "العربة",
     "logoutButton": "تسجيل الخروج"
@@ -76,6 +77,7 @@
       "continueShoppingButton": "ابدأ التسوق"
     },
     "cartContent": {
+      "currency": "جنيه",
       "checkOut": {
         "header": "ملخص سلة التسوق",
         "title": "الاجمالي",

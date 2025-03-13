@@ -13,6 +13,7 @@ import { BASE_URL, PRODUCT_SEARCH } from "../../Api/Api";
 import Skeleton from "react-loading-skeleton";
 import { useTranslation } from "react-i18next";
 import Cookie from "cookie-universal";
+import { MdDashboard } from "react-icons/md";
 type searchResultsType = { _id: number; title: string }[];
 
 function Header() {
@@ -144,10 +145,11 @@ function Header() {
 
   const handleLogout = () => {
     cookies.remove("ECT");
-    window.location.reload();
+    window.location.href = "/";
   };
 
   const handleSearchChange = async (searchTxt: string) => {
+    console.log(window.location);
     if (cancelTokenRef.current) {
       cancelTokenRef.current.cancel();
     }
@@ -176,7 +178,7 @@ function Header() {
   };
 
   return (
-    <header className="Header">
+    <header className="Header" style={{position: window.location.pathname.includes("dashboard") ? "relative" : "sticky"}}>
       <div className="container">
         <nav>
           <Link to="/" className="logo">
@@ -316,19 +318,29 @@ function Header() {
                   </li>
                 )}
 
-                <li>
-                  <LuUserRound />
-                  <Link to={`/${lang}/customer/account`}>
-                    {t("header.MyAccountButton")}
-                  </Link>
-                </li>
-
-                <li>
-                  <BsBox2 />
-                  <Link to={`/${lang}/customer/order`}>
-                    {t("header.ordersButton")}
-                  </Link>
-                </li>
+                {data?.role === "admin" || data?.role === "employee" ? (
+                  <li>
+                    <MdDashboard />
+                    <Link to={`/${lang}/dashboard`}>
+                      {t("header.dashboardButton")}
+                    </Link>
+                  </li>
+                ) : (
+                  <>
+                    <li>
+                      <LuUserRound />
+                      <Link to={`/${lang}/customer/account`}>
+                        {t("header.MyAccountButton")}
+                      </Link>
+                    </li>
+                    <li>
+                      <BsBox2 />
+                      <Link to={`/${lang}/customer/order`}>
+                        {t("header.ordersButton")}
+                      </Link>
+                    </li>
+                  </>
+                )}
 
                 {data !== null && !loading && (
                   <li className="logout-option">

@@ -7,14 +7,17 @@ import { Provider } from "react-redux";
 import store from "./Redux/app/store.ts";
 import App from "./App.tsx";
 import WindowProvider from "./context/windowContext.tsx";
-import "./i18n";  
+import "./i18n";
+import MenuProvider from "./context/MenuContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <Router>
       <Provider store={store}>
         <WindowProvider>
-          <App />
+          <MenuProvider>
+            <App />
+          </MenuProvider>
         </WindowProvider>
       </Provider>
     </Router>

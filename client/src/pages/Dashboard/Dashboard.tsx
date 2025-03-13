@@ -1,6 +1,13 @@
-import "./Dashboard.scss"
+import { Outlet } from "react-router-dom";
+import "./Dashboard.scss";
+import SideBar from "../../components/Dashboard/SideBar/SideBar";
 function Dashboard() {
-  return <div>Dashboard</div>;
+  return (
+    <div className="dashboard">
+      <SideBar />
+      <Outlet />
+    </div>
+  );
 }
 
 export default Dashboard;

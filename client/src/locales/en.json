@@ -43,6 +43,7 @@
       "signin": "Sign in"
     },
     "signinButton": "Sign in",
+    "dashboardButton": "Dashboard",
     "MyAccountButton": "My Account",
     "ordersButton": "Orders",
     "cart": "Cart",

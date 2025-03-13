@@ -21,9 +21,18 @@ import { saveLang } from "./Redux/feature/languageSlice/languageSlice";
 import Footer from "./components/Footer/Footer";
 import ShowProduct from "./pages/ShowProduct/ShowProduct";
 import Signup from "./pages/Auth/Signup/Signup";
+import Employees from "./pages/Dashboard/Employees/Employees";
+import AddEmployee from "./pages/Dashboard/Employees/AddEmployee/AddEmployee";
+import Categories from "./pages/Dashboard/Categories/Categories";
+import AddCategory from "./pages/Dashboard/Categories/AddCategory/AddCategory";
+import Products from "./pages/Dashboard/Products/Products";
+import AddProduct from "./pages/Dashboard/Products/AddProduct/AddProduct";
+import UpdateCategory from "./pages/Dashboard/Categories/UpdateCategory/UpdateCategory";
+import UpdateProduct from "./pages/Dashboard/Products/UpdateProduct/UpdateProduct";
 
 function App() {
   const { lang } = useAppSelector((state) => state.language);
+  const { data } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -86,7 +95,49 @@ function App() {
                       <RequireAuth allowedRole={["admin", "employee"]} />
                     }
                   >
-                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route
+                      path="/dashboard"
+                      element={
+                        <>
+                          <Header />
+                          <Dashboard />
+                          <Footer />
+                        </>
+                      }
+                    >
+                      <Route element={<RequireAuth allowedRole={["admin"]} />}>
+                        {data && data.role === "admin" && (
+                          <Route index element={<Employees />} />
+                        )}
+                        <Route path="employees" element={<Employees />} />
+                        <Route path="employees/add" element={<AddEmployee />} />
+                      </Route>
+
+                      <Route
+                        element={
+                          <RequireAuth allowedRole={["admin", "employee"]} />
+                        }
+                      >
+                        {data && data.role === "employee" && (
+                          <Route index element={<Categories />} />
+                        )}
+                        <Route path="categories" element={<Categories />} />
+                        <Route
+                          path="categories/add"
+                          element={<AddCategory />}
+                        />
+                        <Route
+                          path="categories/update/:id"
+                          element={<UpdateCategory />}
+                        />
+                        <Route path="products" element={<Products />} />
+                        <Route path="products/add" element={<AddProduct />} />
+                        <Route
+                          path="products/update/:id"
+                          element={<UpdateProduct />}
+                        />
+                      </Route>
+                    </Route>
                   </Route>
                   <Route element={<RequireAuth allowedRole={["user"]} />}>
                     <Route
