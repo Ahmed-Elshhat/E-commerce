@@ -21,10 +21,10 @@ exports.createUserValidator = [
     "name",
     "email",
     "password",
-    "passwordConfirm",
-    "phone",
+    "confirmPassword",
     "startShift",
     "endShift",
+    "phone",
   ]),
   body("name")
     .notEmpty()
@@ -53,12 +53,12 @@ exports.createUserValidator = [
     .isLength({ min: 6 })
     .withMessage("Too short password, Must be longer than 6 characters")
     .custom((val, { req }) => {
-      if (val !== req.body.passwordConfirm) {
+      if (val !== req.body.confirmPassword) {
         throw new Error("Confirm password does not match");
       }
       return true;
     }),
-  body("passwordConfirm")
+  body("confirmPassword")
     .notEmpty()
     .withMessage("Password confirmation required"),
 
@@ -158,5 +158,3 @@ exports.changeUserPasswordValidator = [
     }),
   validatorMiddleware,
 ];
-
-

@@ -99,7 +99,6 @@ function App() {
                       path="/dashboard"
                       element={
                         <>
-                          <Header />
                           <Dashboard />
                           <Footer />
                         </>
