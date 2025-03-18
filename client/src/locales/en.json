@@ -90,5 +90,50 @@
         "removeButton": "Remove"
       }
     }
+  },
+  "dashboard": {
+    "employees": {
+      "name": "Name",
+      "role": "Role",
+      "shift": "Shift",
+      "actions": "Actions",
+      "employee": "Employee",
+      "hour": "h",
+      "minute": "m",
+      "noEmployeesFound": "No Employees Found"
+    },
+    "addEmployee": {
+      "title": "Add a new employee",
+      "nameLabel": "Name",
+      "namePlaceholder": "Name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Email",
+      "passwordLabel": "Password",
+      "confirmPasswordLabel": "Confirm password",
+      "startShiftLabel": "Shift Start Time",
+      "endShiftLabel": "Shift End Time",
+      "submitButton": "Add Employee"
+    },
+    "categories": {
+      "name": "Name",
+      "actions": "Actions",
+      "noEmployeesFound": "No Categories Found"
+    },
+    "addCategory": {
+      "title": "Add a new category",
+      "nameLabel": "Name",
+      "namePlaceholder": "Name",
+      "uploadImage": "Upload Image",
+      "submitButton": "Add Category"
+    }
+  },
+  "sidebar": {
+    "home": "Home",
+    "employees": "Employees",
+    "addEmployee": "Add Employee",
+    "categories": "Categories",
+    "addCategory": "Add Category",
+    "products": "Products",
+    "addProduct": "Add Product"
   }
 }

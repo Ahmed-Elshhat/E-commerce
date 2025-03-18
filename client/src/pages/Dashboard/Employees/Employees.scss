@@ -1,176 +1,172 @@
 @use "sass:color";
 
 $primary-color: #3498db;
-$secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
 $text-color: #333;
 $border-color: #ddd;
 
-.employee {
+.employees {
+  position: relative;
   width: 100%;
   overflow-x: hidden;
-}
 
-.employee-container {
-  font-family: "Cairo", sans-serif;
-  display: flex;
-  // justify-content: center;
-  // align-items: center;
-  padding: 20px;
-  background-color: $bg-color;
-  min-height: 100vh;
-  width: 100%;
-
-  .table-wrapper {
-    // max-width: 900px;
+  .employees-container {
+    background-color: $bg-color;
+    display: flex;
     width: 100%;
-    overflow-x: auto;
-    background: white;
+    min-height: 100vh;
     padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
-  }
+    font-family: "Cairo", sans-serif;
 
-  .custom-table {
-    width: 100%;
-    border-collapse: collapse;
-    text-align: center;
-
-    thead {
-      background-color: $primary-color;
-      color: white;
-
-      th {
-        padding: 12px;
-        font-size: 18px;
+    @media (max-width: 768px) {
+      .table-wrapper {
+        padding: 10px;
       }
-    }
 
-    tbody {
-      tr {
-        transition: background 0.3s ease;
+      .custom-table {
+        font-size: 14px;
 
-        &:nth-child(even) {
-          background-color: #f2f2f2;
-        }
-
-        &:hover {
-          background-color: $secondary-color;
-          color: white;
-        }
-
-        td {
-          padding: 12px;
-          border-bottom: 1px solid $border-color;
+        thead th {
           font-size: 16px;
         }
-      }
 
-      .no-data {
-        text-align: center;
-        padding: 20px;
-        font-size: 18px;
-        font-weight: bold;
-        color: $text-color;
-        text-align: center;
-        td {
-          justify-content: center;
+        tbody td {
+          padding: 10px;
         }
       }
     }
-  }
-}
 
-.action-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 10px;
-
-  .btn {
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 18px;
-    transition: 0.3s;
-
-    &-view {
-      color: #3498db; // لون أزرق لزر العرض
-      &:hover {
-        color: color.adjust(#3498db, $lightness: -10%);
-      }
-    }
-
-    &-edit {
-      color: #f39c12; // لون أصفر لزر التعديل
-      &:hover {
-        color: color.adjust(#f39c12, $lightness: -10%);
-      }
-    }
-
-    &-delete {
-      color: #e74c3c; // لون أحمر لزر الحذف
-      &:hover {
-        color: color.adjust(#e74c3c, $lightness: -10%);
-      }
-    }
-  }
-}
-
-// 🔹 Responsive Design
-@media (max-width: 768px) {
-  .employee-container {
     .table-wrapper {
-      padding: 10px;
-    }
+      background: white;
+      width: 100%;
+      padding: 20px;
+      overflow-x: auto;
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 
-    .custom-table {
-      font-size: 14px;
+      .custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: center;
 
-      thead th {
-        font-size: 16px;
-      }
+        @media (max-width: 710px) {
+          thead {
+            display: none;
+          }
 
-      tbody td {
-        padding: 10px;
+          tbody {
+            tr {
+              display: block;
+              margin-bottom: 10px;
+              border: 1px solid $border-color;
+              border-radius: 8px;
+              padding: 10px;
+              background: white;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            td {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px;
+              font-size: 14px;
+              font-weight: bold;
+              border-bottom: 1px solid $border-color;
+              position: relative;
+
+              &::before {
+                content: attr(data-label);
+                font-weight: bold;
+                text-transform: uppercase;
+                color: $primary-color;
+                margin-right: 10px;
+              }
+            }
+          }
+        }
+
+        thead {
+          background-color: $primary-color;
+          color: white;
+
+          th {
+            padding: 12px;
+            font-size: 18px;
+          }
+        }
+
+        tbody {
+          tr {
+            transition: background 0.3s ease;
+
+            &:nth-child(even) {
+              background-color: #f2f2f2;
+            }
+
+            td {
+              padding: 12px;
+              font-size: 16px;
+              border-bottom: 1px solid $border-color;
+
+              .action-buttons {
+                display: flex;
+                justify-content: center;
+                gap: 10px;
+
+                .btn {
+                  border: none;
+                  background: none;
+                  cursor: pointer;
+                  font-size: 18px;
+                  transition: 0.3s;
+
+                  &-view {
+                    color: #3498db;
+                    &:hover {
+                      color: color.adjust(#3498db, $lightness: -10%);
+                    }
+                  }
+
+                  &-delete {
+                    color: #e74c3c;
+                    &:hover {
+                      color: color.adjust(#e74c3c, $lightness: -10%);
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          .no-data {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            color: $text-color;
+            text-align: center;
+            td {
+              justify-content: center;
+            }
+          }
+        }
       }
     }
   }
-}
 
-@media (max-width: 710px) {
-  .custom-table {
-    thead {
-      display: none;
-    }
+  .loading-bottom {
+    width: 50px;
+    height: 50px;
+    margin: 10px auto;
+    border-radius: 50%;
+    border: 4px solid #0099ff;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+  }
 
-    tbody {
-      tr {
-        display: block;
-        margin-bottom: 10px;
-        border: 1px solid $border-color;
-        border-radius: 8px;
-        padding: 10px;
-        background: white;
-        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      td {
-        display: flex;
-        justify-content: space-between;
-        padding: 10px;
-        font-size: 14px;
-        font-weight: bold;
-        border-bottom: 1px solid $border-color;
-        position: relative;
-
-        &:before {
-          content: attr(data-label);
-          font-weight: bold;
-          text-transform: uppercase;
-          color: $primary-color;
-          margin-right: 10px;
-        }
-      }
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
     }
   }
 }

@@ -29,6 +29,8 @@ import Products from "./pages/Dashboard/Products/Products";
 import AddProduct from "./pages/Dashboard/Products/AddProduct/AddProduct";
 import UpdateCategory from "./pages/Dashboard/Categories/UpdateCategory/UpdateCategory";
 import UpdateProduct from "./pages/Dashboard/Products/UpdateProduct/UpdateProduct";
+import ShowEmployee from "./pages/Dashboard/Employees/ShowEmployee/ShowEmployee";
+import ShowCategory from "./pages/Dashboard/Categories/ShowCategory/ShowCategory";
 
 function App() {
   const { lang } = useAppSelector((state) => state.language);
@@ -110,6 +112,10 @@ function App() {
                         )}
                         <Route path="employees" element={<Employees />} />
                         <Route path="employees/add" element={<AddEmployee />} />
+                        <Route
+                          path="employees/show/:id"
+                          element={<ShowEmployee />}
+                        />
                       </Route>
 
                       <Route
@@ -121,6 +127,10 @@ function App() {
                           <Route index element={<Categories />} />
                         )}
                         <Route path="categories" element={<Categories />} />
+                        <Route
+                          path="categories/show/:id"
+                          element={<ShowCategory />}
+                        />
                         <Route
                           path="categories/add"
                           element={<AddCategory />}

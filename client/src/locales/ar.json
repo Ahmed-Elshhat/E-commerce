@@ -89,5 +89,50 @@
         "removeButton": "إزالة"
       }
     }
+  },
+  "dashboard": {
+    "employees": {
+      "name": "الأسم",
+      "role": "الصلاحية",
+      "shift": "الوردية",
+      "actions": "الإجراءات",
+      "employee": "موظف",
+      "hour": "س",
+      "minute": "د",
+      "noEmployeesFound": "لم يتم العثور على موظفين"
+    },
+    "addEmployee": {
+      "title": "إضافة موظف جديد",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "الاسم",
+      "emailLabel": "البريد الإلكتروني",
+      "emailPlaceholder": "البريد الإلكتروني",
+      "passwordLabel": "كلمة المرور",
+      "confirmPasswordLabel": "تأكيد كلمة المرور",
+      "startShiftLabel": "وقت بدء الوردية",
+      "endShiftLabel": "وقت انتهاء الوردية",
+      "submitButton": "إضافة الموظف"
+    },
+    "categories": {
+      "name": "الأسم",
+      "actions": "الإجراءات",
+      "noCategoriesFound": "لم يتم العثور على تصنيفات"
+    },
+    "addCategory": {
+      "title": "إضافة تصنيف جديد",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "الاسم",
+      "uploadImage": "تحميل صورة",
+      "submitButton": "إضافة التصنيف"
+    }
+  },
+  "sidebar": {
+    "home": "الصفحة الرئيسية",
+    "employees": "الموظفون",
+    "addEmployee": "إضافة موظف",
+    "categories": "التصنيفات",
+    "addCategory": "إضافة تصنيف",
+    "products": "المنتجات",
+    "addProduct": "إضافة منتج"
   }
 }

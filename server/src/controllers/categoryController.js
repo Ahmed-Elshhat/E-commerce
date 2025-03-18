@@ -21,7 +21,7 @@
         .resize(600, 600)
         .toFormat("jpeg")
         .jpeg({ quality: 100 })
-        .toFile(`src/uploads/categories/${fileName}`);
+        .toFile(`uploads/categories/${fileName}`);
 
       // Save image into our db
       req.body.image = fileName;

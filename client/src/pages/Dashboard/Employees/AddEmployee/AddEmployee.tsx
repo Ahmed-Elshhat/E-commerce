@@ -19,15 +19,39 @@ function AddEmployee() {
   });
 
   const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [errors, setErrors] = useState<{ msg: string; path?: string }[]>([]);
+  const [errors, setErrors] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    startShift: "",
+    endShift: "",
+    general: "",
+  });
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
-  const { i18n } = useTranslation();
+  const { t , i18n } = useTranslation();
 
   useEffect(() => {
     if (isSubmitted) {
-      validateForm();
+      const fields = [
+        "name",
+        "email",
+        "password",
+        "confirmPassword",
+        "startShift",
+        "endShift",
+        "general",
+      ];
+
+      const newErrors = validateForm().errors;
+
+      fields.forEach((field) => {
+        if (!newErrors[field]) {
+          setErrors((prevErrors) => ({ ...prevErrors, [field]: "" }));
+        }
+      });
     }
   }, [form]);
 
@@ -39,10 +63,19 @@ function AddEmployee() {
     setShowPassword(!showPassword);
   };
 
+  function getHour(time: string) {
+    const match = time.match(/^(\d{1,2}):([0-5]\d)$/);
+    if (!match) return null;
+
+    const hour = parseInt(match[1], 10);
+    return hour >= 0 && hour < 24 ? hour : null;
+  }
+
   const validateForm = () => {
     const newErrors: { msg: string; path?: string }[] = [];
     const emailRegex = /^[^\s@]+@[^\s@]+\.(com)$/;
-    const timeRegex = /^([01]\d|2[0-4]):([0-5]\d)$/;
+    const startShiftHour = getHour(form.startShift);
+    const endShiftHour = getHour(form.endShift);
 
     if (!form.name.trim()) {
       newErrors.push({ msg: "Name is required", path: "name" });
@@ -80,14 +113,24 @@ function AddEmployee() {
       });
     }
 
-    if (form.startShift && !timeRegex.test(form.startShift)) {
+    if (
+      form.startShift === "" ||
+      startShiftHour === null ||
+      startShiftHour < 0 ||
+      startShiftHour > 23
+    ) {
       newErrors.push({
         msg: "Invalid start shift format (HH:MM)",
         path: "startShift",
       });
     }
 
-    if (form.endShift && !timeRegex.test(form.endShift)) {
+    if (
+      form.endShift === "" ||
+      endShiftHour === null ||
+      endShiftHour < 0 ||
+      endShiftHour > 23
+    ) {
       newErrors.push({
         msg: "Invalid end shift format (HH:MM)",
         path: "endShift",
@@ -97,20 +140,42 @@ function AddEmployee() {
     if (form.startShift === form.endShift) {
       newErrors.push({
         msg: "Start and end shifts cannot be the same",
-        path: "shiftMatch",
+        path: "",
       });
     }
 
-    setErrors(newErrors);
-    return newErrors.length === 0;
+    const errorsMap = newErrors.reduce<Record<string, string>>((acc, error) => {
+      if (error.path) {
+        acc[error.path] = error.msg;
+      } else {
+        acc.general = error.msg;
+      }
+      return acc;
+    }, {});
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      ...errorsMap,
+    }));
+
+    return { isValid: newErrors.length === 0, errors: errorsMap };
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrors([]);
+    setErrors({
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+      startShift: "",
+      endShift: "",
+      general: "",
+    });
+
     setIsSubmitted(true);
 
-    if (!validateForm()) return;
+    if (!validateForm().isValid) return;
 
     try {
       const res = await Axios.post(`${USERS}`, form);
@@ -121,22 +186,37 @@ function AddEmployee() {
       console.log(err);
       if (axios.isAxiosError(err) && err.response) {
         if (err.response.data?.message) {
-          setErrors([{ msg: err.response.data.message }]);
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            general: err.response?.data.message,
+          }));
         } else if (err.response.data?.errors) {
-          setErrors(
-            err.response.data.errors.map(
-              (error: { msg: string; path: string }) => ({
-                msg: error.msg,
-                path: error.path,
-              })
-            )
+          const newErrors: { msg: string; path?: string }[] =
+            err.response.data.errors;
+
+          const errorsMap = newErrors.reduce<Record<string, string>>(
+            (acc, error) => {
+              if (error.path) {
+                acc[error.path] = error.msg;
+              } else {
+                acc.general = error.msg;
+              }
+              return acc;
+            },
+            {}
           );
+
+          setErrors((prevErrors) => ({
+            ...prevErrors,
+            ...errorsMap,
+          }));
         }
       } else {
         console.error("Unexpected error:", err);
-        setErrors([
-          { msg: "An unexpected error occurred. Please try again later." },
-        ]);
+        setErrors((prevErrors) => ({
+          ...prevErrors,
+          general: "An unexpected error occurred. Please try again later.",
+        }));
       }
     }
   };
@@ -144,47 +224,45 @@ function AddEmployee() {
   return (
     <div className="add-employee">
       <div className="form-container">
-        <h2>إضافة موظف جديد</h2>
+        <h2>{t("dashboard.addEmployee.title")}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">الاسم</label>
+            <label htmlFor="name">{t("dashboard.addEmployee.nameLabel")}</label>
             <input
               type="text"
               id="name"
               name="name"
-              placeholder="أدخل اسم الموظف"
+              placeholder={t("dashboard.addEmployee.namePlaceholder")}
               value={form.name}
               onChange={handleChange}
             />
 
-            {errors.some((error) => error.path === "name" && isSubmitted) && (
+            {errors.name && (
               <p className="error-text">
-                <span className="error-star">*</span>{" "}
-                {errors.find((error) => error.path === "name")?.msg}
+                <span className="error-star">*</span> {errors.name}
               </p>
             )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">البريد الإلكتروني</label>
+            <label htmlFor="email">{t("dashboard.addEmployee.emailLabel")}</label>
             <input
               type="email"
               id="email"
               name="email"
-              placeholder="أدخل البريد الإلكتروني"
+              placeholder={t("dashboard.addEmployee.emailPlaceholder")}
               value={form.email}
               onChange={handleChange}
             />
-            {errors.some((error) => error.path === "email" && isSubmitted) && (
+            {errors.email && (
               <p className="error-text">
-                <span className="error-star">*</span>{" "}
-                {errors.find((error) => error.path === "email")?.msg}
+                <span className="error-star">*</span> {errors.email}
               </p>
             )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">كلمة المرور</label>
+            <label htmlFor="password">{t("dashboard.addEmployee.passwordLabel")}</label>
             <div className="cover">
               <input
                 type={showPassword ? "text" : "password"}
@@ -211,18 +289,15 @@ function AddEmployee() {
               </button>
             </div>
 
-            {errors.some(
-              (error) => error.path === "password" && isSubmitted
-            ) && (
+            {errors.password && (
               <p className="error-text">
-                <span className="error-star">*</span>{" "}
-                {errors.find((error) => error.path === "password")?.msg}
+                <span className="error-star">*</span> {errors.password}
               </p>
             )}
           </div>
 
           <div className="form-group">
-            <label htmlFor="confirmPassword">تأكيد كلمة المرور</label>
+            <label htmlFor="confirmPassword">{t("dashboard.addEmployee.confirmPasswordLabel")}</label>
             <div className="cover">
               <input
                 type={showPassword ? "text" : "password"}
@@ -249,19 +324,16 @@ function AddEmployee() {
               </button>
             </div>
 
-            {errors.some(
-              (error) => error.path === "confirmPassword" && isSubmitted
-            ) && (
+            {errors.confirmPassword && (
               <p className="error-text">
-                <span className="error-star">*</span>{" "}
-                {errors.find((error) => error.path === "confirmPassword")?.msg}
+                <span className="error-star">*</span> {errors.confirmPassword}
               </p>
             )}
           </div>
 
           <div className="shifts">
             <div className="form-group">
-              <label htmlFor="startShift">startShift</label>
+              <label htmlFor="startShift">{t("dashboard.addEmployee.startShiftLabel")}</label>
 
               <input
                 type="time"
@@ -271,18 +343,15 @@ function AddEmployee() {
                 onChange={handleChange}
               />
 
-              {errors.some(
-                (error) => error.path === "shiftMatch" && isSubmitted
-              ) && (
+              {errors.startShift && (
                 <p className="error-text">
-                  <span className="error-star">*</span>{" "}
-                  {errors.find((error) => error.path === "shiftMatch")?.msg}
+                  <span className="error-star">*</span> {errors.startShift}
                 </p>
               )}
             </div>
 
             <div className="form-group">
-              <label htmlFor="endShift">endShift</label>
+              <label htmlFor="endShift">{t("dashboard.addEmployee.endShiftLabel")}</label>
               <input
                 type="time"
                 id="endShift"
@@ -291,31 +360,24 @@ function AddEmployee() {
                 onChange={handleChange}
               />
 
-              {errors.some(
-                (error) => error.path === "endShift" && isSubmitted
-              ) && (
+              {errors.endShift && (
                 <p className="error-text">
-                  <span className="error-star">*</span>{" "}
-                  {errors.find((error) => error.path === "endShift")?.msg}
+                  <span className="error-star">*</span> {errors.endShift}
                 </p>
               )}
             </div>
           </div>
 
-          {errors.some((error) => !error.path && isSubmitted) && (
+          {errors.general && (
             <div className="error-box">
-              {errors
-                .filter((error) => !error.path)
-                .map((error, index) => (
-                  <p key={index} className="error-text">
-                    <span className="error-star">*</span> {error.msg}
-                  </p>
-                ))}
+              <p className="error-text">
+                <span className="error-star">*</span> {errors.general}
+              </p>
             </div>
           )}
 
           <button type="submit" className="btn-submit">
-            إضافة الموظف
+            {t("dashboard.addEmployee.submitButton")}
           </button>
         </form>
       </div>

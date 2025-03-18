@@ -1,6 +1,5 @@
 @use "sass:color";
 
-
 $primary-color: #3498db;
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
@@ -8,50 +7,45 @@ $text-color: #333;
 $border-color: #ddd;
 
 .add-employee {
+  background-color: $bg-color;
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100%;
-  background-color: $bg-color;
-  font-family: "Cairo", sans-serif;
   width: 100%;
+  min-height: 100vh;
+  max-height: 100%;
+  font-family: "Cairo", sans-serif;
 
   .form-container {
-    padding: 30px;
-    border-radius: 10px;
     max-width: 600px;
     width: 100%;
-    text-align: center;
+    padding: 30px;
+    border-radius: 10px;
 
     h2 {
       margin-bottom: 20px;
       color: $primary-color;
+      text-align: center;
     }
 
     form {
-      display: flex;
-      flex-direction: column;
-
       .form-group {
-        display: flex;
-        flex-direction: column;
-        text-align: left;
         margin-bottom: 15px;
 
         label {
-          font-weight: bold;
-          margin-bottom: 5px;
           color: $text-color;
+          margin-bottom: 5px;
+          font-weight: bold;
         }
 
         input {
+          width: 100%;
           padding: 10px;
-          border: 1px solid $border-color;
-          border-radius: 5px;
           font-size: 16px;
           outline: none;
+          border-radius: 5px;
+          border: 1px solid $border-color;
           transition: border 0.3s;
-          width: 100%;
 
           &:focus {
             border-color: $primary-color;
@@ -59,9 +53,42 @@ $border-color: #ddd;
         }
       }
 
+      .cover {
+        position: relative;
+        width: 100%;
+        button {
+          background: none;
+          position: absolute;
+          top: 9px;
+          font-size: 20px;
+          border: none;
+          cursor: pointer;
+          svg {
+            fill: rgb(134, 134, 134);
+          }
+        }
+      }
+
+      .shifts {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        margin-top: 20px;
+        .form-group {
+          width: 100%;
+          @media (max-width: 565px) {
+            .error-text {
+              text-align: center;
+            }
+          }
+        }
+      }
+
       .btn-submit {
         background-color: $primary-color;
         color: white;
+        width: 100%;
         padding: 12px;
         font-size: 18px;
         border: none;
@@ -75,53 +102,29 @@ $border-color: #ddd;
       }
     }
   }
-}
 
-// 🔹 تصميم متجاوب
-@media (max-width: 480px) {
-  .form-container {
-    padding: 20px;
-  }
+  @media (max-width: 480px) {
+    .form-container {
+      padding: 20px;
+    }
 
-  .btn-submit {
-    font-size: 16px;
-    padding: 10px;
-  }
-}
-
-.cover {
-  position: relative;
-  width: 100%;
-  button {
-    background: none;
-    position: absolute;
-    top: 9px;
-    font-size: 20px;
-    border: none;
-    cursor: pointer;
-    svg {
-      fill: rgb(134, 134, 134);
+    .btn-submit {
+      padding: 10px;
+      font-size: 16px;
     }
   }
-}
 
-.shifts {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 20px;
-  gap: 10px;
-  .form-group {
-    width: 100%;
+  .error-box {
+    margin-bottom: 10px;
   }
-}
 
-.error-text {
-  color: red;
-  font-size: 14px;
-}
+  .error-text {
+    color: red;
+    font-size: 14px;
+  }
 
-.error-star {
-  color: red;
-  font-weight: bold;
+  .error-star {
+    color: red;
+    font-weight: bold;
+  }
 }

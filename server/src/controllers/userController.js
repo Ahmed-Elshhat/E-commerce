@@ -45,27 +45,40 @@ exports.getUser = factory.getOne(User, "", "users");
 
 // transform time format to number
 function getHour(time) {
-  let match = time.match(/^0?(\d+):/); // التقاط الرقم بدون الصفر الأول إن وجد
-  return match ? +match[1] : null; // إرجاع الرقم الصحيح
+  const match = time.match(/^0?(\d+):([0-5]\d)$/);
+  if (!match) return { hour: null, minutes: null };
+
+  const hour = parseInt(match[1], 10);
+  let minutes = parseInt(match[2], 10);
+
+  if (minutes === 0) minutes = 0;
+
+  return { hour, minutes };
 }
 
 // Middleware because transform time format to number for StartShift and EndShift
 exports.createUserValidatorMiddleware = (req, res, next) => {
   let errors = {};
-  let startShiftHour = getHour(req.body.startShift);
-  let endShiftHour = getHour(req.body.endShift);
+  let startShift = getHour(req.body.startShift);
+  let endShift = getHour(req.body.endShift);
 
-  if (!startShiftHour || startShiftHour > 24) {
+  console.log(startShift.hour, startShift.hour)
+  console.log(endShift.hour, endShift.hour)
+
+  if (!startShift?.hour || startShift?.hour > 24) {
     errors.startShift =
       "Invalid start shift time must be between 1 and 24 example(01:00 Or 24:00)";
   }
 
-  if (!endShiftHour || endShiftHour > 24) {
+  if (!endShift?.hour || endShift?.hour > 24) {
     errors.endShift =
       "Invalid end shift time must be between 1 and 24 example(01:00 Or 24:00)";
   }
 
-  if (startShiftHour === endShiftHour) {
+  if (
+    startShift.hour === endShift.hour &&
+    startShift.minutes === endShift.minutes
+  ) {
     errors.shiftMatch = "Start shift and end shift cannot be the same.";
   }
 
@@ -73,8 +86,8 @@ exports.createUserValidatorMiddleware = (req, res, next) => {
     return next(new ApiError("Shift Errors", 400, errors));
   }
 
-  req.body.startShift = startShiftHour;
-  req.body.endShift = endShiftHour;
+  req.body.startShift = startShift;
+  req.body.endShift = endShift;
   next();
 };
 

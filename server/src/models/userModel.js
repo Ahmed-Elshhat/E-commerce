@@ -29,8 +29,14 @@ const userSchema = new mongoose.Schema(
       minlength: [6, "Too short password"],
     },
     phone: String,
-    startShift: Number,
-    endShift: Number,
+    startShift: {
+      hour: Number,
+      minutes: Number,
+    },
+    endShift: {
+      hour: Number,
+      minutes: Number,
+    },
     passwordChangedAt: Date,
     passwordResetCode: String,
     passwordResetExpires: Date,

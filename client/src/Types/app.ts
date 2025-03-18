@@ -45,13 +45,19 @@ export type UserSchema = {
   addresses: [];
   id: string;
   _id: string;
-  startShift: number;
-  endShift: number;
+  startShift: {
+    hour: number;
+    minutes: number;
+  };
+  endShift: {
+    hour: number;
+    minutes: number;
+  };
 };
 
 // Category Schema
 export type CategorySchema = {
-  id: string;
+  _id: string;
   name: string;
 };
 
