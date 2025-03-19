@@ -68,13 +68,13 @@ const SidebarLinks = () => {
     },
     {
       name: t("sidebar.coupons"),
-      path: `/${lang}/dashboard/products`,
+      path: `/${lang}/dashboard/coupons`,
       icon: <RiCoupon3Fill />,
       role: ["admin", "employee"],
     },
     {
       name: t("sidebar.addCoupon"),
-      path: `/${lang}/dashboard/coupon/add`,
+      path: `/${lang}/dashboard/coupons/add`,
       icon: <MdOutlineAddBox />,
       role: ["admin", "employee"],
     },

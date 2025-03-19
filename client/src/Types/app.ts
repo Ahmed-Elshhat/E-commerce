@@ -61,6 +61,12 @@ export type CategorySchema = {
   name: string;
 };
 
+// Brand Schema
+export type BrandSchema = {
+  _id: string;
+  name: string;
+};
+
 // Reset Password
 export type ResetPasswordFormState = {
   password: string;

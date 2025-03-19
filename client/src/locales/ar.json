@@ -124,6 +124,11 @@
       "namePlaceholder": "الاسم",
       "uploadImage": "تحميل صورة",
       "submitButton": "إضافة التصنيف"
+    },
+    "brands": {
+      "name": "الأسم",
+      "actions": "الإجراءات",
+      "noBrandsFound": "لم يتم العثور على ماركات"
     }
   },
   "sidebar": {

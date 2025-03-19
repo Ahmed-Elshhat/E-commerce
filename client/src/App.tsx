@@ -31,6 +31,15 @@ import UpdateCategory from "./pages/Dashboard/Categories/UpdateCategory/UpdateCa
 import UpdateProduct from "./pages/Dashboard/Products/UpdateProduct/UpdateProduct";
 import ShowEmployee from "./pages/Dashboard/Employees/ShowEmployee/ShowEmployee";
 import ShowCategory from "./pages/Dashboard/Categories/ShowCategory/ShowCategory";
+import ShowProductDetails from "./pages/Dashboard/Products/ShowProductDetails/ShowProductDetails";
+import Brands from "./pages/Dashboard/Brands/Brands";
+import ShowBrand from "./pages/Dashboard/Brands/ShowBrand/ShowBrand";
+import AddBrand from "./pages/Dashboard/Brands/AddBrand/AddBrand";
+import UpdateBrand from "./pages/Dashboard/Brands/UpdateBrand/UpdateCategory";
+import Coupons from "./pages/Dashboard/Coupons/Coupons";
+import ShowCoupon from "./pages/Dashboard/Coupons/ShowCoupon/ShowCoupon";
+import AddCoupon from "./pages/Dashboard/Coupons/AddCoupon/AddCoupon";
+import UpdateCoupon from "./pages/Dashboard/Coupons/UpdateCoupon/UpdateCoupon";
 
 function App() {
   const { lang } = useAppSelector((state) => state.language);
@@ -118,34 +127,52 @@ function App() {
                         />
                       </Route>
 
+                      {data && data.role === "employee" && (
+                        <Route index element={<Categories />} />
+                      )}
+                      <Route path="categories" element={<Categories />} />
                       <Route
-                        element={
-                          <RequireAuth allowedRole={["admin", "employee"]} />
-                        }
-                      >
-                        {data && data.role === "employee" && (
-                          <Route index element={<Categories />} />
-                        )}
-                        <Route path="categories" element={<Categories />} />
-                        <Route
-                          path="categories/show/:id"
-                          element={<ShowCategory />}
-                        />
-                        <Route
-                          path="categories/add"
-                          element={<AddCategory />}
-                        />
-                        <Route
-                          path="categories/update/:id"
-                          element={<UpdateCategory />}
-                        />
-                        <Route path="products" element={<Products />} />
-                        <Route path="products/add" element={<AddProduct />} />
-                        <Route
-                          path="products/update/:id"
-                          element={<UpdateProduct />}
-                        />
-                      </Route>
+                        path="categories/show/:id"
+                        element={<ShowCategory />}
+                      />
+                      <Route path="categories/add" element={<AddCategory />} />
+                      <Route
+                        path="categories/update/:id"
+                        element={<UpdateCategory />}
+                      />
+
+                      <Route path="brands" element={<Brands />} />
+                      <Route
+                        path="brands/show/:id"
+                        element={<ShowBrand />}
+                      />
+                      <Route path="brands/add" element={<AddBrand />} />
+                      <Route
+                        path="brands/update/:id"
+                        element={<UpdateBrand />}
+                      />
+
+                      <Route path="coupons" element={<Coupons />} />
+                      <Route
+                        path="coupons/show/:id"
+                        element={<ShowCoupon />}
+                      />
+                      <Route path="coupons/add" element={<AddCoupon />} />
+                      <Route
+                        path="coupons/update/:id"
+                        element={<UpdateCoupon />}
+                      />
+                      
+                      <Route path="products" element={<Products />} />
+                      <Route
+                        path="products/show/:id"
+                        element={<ShowProductDetails />}
+                      />
+                      <Route path="products/add" element={<AddProduct />} />
+                      <Route
+                        path="products/update/:id"
+                        element={<UpdateProduct />}
+                      />
                     </Route>
                   </Route>
                   <Route element={<RequireAuth allowedRole={["user"]} />}>

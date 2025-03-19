@@ -22,3 +22,6 @@ export const CART: string = "/cart";
 
 // categories
 export const CATEGORIES: string = "/categories";
+
+// brands
+export const BRANDS: string = "/brands";
