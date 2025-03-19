@@ -123,12 +123,25 @@
       "nameLabel": "الاسم",
       "namePlaceholder": "الاسم",
       "uploadImage": "تحميل صورة",
-      "submitButton": "إضافة التصنيف"
+      "submitButton": "إضافة التصنيف",
+      "deleteImageButton": "حذف",
+      "fileName": "اسم الملف",
+      "size": "الحجم"
     },
     "brands": {
       "name": "الأسم",
       "actions": "الإجراءات",
       "noBrandsFound": "لم يتم العثور على ماركات"
+    },
+    "addBrand": {
+      "title": "إضافة ماركة جديد",
+      "nameLabel": "الاسم",
+      "namePlaceholder": "الاسم",
+      "uploadImage": "تحميل صورة",
+      "submitButton": "إضافة الماركة",
+      "deleteImageButton": "حذف",
+      "fileName": "اسم الملف",
+      "size": "الحجم"
     }
   },
   "sidebar": {

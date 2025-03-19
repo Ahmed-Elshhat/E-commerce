@@ -21,7 +21,7 @@ exports.resizeImage = asyncHandler(async (req, res, next) => {
       .resize(600, 600)
       .toFormat("jpeg")
       .jpeg({ quality: 95 })
-      .toFile(`src/uploads/brands/${fileName}`);
+      .toFile(`uploads/brands/${fileName}`);
 
     // Save image into our db
     req.body.image = fileName;

@@ -3,7 +3,7 @@ import "./AddBrand.scss";
 import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CATEGORIES } from "../../../../Api/Api";
+import { BRANDS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 
@@ -41,9 +41,9 @@ function AddBrand() {
 
     if (!name.trim()) {
       newErrors.push({ msg: "Name is required", path: "name" });
-    } else if (name.length < 4) {
+    } else if (name.length < 2) {
       newErrors.push({
-        msg: "Name must be at least 4 characters",
+        msg: "Name must be at least 2 characters",
         path: "name",
       });
     }
@@ -94,9 +94,9 @@ function AddBrand() {
     }
 
     try {
-      const res = await Axios.post(`${CATEGORIES}`, form);
+      const res = await Axios.post(`${BRANDS}`, form);
       if (res.status === 201) {
-        navigate(`/${lang}/dashboard/categories`);
+        navigate(`/${lang}/dashboard/brands`);
         console.log(res.data);
       }
     } catch (err) {
@@ -139,19 +139,25 @@ function AddBrand() {
   };
 
   return (
-    <div className="add-employee">
+    <div className="add-brand">
       <div className="form-container">
-        <h2>{t("dashboard.addCategory.title")}</h2>
+        <h2>{t("dashboard.addBrand.title")}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">{t("dashboard.addCategory.nameLabel")}</label>
+            <label htmlFor="name">{t("dashboard.addBrand.nameLabel")}</label>
             <input
               type="text"
               id="name"
               name="name"
-              placeholder={t("dashboard.addCategory.namePlaceholder")}
+              placeholder={t("dashboard.addBrand.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault(); 
+                  handleSubmit(e);
+                }
+              }}
             />
 
             {errors.name && (
@@ -182,13 +188,15 @@ function AddBrand() {
               />
               <div className="image-details">
                 <p>
-                  <strong>File name : </strong> {image.name}
+                  <strong>{t("dashboard.addBrand.fileName")} : </strong>{" "}
+                  {image.name}
                 </p>
                 <p>
-                  <strong>Size :</strong> {(image.size / 1024).toFixed(2)} KB
+                  <strong>{t("dashboard.addBrand.size")} :</strong>{" "}
+                  {(image.size / 1024).toFixed(2)} KB
                 </p>
                 <button className="remove-btn" onClick={() => setImage(null)}>
-                  ❌ حذف
+                  ❌ {t("dashboard.addBrand.deleteImageButton")}
                 </button>
               </div>
             </div>
@@ -200,7 +208,7 @@ function AddBrand() {
             style={{ display: image ? "none" : "block" }}
           >
             <img src="/images/upload.png" alt="" />
-            <p>{t("dashboard.addCategory.uploadImage")}</p>
+            <p>{t("dashboard.addBrand.uploadImage")}</p>
           </div>
 
           {errors.image && (
@@ -218,7 +226,7 @@ function AddBrand() {
           )}
 
           <button type="submit" className="btn-submit">
-            {t("dashboard.addCategory.submitButton")}
+            {t("dashboard.addBrand.submitButton")}
           </button>
         </form>
       </div>

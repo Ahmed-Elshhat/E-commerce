@@ -6,7 +6,7 @@ $bg-color: #f8f9fa;
 $text-color: #333;
 $border-color: #ddd;
 
-.add-employee {
+.add-brand {
   background-color: $bg-color;
   display: flex;
   justify-content: center;
@@ -152,7 +152,8 @@ $border-color: #ddd;
 
       .image-err,
       .error-box {
-        margin-top: -20px;
+        margin-top: -15px;
+        margin-bottom: 10px;
       }
 
       .btn-submit {

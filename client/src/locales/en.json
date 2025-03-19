@@ -124,7 +124,25 @@
       "nameLabel": "Name",
       "namePlaceholder": "Name",
       "uploadImage": "Upload Image",
-      "submitButton": "Add Category"
+      "submitButton": "Add Category",
+      "deleteImageButton": "Delete",
+      "fileName": "File Name",
+      "size": "Size"
+    },
+    "brands": {
+      "name": "Name",
+      "actions": "Actions",
+      "noBrandsFound": "No Brands Found"
+    },
+    "addBrand": {
+      "title": "Add a new brand",
+      "nameLabel": "Name",
+      "namePlaceholder": "Name",
+      "uploadImage": "Upload Image",
+      "submitButton": "Add brand",
+      "deleteImageButton": "Delete",
+      "fileName": "File Name",
+      "size": "Size"
     }
   },
   "sidebar": {

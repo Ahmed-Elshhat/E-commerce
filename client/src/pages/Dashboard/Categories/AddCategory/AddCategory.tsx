@@ -139,7 +139,7 @@ function AddCategory() {
   };
 
   return (
-    <div className="add-employee">
+    <div className="add-category">
       <div className="form-container">
         <h2>{t("dashboard.addCategory.title")}</h2>
         <form onSubmit={handleSubmit}>
@@ -152,6 +152,12 @@ function AddCategory() {
               placeholder={t("dashboard.addCategory.namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  handleSubmit(e);
+                }
+              }}
             />
 
             {errors.name && (
@@ -182,13 +188,15 @@ function AddCategory() {
               />
               <div className="image-details">
                 <p>
-                  <strong>File name : </strong> {image.name}
+                  <strong>{t("dashboard.addCategory.fileName")} : </strong>{" "}
+                  {image.name}
                 </p>
                 <p>
-                  <strong>Size :</strong> {(image.size / 1024).toFixed(2)} KB
+                  <strong>{t("dashboard.addCategory.size")} :</strong>{" "}
+                  {(image.size / 1024).toFixed(2)} KB
                 </p>
                 <button className="remove-btn" onClick={() => setImage(null)}>
-                  ❌ حذف
+                  ❌ {t("dashboard.addCategory.deleteImageButton")}
                 </button>
               </div>
             </div>
