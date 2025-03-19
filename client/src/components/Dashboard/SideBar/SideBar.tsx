@@ -13,14 +13,14 @@ function SideBar() {
   const windowSize = useWindow();
   const isOpen = menu?.isOpen;
 
-  const isLargeScreen = windowSize?.windowSize && windowSize.windowSize > 772;
-  const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 772;
+  const isLargeScreen = windowSize?.windowSize && windowSize.windowSize > 768;
+  const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 768;
 
   return (
     <div
       className="sidebar"
       style={{
-        width: isOpen && isLargeScreen ? "220px" : "60px",
+        width: isOpen && isLargeScreen ? "230px" : "60px",
       }}
     >
       <div className="menu">

@@ -2,8 +2,10 @@ import { useTranslation } from "react-i18next";
 import { BiCartAdd, BiPlusCircle, BiSolidCategoryAlt } from "react-icons/bi";
 import { FaProductHunt, FaUser } from "react-icons/fa";
 import { IoMdHome } from "react-icons/io";
-import { RiUserAddFill } from "react-icons/ri";
+import { RiCoupon3Fill, RiUserAddFill } from "react-icons/ri";
 import { useAppSelector } from "../../Redux/app/hooks";
+import { BsShop } from "react-icons/bs";
+import { MdAddBusiness, MdOutlineAddBox } from "react-icons/md";
 
 const SidebarLinks = () => {
   const { lang } = useAppSelector((state) => state.language);
@@ -41,6 +43,18 @@ const SidebarLinks = () => {
       role: ["admin", "employee"],
     },
     {
+      name: t("sidebar.brands"),
+      path: `/${lang}/dashboard/brands`,
+      icon: <BsShop />,
+      role: ["admin", "employee"],
+    },
+    {
+      name: t("sidebar.addBrand"),
+      path: `/${lang}/dashboard/brands/add`,
+      icon: <MdAddBusiness size={26} />,
+      role: ["admin", "employee"],
+    },
+    {
       name: t("sidebar.products"),
       path: `/${lang}/dashboard/products`,
       icon: <FaProductHunt />,
@@ -52,9 +66,21 @@ const SidebarLinks = () => {
       icon: <BiCartAdd />,
       role: ["admin", "employee"],
     },
+    {
+      name: t("sidebar.coupons"),
+      path: `/${lang}/dashboard/products`,
+      icon: <RiCoupon3Fill />,
+      role: ["admin", "employee"],
+    },
+    {
+      name: t("sidebar.addCoupon"),
+      path: `/${lang}/dashboard/coupon/add`,
+      icon: <MdOutlineAddBox />,
+      role: ["admin", "employee"],
+    },
   ];
 
-  return links; // يمكنك تمرير هذا إلى مكون آخر إذا لزم الأمر
+  return links;
 };
 
 export default SidebarLinks;

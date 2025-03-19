@@ -134,6 +134,10 @@
     "categories": "Categories",
     "addCategory": "Add Category",
     "products": "Products",
-    "addProduct": "Add Product"
+    "addProduct": "Add Product",
+    "brands": "Brands",
+    "addBrand": "Add Brand",
+    "coupons": "Coupons",
+    "addCoupon": "Add Coupon"
   }
 }

@@ -133,6 +133,10 @@
     "categories": "التصنيفات",
     "addCategory": "إضافة تصنيف",
     "products": "المنتجات",
-    "addProduct": "إضافة منتج"
+    "addProduct": "إضافة منتج",
+    "brands": "الماركات",
+    "addBrand": "إضافة ماركة",
+    "coupons": "القسائم",
+    "addCoupon": "إضافة قسيمة"
   }
 }
