@@ -92,6 +92,8 @@
     }
   },
   "dashboard": {
+    "copyButton": "copy",
+    "copiedButton": "copied",
     "employees": {
       "name": "Name",
       "role": "Role",
@@ -145,8 +147,6 @@
       "size": "Size"
     },
     "coupons": {
-      "copyButton": "copy",
-      "copiedButton": "copied",
       "name": "Name",
       "discount": "discount",
       "expire": "expire",

@@ -91,6 +91,8 @@
     }
   },
   "dashboard": {
+    "copyButton": "نسخ",
+    "copiedButton": "تم النسخ",
     "employees": {
       "name": "الأسم",
       "role": "الصلاحية",
@@ -144,8 +146,6 @@
       "size": "الحجم"
     },
     "coupons": {
-      "copyButton": "نسخ",
-      "copiedButton": "تم النسخ",
       "name": "الأسم",
       "discount": "نسبة الخصم",
       "expire": "تاريخ الانتهاء",

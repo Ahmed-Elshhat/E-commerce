@@ -55,46 +55,12 @@ $border-color: #ddd;
               justify-content: center;
               align-items: center;
 
-              .copy-btn {
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                background-color: #007bff;
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                border-radius: 4px;
 
-                &:hover {
-                  background-color: #0056b3;
-                }
-              }
-
-              .copied {
-                background-color: rgb(52, 216, 30) !important; // اللون الأخضر
-                color: white;
-              }
             }
 
             td {
               padding: 12px;
               font-size: 16px;
-
-              .copy-btn {
-                border: none;
-                outline: none;
-                background-color: blue;
-                color: white;
-                padding: 5px 10px;
-                border-radius: 6px;
-                cursor: pointer;
-                display: flex;
-                align-items: center;
-                gap: 6px;
-              }
-
               .action-buttons {
                 display: flex;
                 justify-content: center;
