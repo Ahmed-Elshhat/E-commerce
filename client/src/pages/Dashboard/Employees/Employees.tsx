@@ -8,6 +8,7 @@ import Loading from "../../../components/Loading/Loading";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../../../Redux/app/hooks";
 import { useTranslation } from "react-i18next";
+import CopyButton from "../../../components/CopyButton/CopyButton";
 
 function Employees() {
   const [paginationResults, setPaginationResults] = useState({
@@ -145,7 +146,10 @@ function Employees() {
               {employees.length > 0 ? (
                 employees.map((emp, index) => (
                   <tr key={`${emp._id}-${index}`}>
-                    <td data-label="ID">{emp._id}</td>
+                    <td data-label="ID">
+                      {" "}
+                      <CopyButton couponId={emp._id} />
+                    </td>
                     <td data-label={t("dashboard.employees.name")}>
                       {emp.name}
                     </td>
