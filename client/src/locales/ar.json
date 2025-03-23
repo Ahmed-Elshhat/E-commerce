@@ -120,8 +120,8 @@
     },
     "addCategory": {
       "title": "إضافة تصنيف جديد",
-      "nameLabel": "الاسم",
-      "namePlaceholder": "الاسم",
+      "nameLabel": "اسم التصنيف",
+      "namePlaceholder": "اسم التصنيف",
       "uploadImage": "تحميل صورة",
       "submitButton": "إضافة التصنيف",
       "deleteImageButton": "حذف",
@@ -134,14 +134,48 @@
       "noBrandsFound": "لم يتم العثور على ماركات"
     },
     "addBrand": {
-      "title": "إضافة ماركة جديد",
-      "nameLabel": "الاسم",
-      "namePlaceholder": "الاسم",
+      "title": "إضافة ماركة جديدة",
+      "nameLabel": "اسم الماركة",
+      "namePlaceholder": "اسم الماركة",
       "uploadImage": "تحميل صورة",
       "submitButton": "إضافة الماركة",
       "deleteImageButton": "حذف",
       "fileName": "اسم الملف",
       "size": "الحجم"
+    },
+    "coupons": {
+      "copyButton": "نسخ",
+      "name": "الأسم",
+      "discount": "نسبة الخصم",
+      "expire": "تاريخ الانتهاء",
+      "TheRemainingTime": "المتبقي من الزمن",
+      "remaining": {
+        "expire": "منتهي الصلاحية",
+        "remaining": "متبقي",
+        "day": "يوم و",
+        "days": "أيام و",
+        "twoDays": "يومان و",
+        "hour": "ساعة و",
+        "hours": "ساعات و",
+        "twoHours": "ساعتان و",
+        "minute": "دقيقة",
+        "minutes": "دقائق",
+        "twoMinutes": "دقيقتان"
+      },
+      "AM": "ص",
+      "PM": "م",
+      "actions": "الإجراءات",
+      "noCouponsFound": "لم يتم العثور على قسائم"
+    },
+    "addCoupon": {
+      "title": "إضافة قسيمة جديدة",
+      "nameLabel": "اسم القسيمة",
+      "namePlaceholder": "اسم القسيمة",
+      "expireLabel": "تاريخ الانتهاء",
+      "expirePlaceholder": "تاريخ الانتهاء",
+      "discountLabel": "نسبة الخصم",
+      "discountPlaceholder": "نسبة الخصم",
+      "submitButton": "إضافة القسيمة"
     }
   },
   "sidebar": {

@@ -121,8 +121,8 @@
     },
     "addCategory": {
       "title": "Add a new category",
-      "nameLabel": "Name",
-      "namePlaceholder": "Name",
+      "nameLabel": "Category name",
+      "namePlaceholder": "Category name",
       "uploadImage": "Upload Image",
       "submitButton": "Add Category",
       "deleteImageButton": "Delete",
@@ -136,13 +136,47 @@
     },
     "addBrand": {
       "title": "Add a new brand",
-      "nameLabel": "Name",
-      "namePlaceholder": "Name",
+      "nameLabel": "Brand name",
+      "namePlaceholder": "Brand name",
       "uploadImage": "Upload Image",
       "submitButton": "Add brand",
       "deleteImageButton": "Delete",
       "fileName": "File Name",
       "size": "Size"
+    },
+    "coupons": {
+      "copyButton": "copy",
+      "name": "Name",
+      "discount": "discount",
+      "expire": "expire",
+      "TheRemainingTime": "The remaining time",
+      "remaining": {
+        "expire": "expire",
+        "remaining": "Remaining",
+        "day": "Day and",
+        "days": "Days and",
+        "twoDays": "Two days and",
+        "hour": "Hour and",
+        "hours": "Hours and",
+        "twoHours": "Two hours and",
+        "minute": "Minute",
+        "minutes": "Minutes",
+        "twoMinutes": "Two minutes"
+      },
+      "AM": "AM",
+      "PM": "PM",
+      "actions": "Actions",
+      "noCouponsFound": "No Coupons Found"
+    },
+    "addCoupon": {
+      "title": "Add a new coupon",
+      "nameLabel": "Coupon name",
+      "namePlaceholder": "Name",
+      "expireLabel": "Expire",
+      "expirePlaceholder": "Expire",
+      "discountLabel": "Discount",
+      "discountPlaceholder": "Discount",
+      "submitButton": "Add coupon"
     }
   },
   "sidebar": {

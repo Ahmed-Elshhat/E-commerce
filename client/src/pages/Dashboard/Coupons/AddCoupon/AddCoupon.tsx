@@ -1,22 +1,25 @@
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import "./AddCoupon.scss";
 import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CATEGORIES } from "../../../../Api/Api";
+import { COUPONS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 
 function AddCoupon() {
-  const [name, setName] = useState("");
-  const [image, setImage] = useState<File | null>(null);
+  const [form, setForm] = useState({
+    name: "",
+    expire: "",
+    discount: 5,
+  });
 
   const [errors, setErrors] = useState({
     name: "",
-    image: "",
+    expire: "",
+    discount: "",
     general: "",
   });
-  const openImage = useRef<HTMLInputElement | null>(null);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
@@ -24,7 +27,7 @@ function AddCoupon() {
 
   useEffect(() => {
     if (isSubmitted) {
-      const fields = ["name", "image", "general"];
+      const fields = ["name", "expire", "discount", "general"];
 
       const newErrors = validateForm().errors;
 
@@ -34,22 +37,57 @@ function AddCoupon() {
         }
       });
     }
-  }, [name, image]);
+  }, [form.name, form.expire, form.discount]);
+
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const validateForm = () => {
     const newErrors: { msg: string; path?: string }[] = [];
 
-    if (!name.trim()) {
+    if (!form.name.trim()) {
       newErrors.push({ msg: "Name is required", path: "name" });
-    } else if (name.length < 4) {
+    } else if (form.name.length < 8) {
       newErrors.push({
-        msg: "Name must be at least 4 characters",
+        msg: "Name must be at least 8 characters",
+        path: "name",
+      });
+    } else if (form.name.length > 20) {
+      newErrors.push({
+        msg: "Name must be less than 20 characters",
         path: "name",
       });
     }
 
-    if (!image) {
-      newErrors.push({ msg: "Image is required", path: "image" });
+    if (!form.expire) {
+      newErrors.push({ msg: "Expiration date is required", path: "expire" });
+    } else {
+      const selectedDateTime = new Date(form.expire).getTime(); // تحويل المدخلات إلى Milliseconds
+      const currentDateTime = new Date().getTime(); // الوقت الحالي
+
+      if (selectedDateTime < currentDateTime) {
+        newErrors.push({
+          msg: "Expiration date and time cannot be in the past",
+          path: "expire",
+        });
+      }
+    }
+
+    const allowedDiscounts = [
+      5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
+      100,
+    ];
+
+    if (!allowedDiscounts.includes(+form.discount)) {
+      newErrors.push({
+        msg:
+          "Discount must be one of the following values: " +
+          allowedDiscounts.join(", "),
+        path: "discount",
+      });
     }
 
     const errorsMap = newErrors.reduce<Record<string, string>>((acc, error) => {
@@ -69,17 +107,12 @@ function AddCoupon() {
     return { isValid: newErrors.length === 0, errors: errorsMap };
   };
 
-  function handleOpenImage() {
-    if (openImage.current !== null) {
-      openImage.current.click();
-    }
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({
       name: "",
-      image: "",
+      expire: "",
+      discount: "",
       general: "",
     });
 
@@ -87,16 +120,14 @@ function AddCoupon() {
 
     if (!validateForm().isValid) return;
 
-    const form = new FormData();
-    form.append("name", name);
-    if (image) {
-      form.append("image", image);
-    }
-
     try {
-      const res = await Axios.post(`${CATEGORIES}`, form);
+      const res = await Axios.post(`${COUPONS}`, {
+        name: form.name,
+        expire: new Date(form.expire).getTime(),
+        discount: form.discount,
+      });
       if (res.status === 201) {
-        navigate(`/${lang}/dashboard/categories`);
+        navigate(`/${lang}/dashboard/coupons`);
         console.log(res.data);
       }
     } catch (err) {
@@ -139,19 +170,19 @@ function AddCoupon() {
   };
 
   return (
-    <div className="add-employee">
+    <div className="add-coupon">
       <div className="form-container">
-        <h2>{t("dashboard.addCategory.title")}</h2>
+        <h2>{t("dashboard.addCoupon.title")}</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="name">{t("dashboard.addCategory.nameLabel")}</label>
+            <label htmlFor="name">{t("dashboard.addCoupon.nameLabel")}</label>
             <input
               type="text"
               id="name"
               name="name"
-              placeholder={t("dashboard.addCategory.namePlaceholder")}
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              placeholder={t("dashboard.addCoupon.namePlaceholder")}
+              value={form.name}
+              onChange={handleChange}
             />
 
             {errors.name && (
@@ -161,53 +192,64 @@ function AddCoupon() {
             )}
           </div>
 
-          <div className="file-wrapper">
+          <div className="form-group">
+            <label htmlFor="expire">
+              {t("dashboard.addCoupon.expireLabel")}
+            </label>
             <input
-              type="file"
-              accept="image/*"
-              ref={openImage}
-              onChange={(e) => {
-                const file = e.target.files?.item(0);
-                if (file) setImage(file);
-              }}
+              type="datetime-local"
+              id="expire"
+              name="expire"
+              value={form.expire}
+              onChange={handleChange}
             />
+
+            {errors.expire && (
+              <p className="error-text">
+                <span className="error-star">*</span> {errors.expire}
+              </p>
+            )}
           </div>
 
-          {image && (
-            <div className="image-preview">
-              <img
-                src={URL.createObjectURL(image)}
-                alt={image.name}
-                className="preview-img"
-              />
-              <div className="image-details">
-                <p>
-                  <strong>File name : </strong> {image.name}
-                </p>
-                <p>
-                  <strong>Size :</strong> {(image.size / 1024).toFixed(2)} KB
-                </p>
-                <button className="remove-btn" onClick={() => setImage(null)}>
-                  ❌ حذف
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="form-group">
+            <label htmlFor="discount">
+              {t("dashboard.addCoupon.discountLabel")}
+            </label>
 
-          <div
-            className="upload-image-btn"
-            onClick={handleOpenImage}
-            style={{ display: image ? "none" : "block" }}
-          >
-            <img src="/images/upload.png" alt="" />
-            <p>{t("dashboard.addCategory.uploadImage")}</p>
+            <select
+              name="discount"
+              id="discount"
+              value={form.discount}
+              onChange={handleChange}
+            >
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+              <option value="20">20</option>
+              <option value="25">25</option>
+              <option value="30">30</option>
+              <option value="35">35</option>
+              <option value="40">40</option>
+              <option value="45">45</option>
+              <option value="45">50</option>
+              <option value="55">55</option>
+              <option value="60">60</option>
+              <option value="60">65</option>
+              <option value="70">70</option>
+              <option value="75">75</option>
+              <option value="75">80</option>
+              <option value="85">85</option>
+              <option value="90">90</option>
+              <option value="95">95</option>
+              <option value="95">100</option>
+            </select>
+
+            {errors.discount && (
+              <p className="error-text">
+                <span className="error-star">*</span> {errors.discount}
+              </p>
+            )}
           </div>
-
-          {errors.image && (
-            <p className="error-text image-err">
-              <span className="error-star">*</span> {errors.image}
-            </p>
-          )}
 
           {errors.general && (
             <div className="error-box">
@@ -218,7 +260,7 @@ function AddCoupon() {
           )}
 
           <button type="submit" className="btn-submit">
-            {t("dashboard.addCategory.submitButton")}
+            {t("dashboard.addCoupon.submitButton")}
           </button>
         </form>
       </div>

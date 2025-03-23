@@ -42,7 +42,7 @@ exports.createCouponValidator = [
     .withMessage("Coupon name is required")
     .isLength({ min: 8 })
     .withMessage("Too short coupon name")
-    .isLength({ max: 10 })
+    .isLength({ max: 20 })
     .withMessage("Too long coupon name"),
   check("expire")
     .notEmpty()
@@ -75,7 +75,7 @@ exports.updateCouponValidator = [
     .optional()
     .isLength({ min: 8 })
     .withMessage("Too short coupon name")
-    .isLength({ max: 10 })
+    .isLength({ max: 20 })
     .withMessage("Too long coupon name"),
   body("expire")
     .optional()

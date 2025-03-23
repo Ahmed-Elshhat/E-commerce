@@ -25,3 +25,6 @@ export const CATEGORIES: string = "/categories";
 
 // brands
 export const BRANDS: string = "/brands";
+
+// coupon
+export const COUPONS: string = "/coupons";

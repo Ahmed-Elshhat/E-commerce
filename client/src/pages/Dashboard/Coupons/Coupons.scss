@@ -5,36 +5,17 @@ $bg-color: #f8f9fa;
 $text-color: #333;
 $border-color: #ddd;
 
-.categories {
+.coupons {
   position: relative;
   width: 100%;
   overflow-x: hidden;
-
-  .categories-container {
+  .coupons-container {
     background-color: $bg-color;
     display: flex;
     width: 100%;
     min-height: 100vh;
     padding: 20px;
     font-family: "Cairo", sans-serif;
-
-    @media (max-width: 768px) {
-      .table-wrapper {
-        padding: 10px;
-      }
-
-      .custom-table {
-        font-size: 14px;
-
-        thead th {
-          font-size: 16px;
-        }
-
-        tbody td {
-          padding: 10px;
-        }
-      }
-    }
 
     .table-wrapper {
       background: white;
@@ -49,64 +30,48 @@ $border-color: #ddd;
         border-collapse: collapse;
         text-align: center;
 
-        @media (max-width: 710px) {
-          thead {
-            display: none;
-          }
-
-          tbody {
-            tr {
-              display: block;
-              margin-bottom: 10px;
-              border: 1px solid $border-color;
-              border-radius: 8px;
-              padding: 10px;
-              background: white;
-              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            }
-
-            td {
-              display: flex;
-              justify-content: space-between;
-              padding: 10px;
-              font-size: 14px;
-              font-weight: bold;
-              border-bottom: 1px solid $border-color;
-              position: relative;
-
-              &::before {
-                content: attr(data-label);
-                font-weight: bold;
-                text-transform: uppercase;
-                color: $primary-color;
-                margin-right: 10px;
-              }
-            }
-          }
-        }
-
         thead {
           background-color: $primary-color;
           color: white;
 
           th {
             padding: 12px;
-            font-size: 18px;
+            font-size: 15px;
+            text-wrap: nowrap;
           }
         }
 
         tbody {
           tr {
             transition: background 0.3s ease;
+            border-bottom: 1px solid $border-color;
 
             &:nth-child(even) {
               background-color: #f2f2f2;
             }
 
+            [data-label="ID"] {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+            }
+
             td {
               padding: 12px;
               font-size: 16px;
-              border-bottom: 1px solid $border-color;
+
+              .copy-btn {
+                border: none;
+                outline: none;
+                background-color: blue;
+                color: white;
+                padding: 5px 10px;
+                border-radius: 6px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+              }
 
               .action-buttons {
                 display: flex;
@@ -158,6 +123,64 @@ $border-color: #ddd;
               justify-content: center;
             }
           }
+        }
+
+        @media (max-width: 710px) {
+          thead {
+            display: none;
+          }
+
+          tbody {
+            tr {
+              display: block;
+              margin-bottom: 10px;
+              border: 1px solid $border-color;
+              border-radius: 8px;
+              padding: 10px;
+              background: white;
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            td[data-label="ID"] {
+              justify-content: space-between;
+            }
+
+            td {
+              display: flex;
+              justify-content: space-between;
+              padding: 10px;
+              font-size: 14px;
+              font-weight: bold;
+              border-bottom: 1px solid $border-color;
+              position: relative;
+
+              &::before {
+                content: attr(data-label);
+                font-weight: bold;
+                text-transform: uppercase;
+                color: $primary-color;
+                margin-right: 10px;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .table-wrapper {
+        padding: 10px;
+      }
+
+      .custom-table {
+        font-size: 14px;
+
+        thead th {
+          font-size: 14px !important;
+        }
+
+        tbody td {
+          padding: 10px;
         }
       }
     }

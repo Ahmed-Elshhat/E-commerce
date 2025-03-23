@@ -13,8 +13,8 @@ function SideBar() {
   const windowSize = useWindow();
   const isOpen = menu?.isOpen;
 
-  const isLargeScreen = windowSize?.windowSize && windowSize.windowSize > 768;
-  const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 768;
+  const isLargeScreen = windowSize?.windowSize && windowSize.windowSize > 839;
+  const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 839;
 
   return (
     <div

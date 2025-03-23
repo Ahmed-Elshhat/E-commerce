@@ -67,6 +67,14 @@ export type BrandSchema = {
   name: string;
 };
 
+// Brand Schema
+export type CouponSchema = {
+  _id: string;
+  name: string;
+  discount: number;
+  expire: string;
+};
+
 // Reset Password
 export type ResetPasswordFormState = {
   password: string;
