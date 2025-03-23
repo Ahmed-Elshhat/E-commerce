@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "../../../Redux/app/hooks";
 import { useTranslation } from "react-i18next";
 import { MdEditSquare } from "react-icons/md";
+import CopyButton from "../../../components/CopyButton/CopyButton";
 
 function Categories() {
   const [paginationResults, setPaginationResults] = useState({
@@ -112,7 +113,9 @@ function Categories() {
               {categories.length > 0 ? (
                 categories.map((category, index) => (
                   <tr key={`${category._id}-${index}`}>
-                    <td data-label="ID">{category._id}</td>
+                    <td data-label="ID">
+                      <CopyButton couponId={category._id} />
+                    </td>
                     <td data-label={t("dashboard.categories.name")}>
                       {category.name}
                     </td>
@@ -132,7 +135,7 @@ function Categories() {
                           className="btn-edit-link"
                         >
                           <button className="btn btn-edit">
-                          <MdEditSquare />
+                            <MdEditSquare />
                           </button>
                         </Link>
                         <button

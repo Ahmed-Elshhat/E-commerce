@@ -24,7 +24,6 @@ function Coupons() {
   });
   const { t } = useTranslation();
 
-
   useEffect(() => {
     const getCoupons = async () => {
       setLoading({ status: true, type: "normal" });
@@ -154,8 +153,6 @@ function Coupons() {
 
   //   return resultAr.trim().replace(/ (و|and) $/, "");
   // };
-
-
 
   const handleDelete = async (id: string) => {
     setLoading({ status: true, type: "normal" });
