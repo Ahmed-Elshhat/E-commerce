@@ -201,7 +201,7 @@ function Coupons() {
                     <td data-label={t("dashboard.coupons.discount")}>
                       {coupon.discount}%
                     </td>
-                    <td data-label={t("dashboard.coupons.expire")}>
+                    <td data-label={t("dashboard.coupons.expire")} className="expire">
                       {formatDateTime(coupon.expire)}
                     </td>
                     {/* <td data-label={t("dashboard.coupons.TheRemainingTime")}>
