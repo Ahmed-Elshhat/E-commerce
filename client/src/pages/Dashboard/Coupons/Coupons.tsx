@@ -3,7 +3,7 @@ import "./Coupons.scss";
 import { Axios } from "../../../Api/axios";
 import { COUPONS } from "../../../Api/Api";
 import { CouponSchema } from "../../../Types/app";
-import { FaEye, FaTrash } from "react-icons/fa";
+import { FaCheck, FaEye, FaTrash } from "react-icons/fa";
 import Loading from "../../../components/Loading/Loading";
 import { Link } from "react-router-dom";
 import { useAppSelector } from "../../../Redux/app/hooks";
@@ -23,6 +23,11 @@ function Coupons() {
     type: "normal",
   });
   const { t } = useTranslation();
+  const [copied, setCopied] = useState({
+    status: false,
+    id: "",
+  });
+
   useEffect(() => {
     const getCoupons = async () => {
       setLoading({ status: true, type: "normal" });
@@ -94,7 +99,6 @@ function Coupons() {
   //   return `${formattedDate} (${hours}:${minutes} ${period})`;
   // };
 
-
   const formatDateTime = (isoString: string) => {
     const formattedDate = isoString.split("T")[0];
     return `${formattedDate}`;
@@ -157,7 +161,8 @@ function Coupons() {
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      console.log("تم النسخ بنجاح!");
+      setCopied({ status: true, id: text });
+      setTimeout(() => setCopied({ status: false, id: text }), 1000);
     } catch (err) {
       console.error("فشل النسخ:", err);
     }
@@ -203,10 +208,21 @@ function Coupons() {
                     <td data-label="ID">
                       <button
                         onClick={() => copyToClipboard(coupon._id)}
-                        className="copy-btn"
+                        className={`copy-btn ${
+                          copied.status && copied.id === coupon._id
+                            ? "copied"
+                            : ""
+                        }`}
+                        title={`ID: ${coupon._id}`}
                       >
-                        {t("dashboard.coupons.copyButton")}
-                        <GoCopy />
+                        {copied.status && copied.id === coupon._id
+                          ? t("dashboard.coupons.copiedButton")
+                          : t("dashboard.coupons.copyButton")}
+                        {copied.status && copied.id === coupon._id ? (
+                          <FaCheck />
+                        ) : (
+                          <GoCopy />
+                        )}
                       </button>{" "}
                     </td>
 

@@ -146,6 +146,7 @@
     },
     "coupons": {
       "copyButton": "copy",
+      "copiedButton": "copied",
       "name": "Name",
       "discount": "discount",
       "expire": "expire",

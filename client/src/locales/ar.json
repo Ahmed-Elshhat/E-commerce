@@ -145,6 +145,7 @@
     },
     "coupons": {
       "copyButton": "نسخ",
+      "copiedButton": "تم النسخ",
       "name": "الأسم",
       "discount": "نسبة الخصم",
       "expire": "تاريخ الانتهاء",
