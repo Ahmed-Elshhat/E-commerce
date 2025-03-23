@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 import { useAppSelector } from "../../../Redux/app/hooks";
 import { useTranslation } from "react-i18next";
 import { MdEditSquare } from "react-icons/md";
+import CopyButton from "../../../components/CopyButton/CopyButton";
 
 function Brands() {
   const [paginationResults, setPaginationResults] = useState({
@@ -112,7 +113,9 @@ function Brands() {
               {brands.length > 0 ? (
                 brands.map((brand, index) => (
                   <tr key={`${brand._id}-${index}`}>
-                    <td data-label="ID">{brand._id}</td>
+                    <td data-label="ID">
+                      <CopyButton couponId={brand._id} />
+                    </td>
                     <td data-label={t("dashboard.brands.name")}>
                       {brand.name}
                     </td>
@@ -132,7 +135,7 @@ function Brands() {
                           className="btn-edit-link"
                         >
                           <button className="btn btn-edit">
-                          <MdEditSquare />
+                            <MdEditSquare />
                           </button>
                         </Link>
                         <button
@@ -147,9 +150,7 @@ function Brands() {
                 ))
               ) : (
                 <tr className="no-data">
-                  <td colSpan={5}>
-                    {t("dashboard.brands.noBrandsFound")}
-                  </td>
+                  <td colSpan={5}>{t("dashboard.brands.noBrandsFound")}</td>
                 </tr>
               )}
 
