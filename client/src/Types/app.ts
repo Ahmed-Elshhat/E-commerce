@@ -67,12 +67,30 @@ export type BrandSchema = {
   name: string;
 };
 
-// Brand Schema
+// Coupon Schema
 export type CouponSchema = {
   _id: string;
   name: string;
   discount: number;
   expire: string;
+};
+
+// Product Schema
+export type ProductSchema = {
+  _id: string;
+  title: string;
+  description: string;
+  quantity: number;
+  sold: number
+  price: number;
+  priceAfterDiscount: number;
+  colors: string[];
+  imageCover: string,
+  images: string[];
+  category: string;
+  brand: string;
+  ratingsAverage: number;
+  ratingsQuantity: number;
 };
 
 // Reset Password

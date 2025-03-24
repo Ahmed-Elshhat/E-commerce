@@ -145,6 +145,13 @@
       "fileName": "اسم الملف",
       "size": "الحجم"
     },
+    "products": {
+      "title": "اسم المنتج",
+      "price": "السعر",
+      "quantity": "الكمية",
+      "actions": "الإجراءات",
+      "noProductsFound": "لم يتم العثور على منتجات"
+    },
     "coupons": {
       "name": "الأسم",
       "discount": "نسبة الخصم",

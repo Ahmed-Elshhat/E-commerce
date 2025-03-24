@@ -146,6 +146,13 @@
       "fileName": "File Name",
       "size": "Size"
     },
+    "products": {
+      "title": "title",
+      "price": "price",
+      "quantity": "quantity",
+      "actions": "Actions",
+      "noProductsFound": "No Products Found"
+    },
     "coupons": {
       "name": "Name",
       "discount": "discount",
