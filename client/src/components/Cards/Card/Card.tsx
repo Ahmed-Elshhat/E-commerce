@@ -5,8 +5,8 @@ import { useAppSelector } from "../../../Redux/app/hooks";
 type CardProps = {
   product: {
     _id: number;
-    imageCover: string;
-    description: string;
+    coverImage: string;
+    descriptionAr: string;
     price: number;
     quantity: number;
     sold: number;
@@ -23,10 +23,10 @@ function Card({ product }: CardProps) {
       onClick={() => navigate(`/${lang}/show-product/${product._id}`)}
     >
       <div className="image">
-        <img src={product.imageCover} alt="Card 1" />
+        <img src={product.coverImage} alt="Card 1" />
       </div>
       <div className="content">
-        <p className="description">{product.description}</p>
+        <p className="description">{product.descriptionAr}</p>
         <p className="price">
           EGP{" "}
           {product.priceAfterDiscount !== undefined

@@ -33,7 +33,8 @@ exports.updateOne = (Model, populationOpt) =>
     res.status(200).json({ data: document });
   });
 
-exports.createOne = (Model, modelName) =>
+exports.
+createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
     let body =
       modelName === "users" ? { ...req.body, role: "employee" } : req.body;

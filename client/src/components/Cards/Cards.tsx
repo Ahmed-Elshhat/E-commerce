@@ -4,8 +4,8 @@ import "./Cards.scss";
 type CardsProps = {
   products: {
     _id: number;
-    imageCover: string;
-    description: string;
+    coverImage: string;
+    descriptionAr: string;
     price: number;
     quantity: number;
     sold: number;

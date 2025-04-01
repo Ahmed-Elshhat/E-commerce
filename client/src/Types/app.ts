@@ -78,8 +78,10 @@ export type CouponSchema = {
 // Product Schema
 export type ProductSchema = {
   _id: string;
-  title: string;
-  description: string;
+  titleAr: string;
+  titleEn: string;
+  descriptionAr: string;
+  descriptionEn: string;
   quantity: number;
   sold: number
   price: number;

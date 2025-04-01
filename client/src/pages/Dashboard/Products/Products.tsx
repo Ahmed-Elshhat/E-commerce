@@ -22,7 +22,7 @@ function Products() {
     status: true,
     type: "normal",
   });
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useEffect(() => {
     const getProducts = async () => {
       setLoading({ status: true, type: "normal" });
@@ -120,7 +120,7 @@ function Products() {
                       <CopyButton couponId={product._id} />
                     </td>
                     <td data-label={t("dashboard.products.title")}>
-                      {product.title}
+                      {i18n.language === "ar" ? product.titleAr : product.titleEn}
                     </td>
 
                     <td data-label={t("dashboard.products.price")}>

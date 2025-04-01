@@ -2,22 +2,52 @@ const mongoose = require("mongoose");
 
 const productSchema = new mongoose.Schema(
   {
-    title: {
+    titleEn: {
       type: String,
-      required: [true, "product title is required"],
+      required: [true, "Product title in English is required."],
       trim: true,
-      minlength: [3, "Too short product title"],
-      maxlength: [100, "Too long product title"],
+      minlength: [
+        3,
+        "Product title in English must be at least 3 characters long.",
+      ],
+      maxlength: [
+        100,
+        "Product title in English cannot exceed 100 characters.",
+      ],
     },
-    slug: {
+    titleAr: {
       type: String,
-      required: [true, "product slug is required"],
-      lowercase: true,
+      required: [true, "Product title in Arabic is required."],
+      trim: true,
+      minlength: [
+        3,
+        "Product title in Arabic must be at least 3 characters long.",
+      ],
+      maxlength: [100, "Product title in Arabic cannot exceed 100 characters."],
     },
-    description: {
+    descriptionEn: {
       type: String,
-      required: [true, "product description is required"],
-      minlength: [20, "Too short product description"],
+      required: [true, "Product description in English is required."],
+      minlength: [
+        20,
+        "Product description in English must be at least 20 characters long.",
+      ],
+      maxlength: [
+        2000,
+        "Product description in English must not exceed 2000 characters.",
+      ],
+    },
+    descriptionAr: {
+      type: String,
+      required: [true, "Product description in Arabic is required."],
+      minlength: [
+        20,
+        "Product description in Arabic must be at least 20 characters long.",
+      ],
+      maxlength: [
+        2000,
+        "Product description in Arabic must not exceed 2000 characters.",
+      ],
     },
     quantity: {
       type: Number,
@@ -37,22 +67,21 @@ const productSchema = new mongoose.Schema(
       type: Number,
     },
     colors: [String],
-    imageCover: {
+    coverImage: {
       type: String,
       required: [true, "Product Image cover is required"],
     },
-    images: [{ type: String }],
+    images: [
+      {
+        // _id: { type: mongoose.Schema.Types.ObjectId, auto: true },
+        url: { type: String },
+      },
+    ],
     category: {
       type: mongoose.Schema.ObjectId,
       ref: "Category",
       required: [true, "Product must be belong to category"],
     },
-    subcategories: [
-      {
-        type: mongoose.Schema.ObjectId,
-        ref: "SubCategory",
-      },
-    ],
     brand: {
       type: mongoose.Schema.ObjectId,
       ref: "Brand",
@@ -89,14 +118,17 @@ productSchema.pre(/^find/, function (next) {
 });
 
 const setImageURL = (doc) => {
-  if (doc.imageCover) {
-    const imageUrl = `${process.env.BASE_URL}/products/${doc.imageCover}`;
-    doc.imageCover = imageUrl;
+  if (doc.coverImage) {
+    const imageUrl = `${process.env.BASE_URL}/products/${doc.coverImage}`;
+    doc.coverImage = imageUrl;
   }
   if (doc.images) {
     const imagesList = [];
     doc.images.forEach((image) => {
-      const imageUrl = `${process.env.BASE_URL}/products/${image}`;
+      const imageUrl = {
+        _id: image._id,
+        url: `${process.env.BASE_URL}/products/${image.url}`,
+      };
       imagesList.push(imageUrl);
     });
     doc.images = imagesList;
