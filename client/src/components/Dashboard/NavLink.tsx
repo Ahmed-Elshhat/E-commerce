@@ -51,7 +51,7 @@ const SidebarLinks = () => {
     {
       name: t("sidebar.addBrand"),
       path: `/${lang}/dashboard/brands/add`,
-      icon: <MdAddBusiness size={26} />,
+      icon: <MdAddBusiness size={20} />,
       role: ["admin", "employee"],
     },
     {

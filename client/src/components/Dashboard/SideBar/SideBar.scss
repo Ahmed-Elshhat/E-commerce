@@ -1,12 +1,22 @@
 .sidebar {
-  background-color: white;
+  background-color: #1d2937;
   width: 220px;
   padding-top: 10px;
+  padding: 10px;
   transition: 0.3s;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
   .menu {
     padding-left: 4px;
-    border-bottom: 1px solid rgb(235, 229, 229);
+    display: flex;
+    
+    @media (max-width: 839px) {
+      justify-content: center;
+    }
     button {
+      color: white;
       background: none;
       height: 50px;
       font-size: 50px;
@@ -18,22 +28,32 @@
   
   .links {
     .link {
-      color: blue;
+      color: white;
       display: flex;
       align-items: center;
       gap: 10px;
-      padding: 10px;
-      font-size: 20px;
+      min-height: 38px;
+      padding: 5px;
       transition: 0.3s;
       text-decoration: none;
 
-      &:not(:last-child) {
-        border-bottom: 1px solid rgb(235, 229, 229);
+      &.active {
+        background-color: rgba(255, 255, 255, 0.192);
+        color: white;
+        border-radius: 5px;
+      }
+
+      svg {
+        fill: white;
+        font-size: 18px;
       }
 
       .title {
-        color: black;
+        color: white;
+        font-size: 18px;
       }
     }
   }
 }
+
+

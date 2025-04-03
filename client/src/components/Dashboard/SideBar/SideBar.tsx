@@ -14,7 +14,8 @@ function SideBar() {
   const isOpen = menu?.isOpen;
 
   const isLargeScreen = windowSize?.windowSize && windowSize.windowSize > 839;
-  const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 839;
+  // const isSmallScreen = windowSize?.windowSize && windowSize.windowSize < 839;
+
 
   return (
     <div
@@ -23,7 +24,7 @@ function SideBar() {
         width: isOpen && isLargeScreen ? "230px" : "60px",
       }}
     >
-      <div className="menu">
+      <div className="menu" style={{ justifyContent: !isOpen ? "center" : "" }}>
         <button onClick={() => menu?.setIsOpen(!isOpen)}>
           <IoMenu />
         </button>
@@ -37,12 +38,12 @@ function SideBar() {
                 to={link.path}
                 title={link.name}
                 className="link"
+                end
                 style={{
-                  minHeight: isOpen ? "fit-content" : "38px",
                   justifyContent:
                     isOpen && isLargeScreen ? "flex-start" : "center",
                 }}
-                onClick={() => isSmallScreen && menu?.setIsOpen(false)}
+                // onClick={() => isSmallScreen && menu?.setIsOpen(false)}
               >
                 {link.icon}
                 <p

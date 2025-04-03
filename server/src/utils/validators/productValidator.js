@@ -17,6 +17,7 @@ exports.createProductValidator = [
     "descriptionAr",
     "quantity",
     "price",
+    "priceAfterDiscount",
     "colors",
     "coverImage",
     "images",

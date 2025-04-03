@@ -131,7 +131,6 @@ function AddProduct() {
 
     if (["price", "priceAfterDiscount"].includes(name)) {
       console.log(value);
-      // السماح بالأرقام العشرية فقط
       if (isNaN(Number(value))) return;
     }
 
@@ -442,6 +441,7 @@ function AddProduct() {
             <select
               name="category"
               id="category"
+              value={form.category}
               onChange={handleChange}
               dir={lang === "ar" ? "rtl" : "ltr"} // تحديد اتجاه النص
             >
@@ -469,6 +469,7 @@ function AddProduct() {
             <select
               name="brand"
               id="brand"
+              value={form.brand}
               onChange={handleChange}
               disabled={isDisabled}
               dir={lang === "ar" ? "rtl" : "ltr"} // تحديد اتجاه النص
