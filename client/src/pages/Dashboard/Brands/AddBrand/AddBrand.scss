@@ -159,6 +159,10 @@ $border-color: #ddd;
       .btn-submit {
         background-color: $primary-color;
         color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
         width: 100%;
         padding: 12px;
         font-size: 18px;

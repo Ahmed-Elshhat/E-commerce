@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Axios } from "../../../../Api/axios";
 import { BRANDS, CATEGORIES, PRODUCTS } from "../../../../Api/Api";
 import axios from "axios";
-import { CategorySchema } from "../../../../Types/app";
+import { BrandSchema, CategorySchema } from "../../../../Types/app";
 import { IoClose } from "react-icons/io5";
 import { FaImage, FaImages } from "react-icons/fa";
 
@@ -28,7 +28,7 @@ function AddProduct() {
   });
 
   const [categories, setCategories] = useState<CategorySchema[]>([]);
-  const [brands, setBrands] = useState<CategorySchema[]>([]);
+  const [brands, setBrands] = useState<BrandSchema[]>([]);
   const [previewCover, setPreviewCover] = useState<string | null>(null);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [colorInput, setColorInput] = useState("#0000ff");
@@ -50,7 +50,7 @@ function AddProduct() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isDisabled = !form.category;
 
   useEffect(() => {
@@ -451,7 +451,7 @@ function AddProduct() {
               {/* خيار افتراضي */}
               {categories.map((category, index) => (
                 <option value={category._id} key={category._id + index}>
-                  {category.name}
+                  {i18n.language === "ar" ? category.nameAr : category.nameEn}
                 </option>
               ))}
             </select>

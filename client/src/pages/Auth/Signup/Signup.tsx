@@ -146,7 +146,7 @@ function Signup() {
               type="text"
               name="name"
               id="name"
-              placeholder={t("signup.userNameLabel")}
+              placeholder={t("signup.userNamePlaceholder")}
               value={form.name}
               onChange={handleChange}
             />
@@ -164,7 +164,7 @@ function Signup() {
               type="email"
               name="email"
               id="email"
-              placeholder={t("signup.emailLabel")}
+              placeholder={t("signup.emailPlaceholder")}
               value={form.email}
               onChange={handleChange}
             />
@@ -222,7 +222,7 @@ function Signup() {
                 type={showPassword ? "text" : "password"}
                 name="confirmPassword"
                 id="confirmPassword"
-                placeholder={t("signup.passwordPlaceholder")}
+                placeholder={t("signup.confirmPasswordPlaceholder")}
                 value={form.confirmPassword}
                 onChange={handleChange}
                 style={{

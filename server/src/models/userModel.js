@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
     accessToken: String,
     googleId: {
       type: String,
-      unique: [true, "google ID must be unique"],
+      // unique: [true, "google ID must be unique"],
     },
     name: {
       type: String,

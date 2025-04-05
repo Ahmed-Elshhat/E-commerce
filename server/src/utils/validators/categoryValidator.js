@@ -24,18 +24,21 @@ exports.getCategoryValidator = [
 ];
 
 exports.createCategoryValidator = [
-  validateExactFields(["name", "image"], [], []),
-  check("name")
+  validateExactFields(["nameAr", "nameEn", "image"], [], []),
+  check("nameAr")
     .notEmpty()
-    .withMessage("Category name is required")
+    .withMessage("The category name in Arabic is required")
     .isLength({ min: 3 })
-    .withMessage("Too short category name")
+    .withMessage("The name in Arabic is too short, min 3 chars")
     .isLength({ max: 32 })
-    .withMessage("Too long category name")
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
-      return true;
-    }),
+    .withMessage("The name in Arabic is too long, max 32 chars"),
+  check("nameEn")
+    .notEmpty()
+    .withMessage("The category name in English is required")
+    .isLength({ min: 3 })
+    .withMessage("The name in English is too short, min 3 chars")
+    .isLength({ max: 32 })
+    .withMessage("The name in English is too long, max 32 chars"),
   validatorMiddleware,
 ];
 

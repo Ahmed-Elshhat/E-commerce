@@ -21,13 +21,13 @@
   "signup": {
     "title": "Signup",
     "userNameLabel": "Username",
-    "userNamePlaceholder": "Username",
+    "userNamePlaceholder": "Enter your name",
     "emailLabel": "Email",
-    "emailPlaceholder": "Email",
+    "emailPlaceholder": "Enter your email",
     "passwordLabel": "Password",
-    "passwordPlaceholder": "Password",
-    "confirmPasswordLabel": "Password",
-    "confirmPasswordPlaceholder": "Password",
+    "passwordPlaceholder": "Enter your password",
+    "confirmPasswordLabel": "Confirm password",
+    "confirmPasswordPlaceholder": "Confirm your password",
     "signupButton": "Signup",
     "or": "Or",
     "signupWithGoogleButton": "Signup with Google",
@@ -119,12 +119,23 @@
     "categories": {
       "name": "Name",
       "actions": "Actions",
-      "noEmployeesFound": "No Categories Found"
+      "noCategoriesFound": "No Categories Found"
     },
     "addCategory": {
+      "errors": {
+        "nameEnRequired": "The category name in English is required.",
+        "nameEnMin": "The name in English must be at least 3 characters long.",
+        "nameEnMax": "The name in English must not exceed 32 characters.",
+        "nameArRequired": "The category name in Arabic is required.",
+        "nameArMin": "The name in Arabic must be at least 3 characters long.",
+        "nameArMax": "The name in Arabic must not exceed 32 characters.",
+        "imageRequired": "Image is required."
+      },
       "title": "Add a new category",
-      "nameLabel": "Category name",
-      "namePlaceholder": "Category name",
+      "categoryNameLabelAr": "name in Arabic",
+      "categoryNameLabelEn": "name in English",
+      "categoryNamePlaceholderAr": "Enter the name in Arabic",
+      "categoryNamePlaceholderEn": "Enter the name in English",
       "uploadImage": "Upload Image",
       "submitButton": "Add Category",
       "deleteImageButton": "Delete",
@@ -137,9 +148,20 @@
       "noBrandsFound": "No Brands Found"
     },
     "addBrand": {
+      "errors": {
+        "nameEnRequired": "The brand name in English is required.",
+        "nameEnMin": "The name in English must be at least 2 characters long.",
+        "nameEnMax": "The name in English must not exceed 32 characters.",
+        "nameArRequired": "The brand name in Arabic is required.",
+        "nameArMin": "The name in Arabic must be at least 2 characters long.",
+        "nameArMax": "The name in Arabic must not exceed 32 characters.",
+        "imageRequired": "Image is required."
+      },
       "title": "Add a new brand",
-      "nameLabel": "Brand name",
-      "namePlaceholder": "Brand name",
+      "brandNameLabelAr": "name in Arabic",
+      "brandNameLabelEn": "name in English",
+      "brandNamePlaceholderAr": "Enter the name in Arabic",
+      "brandNamePlaceholderEn": "Enter the name in English",
       "uploadImage": "Upload Image",
       "submitButton": "Add brand",
       "deleteImageButton": "Delete",

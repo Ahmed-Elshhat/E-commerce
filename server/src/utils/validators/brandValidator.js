@@ -18,19 +18,22 @@ exports.getBrandValidator = [
   validatorMiddleware,
 ];
 
-exports.createBrandValidator = [
-  validateExactFields(["name", "image"]),
-  check("name")
+exports.createBrandValidator = [  
+  validateExactFields(["nameAr", "nameEn", "image"], [], []),
+  check("nameAr")
     .notEmpty()
-    .withMessage("Brand name is required")
+    .withMessage("The brand name in Arabic is required")
     .isLength({ min: 2 })
-    .withMessage("Too short brand name")
+    .withMessage("The name in Arabic is too short, min 2 chars")
     .isLength({ max: 32 })
-    .withMessage("Too long brand name")
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
-      return true;
-    }),
+    .withMessage("The name in Arabic is too long, max 32 chars"),
+  check("nameEn")
+    .notEmpty()
+    .withMessage("The brand name in English is required")
+    .isLength({ min: 2 })
+    .withMessage("The name in English is too short, min 2 chars")
+    .isLength({ max: 32 })
+    .withMessage("The name in English is too long, max 32 chars"),
   validatorMiddleware,
 ];
 

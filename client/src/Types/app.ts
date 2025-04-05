@@ -58,13 +58,15 @@ export type UserSchema = {
 // Category Schema
 export type CategorySchema = {
   _id: string;
-  name: string;
+  nameAr: string;
+  nameEn: string;
 };
 
 // Brand Schema
 export type BrandSchema = {
   _id: string;
-  name: string;
+  nameAr: string;
+  nameEn: string;
 };
 
 // Coupon Schema

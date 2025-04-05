@@ -20,16 +20,18 @@
   },
   "signup": {
     "title": "إنشاء حساب",
-    "emailLabel": "البريد الالكتروني",
-    "emailPlaceholder": "البريد الالكتروني",
+    "userNameLabel": "الاسم",
+    "userNamePlaceholder": "ادخل الاسم",
+    "emailLabel": "البريد الإلكتروني",
+    "emailPlaceholder": "ادخل البريد الإلكتروني",
     "passwordLabel": "كلمة المرور",
-    "passwordPlaceholder": "كلمة المرور",
-    "rememberMe": "تذكرني",
-    "forgotPassword": "هل نسيت كلمة المرور؟",
+    "passwordPlaceholder": "ادخل كلمة المرور",
+    "confirmPasswordLabel": "تأكيد كلمة المرور",
+    "confirmPasswordPlaceholder": "أعد إدخال كلمة المرور",
     "signupButton": "إنشاء حساب",
     "or": "أو",
-    "signupWithGoogleButton": "تسجيل الدخول بجوجل",
-    "Don'tHaveAnAccount": "لديك حساب بالفعل",
+    "signupWithGoogleButton": "إنشاء حساب باستخدام جوجل",
+    "Don'tHaveAnAccount": "ليس لديك حساب؟",
     "login": "تسجيل الدخول"
   },
   "header": {
@@ -121,9 +123,20 @@
       "noCategoriesFound": "لم يتم العثور على تصنيفات"
     },
     "addCategory": {
+      "errors": {
+        "nameEnRequired": "اسم الفئة بالإنجليزية مطلوب.",
+        "nameEnMin": "يجب أن يكون الاسم بالإنجليزية على الأقل 3 أحرف.",
+        "nameEnMax": "يجب ألا يتجاوز الاسم بالإنجليزية 32 حرفًا.",
+        "nameArRequired": "اسم الفئة بالعربية مطلوب.",
+        "nameArMin": "يجب أن يكون الاسم بالعربية على الأقل 3 أحرف.",
+        "nameArMax": "يجب ألا يتجاوز الاسم بالعربية 32 حرفًا.",
+        "imageRequired": "الصورة مطلوبة."
+      },
       "title": "إضافة تصنيف جديد",
-      "nameLabel": "اسم التصنيف",
-      "namePlaceholder": "اسم التصنيف",
+      "categoryNameLabelAr": "الاسم بالعربية",
+      "categoryNameLabelEn": "الاسم بالإنجليزية",
+      "categoryNamePlaceholderAr": "أدخل الاسم بالعربية",
+      "categoryNamePlaceholderEn": "أدخل الاسم بالإنجليزية",
       "uploadImage": "تحميل صورة",
       "submitButton": "إضافة التصنيف",
       "deleteImageButton": "حذف",
@@ -136,9 +149,20 @@
       "noBrandsFound": "لم يتم العثور على ماركات"
     },
     "addBrand": {
+      "errors": {
+        "nameEnRequired": "اسم الماركة بالإنجليزية مطلوب.",
+        "nameEnMin": "يجب أن يكون الاسم بالإنجليزية على الأقل 2 أحرف.",
+        "nameEnMax": "يجب ألا يتجاوز الاسم بالإنجليزية 32 حرفًا.",
+        "nameArRequired": "اسم الماركة بالعربية مطلوب.",
+        "nameArMin": "يجب أن يكون الاسم بالعربية على الأقل 2 أحرف.",
+        "nameArMax": "يجب ألا يتجاوز الاسم بالعربية 32 حرفًا.",
+        "imageRequired": "الصورة مطلوبة."
+      },
       "title": "إضافة ماركة جديدة",
-      "nameLabel": "اسم الماركة",
-      "namePlaceholder": "اسم الماركة",
+      "brandNameLabelAr": "الاسم بالعربية",
+      "brandNameLabelEn": "الاسم بالإنجليزية",
+      "brandNamePlaceholderAr": "أدخل الاسم بالعربية",
+      "brandNamePlaceholderEn": "أدخل الاسم بالإنجليزية",
       "uploadImage": "تحميل صورة",
       "submitButton": "إضافة الماركة",
       "deleteImageButton": "حذف",
@@ -152,7 +176,6 @@
       "actions": "الإجراءات",
       "noProductsFound": "لم يتم العثور على منتجات"
     },
-
     "addProduct": {
       "errors": {
         "titleEnRequired": "العنوان بالإنجليزية مطلوب.",

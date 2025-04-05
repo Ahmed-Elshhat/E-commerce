@@ -22,7 +22,7 @@ function Categories() {
     status: true,
     type: "normal",
   });
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useEffect(() => {
     const getCategories = async () => {
       setLoading({ status: true, type: "normal" });
@@ -117,7 +117,7 @@ function Categories() {
                       <CopyButton couponId={category._id} />
                     </td>
                     <td data-label={t("dashboard.categories.name")}>
-                      {category.name}
+                    {i18n.language === "ar" ? category.nameAr : category.nameEn}
                     </td>
                     <td data-label={t("dashboard.categories.actions")}>
                       <div className="action-buttons">
