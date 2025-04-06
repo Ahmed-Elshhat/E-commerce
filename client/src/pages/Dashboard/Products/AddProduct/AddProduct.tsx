@@ -477,7 +477,7 @@ function AddProduct() {
               <option value="">{t("dashboard.addProduct.choseBrand")}</option>{" "}
               {brands.map((brand, index) => (
                 <option value={brand._id} key={brand._id + index}>
-                  {brand.name}
+                  {i18n.language === "ar" ? brand.nameAr : brand.nameEn}
                 </option>
               ))}
             </select>
