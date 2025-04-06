@@ -116,6 +116,30 @@
       "endShiftLabel": "Shift End Time",
       "submitButton": "Add Employee"
     },
+    "showEmployee": {
+      "userDetails": "User Details",
+      "field": "Field",
+      "details": "Details",
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "phone": "Phone",
+      "role": "Role",
+      "active": "Active",
+      "shiftStart": "Shift Start Time",
+      "shiftEnd": "Shift End Time",
+      "workingHours": "Working Hours",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "notProvided": "Not provided",
+      "notAvailable": "Not available",
+      "yes": "Yes",
+      "no": "No",
+      "AM": "AM",
+      "PM": "PM",
+      "hour": "h",
+      "minute": "m"
+    },
     "categories": {
       "name": "Name",
       "actions": "Actions",
@@ -142,6 +166,19 @@
       "fileName": "File Name",
       "size": "Size"
     },
+    "showCategory": {
+      "loading": "Loading data...",
+      "categoryDetails": "Category Details",
+      "field": "Field",
+      "details": "Details",
+      "id": "ID",
+      "nameAr": "Category name in Arabic",
+      "nameEn": "Category name in English",
+      "image": "Image",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "notAvailable": "Not Available"
+    },
     "brands": {
       "name": "Name",
       "actions": "Actions",
@@ -167,6 +204,19 @@
       "deleteImageButton": "Delete",
       "fileName": "File Name",
       "size": "Size"
+    },
+    "showBrand": {
+      "loading": "Loading data...",
+      "brandDetails": "Brand Details",
+      "field": "Field",
+      "details": "Details",
+      "id": "ID",
+      "nameAr": "Brand name in Arabic",
+      "nameEn": "Brand name in English",
+      "image": "Image",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "notAvailable": "Not Available"
     },
     "products": {
       "title": "title",

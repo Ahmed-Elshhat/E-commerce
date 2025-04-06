@@ -1,6 +1,7 @@
 @use "sass:color";
 
 $primary-color: #3498db;
+$primary-color: #2a3a47;
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
 $text-color: #333;
@@ -155,10 +156,12 @@ $border-color: #ddd;
           }
           .add-color-btn {
             background: #0687ff;
+            background: #2a3a47;
             width: 100%;
             color: white;
             &:hover {
               background: #1a7fdd;
+              background-color: darken(#2a3a47, 10%);
             }
           }
         }
@@ -208,6 +211,7 @@ $border-color: #ddd;
 
           .custom-upload-btn {
             background-color: #007bff;
+            background-color: #2a3a47;
             color: white;
             padding: 10px 16px;
             font-size: 16px;
@@ -220,6 +224,7 @@ $border-color: #ddd;
 
             &:hover {
               background-color: darken(#007bff, 10%);
+              background-color: darken(#2a3a47, 10%);
             }
           }
 

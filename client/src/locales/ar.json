@@ -117,6 +117,30 @@
       "endShiftLabel": "وقت انتهاء الوردية",
       "submitButton": "إضافة الموظف"
     },
+    "showEmployee": {
+      "userDetails": "تفاصيل المستخدم",
+      "field": "الحقل",
+      "details": "التفاصيل",
+      "id": "الرقم التعريفي",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "phone": "الهاتف",
+      "role": "الدور",
+      "active": "نشط",
+      "shiftStart": "وقت بداية الدوام",
+      "shiftEnd": "وقت نهاية الدوام",
+      "workingHours": "ساعات العمل",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "notProvided": "لم يتم توفيره",
+      "notAvailable": "غير متوفر",
+      "yes": "نعم",
+      "no": "لا",
+      "AM": "ص",
+      "PM": "م",
+      "hour": "س",
+      "minute": "د"
+    },
     "categories": {
       "name": "الأسم",
       "actions": "الإجراءات",
@@ -142,6 +166,19 @@
       "deleteImageButton": "حذف",
       "fileName": "اسم الملف",
       "size": "الحجم"
+    },
+    "showCategory": {
+      "loading": "جارٍ تحميل البيانات...",
+      "categoryDetails": "تفاصيل الفئة",
+      "field": "الحقل",
+      "details": "التفاصيل",
+      "id": "الرقم التعريفي",
+      "nameAr": "الاسم الفئة بالعربية",
+      "nameEn": "الاسم الفئة بالانجليزية",
+      "image": "الصورة",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "notAvailable": "غير متوفر"
     },
     "brands": {
       "name": "الأسم",

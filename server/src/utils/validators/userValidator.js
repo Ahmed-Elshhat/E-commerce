@@ -1,5 +1,4 @@
 const { check, body, param } = require("express-validator");
-const slugify = require("slugify");
 const bcrypt = require("bcryptjs");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const User = require("../../models/userModel");
@@ -30,11 +29,7 @@ exports.createUserValidator = [
     .notEmpty()
     .withMessage("name is required")
     .isLength({ min: 4 })
-    .withMessage("Too short User name, Must be longer than 4 characters")
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
-      return true;
-    }),
+    .withMessage("Too short User name, Must be longer than 4 characters"),
   body("email")
     .notEmpty()
     .withMessage("User is required")
@@ -71,12 +66,7 @@ exports.createUserValidator = [
 
 exports.updateUserValidator = [
   check("id").isMongoId().withMessage("Invalid user id format"),
-  body("name")
-    .optional()
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
-      return true;
-    }),
+  body("name").optional(),
   check("email")
     .notEmpty()
     .withMessage("Email required")

@@ -1,8 +1,32 @@
+import { useTranslation } from "react-i18next";
 import "./Footer.scss";
+import { useEffect, useState } from "react";
+import { useAppDispatch } from "../../Redux/app/hooks";
+import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
 
 function Footer() {
+  const [lang, setLang] = useState<string>("");
+    const dispatch = useAppDispatch();
+  const { t, i18n } = useTranslation();
+
+  useEffect(() => {
+    console.log(lang);
+    const localLang = localStorage.getItem("lang");
+    setLang(localLang || "en");
+  }, []);
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === "en" ? "ar" : "en";
+    i18n.changeLanguage(newLang);
+    document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
+    setLang(newLang);
+    dispatch(saveLang(newLang));
+    localStorage.setItem("lang", newLang);
+  };
   return (
     <footer className="footer">
+      <button onClick={toggleLanguage}>{t("home.change_language")}</button>
+
       <div className="footer-container">
         {/* Grid Layout for Large Screens */}
         <div className="footer-grid">

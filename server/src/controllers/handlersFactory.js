@@ -62,10 +62,16 @@ exports.getOne = (Model, populationOpt, modelName) =>
     // 2) Execute query
     const document = await query;
 
+    const documentObject = document.toObject();
+    delete documentObject.password;
+    delete documentObject.__v;
+
+  
+
     if (!document) {
       return next(new ApiError(`No document for this id ${id}`, 404));
     }
-    res.status(200).json({ data: document });
+    res.status(200).json({ data: documentObject });
   });
 
 exports.getAll = (Model, searchKeyWord, populationOpt) =>

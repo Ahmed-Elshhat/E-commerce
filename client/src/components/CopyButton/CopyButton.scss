@@ -4,6 +4,7 @@
   align-items: center;
   gap: 5px;
   background-color: #007bff;
+  background-color: rgba(42, 58, 71, 0.884);
   color: white;
   font-size: 16px;
   border: none;
@@ -11,17 +12,19 @@
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 4px;
-
+  
   @media (min-width: 710px) {
     margin: 0 auto;
   }
-
+  
   &:hover {
     background-color: #0056b3;
+    background-color: #2a3a47;
   }
 }
 
 .copied {
-  background-color: rgb(52, 216, 30) !important; // اللون الأخضر
+  background-color: rgb(21, 22, 21) !important; // اللون الأخضر
+  background-color: green !important; // اللون الأخضر
   color: white;
 }
