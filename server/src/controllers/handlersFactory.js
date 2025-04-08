@@ -37,7 +37,7 @@ exports.
 createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
     let body =
-      modelName === "users" ? { ...req.body, role: "employee" } : req.body;
+    modelName === "users" ? { ...req.body, role: "employee" } : req.body;
     const newDoc = await Model.create(body);
     res.status(201).json({ data: newDoc });
   });

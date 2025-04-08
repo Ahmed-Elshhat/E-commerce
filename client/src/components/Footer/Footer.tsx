@@ -1,27 +1,26 @@
 import { useTranslation } from "react-i18next";
-import "./Footer.scss";
-import { useEffect, useState } from "react";
 import { useAppDispatch } from "../../Redux/app/hooks";
 import { saveLang } from "../../Redux/feature/languageSlice/languageSlice";
+import { useNavigate } from "react-router-dom";
+import "./Footer.scss";
 
 function Footer() {
-  const [lang, setLang] = useState<string>("");
-    const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
   const { t, i18n } = useTranslation();
-
-  useEffect(() => {
-    console.log(lang);
-    const localLang = localStorage.getItem("lang");
-    setLang(localLang || "en");
-  }, []);
+  const navigate = useNavigate();
 
   const toggleLanguage = () => {
     const newLang = i18n.language === "en" ? "ar" : "en";
     i18n.changeLanguage(newLang);
     document.documentElement.dir = newLang === "ar" ? "rtl" : "ltr";
-    setLang(newLang);
     dispatch(saveLang(newLang));
     localStorage.setItem("lang", newLang);
+    const pathParts = window.location.pathname.split("/");
+
+    if (pathParts[1] === "ar" || pathParts[1] === "en") {
+      pathParts[1] = newLang;
+    }
+    navigate(pathParts.join("/"));
   };
   return (
     <footer className="footer">

@@ -369,6 +369,7 @@ function AddProduct() {
     formData.append("quantity", form.quantity.toString());
     formData.append("price", form.price.toString());
     formData.append("category", form.category);
+    formData.append("brand", form.brand);
     if (!(form.priceAfterDiscount <= 0)) {
       formData.append("priceAfterDiscount", form.priceAfterDiscount.toString());
     }

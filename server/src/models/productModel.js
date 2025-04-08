@@ -110,10 +110,16 @@ productSchema.virtual("reviews", {
 });
 
 productSchema.pre(/^find/, function (next) {
-  this.populate({
-    path: "category",
-    select: "name",
-  });
+  this.populate([
+    {
+      path: "category",
+      select: "-__v",
+    },
+    {
+      path: "brand",
+      select: "-__v",
+    }
+  ]);
   next();
 });
 

@@ -272,11 +272,64 @@
       "choseImages": "Choose additional images",
       "submitButton": "Add Product"
     },
+    "showProduct": {
+      "loading": "Loading data...",
+      "productDetails": "Product Details",
+      "field": "Field",
+      "details": "Details",
+      "id": "ID",
+      "nameAr": "Product name in Arabic",
+      "nameEn": "Product name in English",
+      "descriptionAr": "Product description in Arabic",
+      "descriptionEn": "Product description in English",
+      "quantity": "Quantity",
+      "price": "Price",
+      "priceAfterDiscount": "Price after discount",
+      "sold": "Sold",
+      "colors": "colors",
+      "coverImage": "Cover image",
+      "images": "images",
+      "categoryId": "Category ID",
+      "categoryNameAr": "Category name in Arabic",
+      "categoryNameEn": "Category name in English",
+      "brandId": "Brand ID",
+      "brandNameAr": "Brand name in Arabic",
+      "brandNameEn": "Brand name in English",
+      "ratingsAverage": "Ratings average",
+      "ratingsQuantity": "Ratings quantity",
+      "showReviewsButton": "Show reviews",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
+      "notAvailable": "Not Available"
+    },
     "coupons": {
       "name": "Name",
       "discount": "discount",
       "expire": "expire",
       "TheRemainingTime": "The remaining time",
+      "actions": "Actions",
+      "noCouponsFound": "No Coupons Found"
+    },
+    "addCoupon": {
+      "title": "Add a new coupon",
+      "nameLabel": "Coupon name",
+      "namePlaceholder": "Name",
+      "expireLabel": "Expire",
+      "expirePlaceholder": "Expire",
+      "discountLabel": "Discount",
+      "discountPlaceholder": "Discount",
+      "submitButton": "Add coupon"
+    },
+    "showCoupon": {
+      "loading": "Loading data...",
+      "brandDetails": "Coupon Details",
+      "field": "Field",
+      "details": "Details",
+      "id": "ID",
+      "name": "Coupon name",
+      "expire": "Coupon name",
+      "createdAt": "Created At",
+      "updatedAt": "Updated At",
       "remaining": {
         "expire": "expire",
         "remaining": "Remaining",
@@ -292,18 +345,7 @@
       },
       "AM": "AM",
       "PM": "PM",
-      "actions": "Actions",
-      "noCouponsFound": "No Coupons Found"
-    },
-    "addCoupon": {
-      "title": "Add a new coupon",
-      "nameLabel": "Coupon name",
-      "namePlaceholder": "Name",
-      "expireLabel": "Expire",
-      "expirePlaceholder": "Expire",
-      "discountLabel": "Discount",
-      "discountPlaceholder": "Discount",
-      "submitButton": "Add coupon"
+      "notAvailable": "Not Available"
     }
   },
   "sidebar": {

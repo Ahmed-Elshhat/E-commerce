@@ -2,6 +2,7 @@ const { check, body, query } = require("express-validator");
 const slugify = require("slugify");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const Category = require("../../models/categoryModel");
+const Brand = require("../../models/brandModel");
 const { validateExactFields } = require("../validateFields");
 
 exports.getProductValidator = [
@@ -22,6 +23,7 @@ exports.createProductValidator = [
     "coverImage",
     "images",
     "category",
+    "brand",
   ]),
   check("titleEn")
     .notEmpty()
@@ -109,7 +111,19 @@ exports.createProductValidator = [
         }
       })
     ),
-  check("brand").optional().isMongoId().withMessage("Invalid ID formate"),
+  check("brand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid ID formate")
+    .custom((brandId) =>
+      Brand.findById(brandId).then((brand) => {
+        if (!brand) {
+          return Promise.reject(
+            new Error(`No brand for this id: ${brandId}`)
+          );
+        }
+      })
+    ),
   validatorMiddleware,
 ];
 

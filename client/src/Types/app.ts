@@ -60,6 +60,8 @@ export type CategorySchema = {
   _id: string;
   nameAr: string;
   nameEn: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Brand Schema
@@ -67,6 +69,8 @@ export type BrandSchema = {
   _id: string;
   nameAr: string;
   nameEn: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Coupon Schema
@@ -75,6 +79,22 @@ export type CouponSchema = {
   name: string;
   discount: number;
   expire: string;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
+// Review Schema
+export type ReviewSchema = {
+  _id: string;
+  title: string
+  ratings: number;
+  user: {
+    _id: string;
+    name: string;
+  };
+  product: string;
+  createdAt: Date;
+  updatedAt: Date;
 };
 
 // Product Schema
@@ -85,16 +105,19 @@ export type ProductSchema = {
   descriptionAr: string;
   descriptionEn: string;
   quantity: number;
-  sold: number
+  sold: number;
   price: number;
   priceAfterDiscount: number;
   colors: string[];
-  imageCover: string,
-  images: string[];
-  category: string;
-  brand: string;
+  coverImage: string;
+  images: { _id: string; url: string }[];
   ratingsAverage: number;
   ratingsQuantity: number;
+  createdAt: null;
+  updatedAt: null;
+  category: CategorySchema;
+  brand: BrandSchema;
+  reviews: ReviewSchema;
 };
 
 // Reset Password
