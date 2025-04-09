@@ -15,7 +15,7 @@
     text-align: center;
   }
 
-  .user-table {
+  .product-table {
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
@@ -117,7 +117,7 @@
       font-size: 1.2rem;
     }
 
-    .user-table {
+    .product-table {
       width: 100%;
       font-size: 0.9rem;
       overflow-x: auto;
@@ -184,11 +184,11 @@
       font-size: 1rem;
     }
 
-    .user-table {
+    .product-table {
       font-size: 0.8rem;
     }
 
-    .user-table td {
+    .product-table td {
       padding: 8px;
     }
   }

@@ -33,11 +33,10 @@ exports.updateOne = (Model, populationOpt) =>
     res.status(200).json({ data: document });
   });
 
-exports.
-createOne = (Model, modelName) =>
+exports.createOne = (Model, modelName) =>
   asyncHandler(async (req, res) => {
     let body =
-    modelName === "users" ? { ...req.body, role: "employee" } : req.body;
+      modelName === "users" ? { ...req.body, role: "employee" } : req.body;
     const newDoc = await Model.create(body);
     res.status(201).json({ data: newDoc });
   });
@@ -62,15 +61,14 @@ exports.getOne = (Model, populationOpt, modelName) =>
     // 2) Execute query
     const document = await query;
 
+    if (!document) {
+      return next(new ApiError(`No document for this id ${id}`, 404));
+    }
+
     const documentObject = document.toObject();
     delete documentObject.password;
     delete documentObject.__v;
 
-  
-
-    if (!document) {
-      return next(new ApiError(`No document for this id ${id}`, 404));
-    }
     res.status(200).json({ data: documentObject });
   });
 

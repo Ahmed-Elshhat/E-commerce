@@ -39,6 +39,7 @@ export type UserSchema = {
   name: string;
   email: string;
   role: string;
+  phone: string;
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -60,6 +61,7 @@ export type CategorySchema = {
   _id: string;
   nameAr: string;
   nameEn: string;
+  image: string;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -69,6 +71,7 @@ export type BrandSchema = {
   _id: string;
   nameAr: string;
   nameEn: string;
+  image: string;
   createdAt: Date;
   updatedAt: Date;
 };

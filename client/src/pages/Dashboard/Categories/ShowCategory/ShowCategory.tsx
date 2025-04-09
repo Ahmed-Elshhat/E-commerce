@@ -5,19 +5,12 @@ import { BASE_URL, CATEGORIES } from "../../../../Api/Api";
 import { useTranslation } from "react-i18next";
 import "./ShowCategory.scss";
 import { BiSolidCategoryAlt } from "react-icons/bi";
+import { CategorySchema } from "../../../../Types/app";
 
 function ShowCategory() {
   const { id } = useParams();
-  const [category, setCategory] = useState({
-    _id: "",
-    nameAr: "",
-    nameEn: "",
-    image: "",
-    createdAt: null,
-    updatedAt: null,
-  });
-
-  const { t, i18n } = useTranslation(); // إضافة الترجمة
+  const [category, setCategory] = useState<CategorySchema | null>(null);
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     const fetchCategory = async () => {
@@ -39,10 +32,10 @@ function ShowCategory() {
   return (
     <div className="show-category">
       <h2>
-        {t("dashboard.showCategory.categoryDetails")}  <BiSolidCategoryAlt />
+        {t("dashboard.showCategory.categoryDetails")} <BiSolidCategoryAlt />
       </h2>
       <table
-        className="user-table"
+        className="category-table"
         style={{ textAlign: i18n.language === "ar" ? "right" : "left" }}
       >
         <thead>
@@ -54,25 +47,29 @@ function ShowCategory() {
         <tbody>
           <tr>
             <td>{t("dashboard.showCategory.id")}</td>
-            <td data-label="ID">{category._id}</td>
+            <td data-label={t("dashboard.showCategory.id")}>{category._id}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showCategory.nameAr")}</td>
-            <td data-label="Name">{category.nameAr}</td>
+            <td data-label={t("dashboard.showCategory.nameAr")}>
+              {category.nameAr}
+            </td>
           </tr>
           <tr>
             <td>{t("dashboard.showCategory.nameEn")}</td>
-            <td data-label="Name">{category.nameEn}</td>
+            <td data-label={t("dashboard.showCategory.nameEn")}>
+              {category.nameEn}
+            </td>
           </tr>
           <tr>
             <td>{t("dashboard.showCategory.image")}</td>
-            <td data-label="Name">
+            <td data-label={t("dashboard.showCategory.image")}>
               <img src={category.image || undefined} alt="category image" />
             </td>
           </tr>
           <tr>
             <td>{t("dashboard.showCategory.createdAt")}</td>
-            <td data-label="Created At">
+            <td data-label={t("dashboard.showCategory.createdAt")}>
               {category.createdAt
                 ? new Date(category.createdAt).toLocaleDateString()
                 : t("dashboard.showCategory.notAvailable")}
@@ -80,7 +77,7 @@ function ShowCategory() {
           </tr>
           <tr>
             <td>{t("dashboard.showCategory.updatedAt")}</td>
-            <td data-label="Updated At">
+            <td data-label={t("dashboard.showCategory.updatedAt")}>
               {category.updatedAt
                 ? new Date(category.updatedAt).toLocaleDateString()
                 : t("dashboard.showCategory.notAvailable")}

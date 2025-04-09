@@ -80,79 +80,10 @@ function Coupons() {
     return () => window.removeEventListener("scroll", fetchMoreCoupons);
   }, [fetchMoreCoupons]);
 
-  // const formatDateTime = (isoString: string) => {
-  //   const date = new Date(isoString);
-
-  //   const formattedDate = isoString.split("T")[0];
-
-  //   let hours = date.getHours();
-  //   const minutes = date.getMinutes().toString().padStart(2, "0");
-  //   const period =
-  //     hours >= 12 ? t("dashboard.coupons.PM") : t("dashboard.coupons.AM");
-
-  //   hours = hours % 12 || 12;
-
-  //   return `${formattedDate} (${hours}:${minutes} ${period})`;
-  // };
-
   const formatDateTime = (isoString: string) => {
     const formattedDate = isoString.split("T")[0];
     return `${formattedDate}`;
   };
-
-  // const getCouponStatus = (expireDate: string): string => {
-  //   const expirationTime = new Date(expireDate).getTime(); // تحويل تاريخ الانتهاء إلى Milliseconds
-  //   const currentTime = new Date().getTime(); // الوقت الحالي
-  //   const timeDiff = expirationTime - currentTime; // الفرق بين التاريخين بالميلي ثانية
-
-  //   if (timeDiff <= 0) {
-  //     return t("dashboard.coupons.remaining.expire");
-  //   }
-
-  //   const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
-  //   const hours = Math.floor(
-  //     (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-  //   );
-  //   const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
-
-  //   let resultAr = `${t("dashboard.coupons.remaining.remaining")} `;
-
-  //   if (days > 0) {
-  //     if (days === 1) {
-  //       resultAr += `${t("dashboard.coupons.remaining.day")} `;
-  //     } else if (days === 2) {
-  //       resultAr += `${t("dashboard.coupons.remaining.twoDays")} `;
-  //     } else if (days >= 3 && days <= 10) {
-  //       resultAr += `${days} ${t("dashboard.coupons.remaining.days")} `;
-  //     } else {
-  //       resultAr += `${days} ${t("dashboard.coupons.remaining.day")} `;
-  //     }
-  //   }
-  //   if (hours > 0) {
-  //     if (hours === 1) {
-  //       resultAr += `${t("dashboard.coupons.remaining.hour")} `;
-  //     } else if (hours === 2) {
-  //       resultAr += `${t("dashboard.coupons.remaining.twoHours")} `;
-  //     } else if (hours >= 3 && hours <= 10) {
-  //       resultAr += `${hours} ${t("dashboard.coupons.remaining.hours")} `;
-  //     } else {
-  //       resultAr += `${hours} ${t("dashboard.coupons.remaining.hour")} `;
-  //     }
-  //   }
-  //   if (minutes > 0) {
-  //     if (minutes === 1) {
-  //       resultAr += `${t("dashboard.coupons.remaining.minute")} `;
-  //     } else if (minutes === 2) {
-  //       resultAr += `${t("dashboard.coupons.remaining.twoMinutes")} `;
-  //     } else if (minutes >= 3 && minutes <= 10) {
-  //       resultAr += `${minutes} ${t("dashboard.coupons.remaining.minutes")}  `;
-  //     } else {
-  //       resultAr += `${minutes} ${t("dashboard.coupons.remaining.minute")}  `;
-  //     }
-  //   }
-
-  //   return resultAr.trim().replace(/ (و|and) $/, "");
-  // };
 
   const handleDelete = async (id: string) => {
     setLoading({ status: true, type: "normal" });

@@ -335,6 +335,37 @@
       "discountLabel": "نسبة الخصم",
       "discountPlaceholder": "نسبة الخصم",
       "submitButton": "إضافة القسيمة"
+    },
+    "showCoupon": {
+      "loading": "جاري تحميل البيانات...",
+      "couponDetails": "تفاصيل الكوبون",
+      "field": "الحقل",
+      "details": "التفاصيل",
+      "id": "المعرّف",
+      "name": "اسم الكوبون",
+      "expire": "تاريخ الانتهاء",
+      "discount": "قيمة الخصم",
+      "createdAt": "تاريخ الإنشاء",
+      "updatedAt": "تاريخ التحديث",
+      "remaining": {
+        "remaining": "المتبقي",
+        "expired": "منتهي الصلاحية",
+        "day": "يوم و",
+        "days": "أيام و",
+        "twoDays": "يومان و",
+        "hour": "ساعة و",
+        "hours": "ساعات و",
+        "twoHours": "ساعتان و",
+        "minute": "دقيقة و",
+        "minutes": "دقائق و",
+        "twoMinutes": "دقيقتان و",
+        "second": "ثانية",
+        "twoSeconds": "ثانيتان",
+        "seconds": "ثواني"
+      },
+      "AM": "صباحًا",
+      "PM": "مساءً",
+      "notAvailable": "غير متوفر"
     }
   },
   "sidebar": {

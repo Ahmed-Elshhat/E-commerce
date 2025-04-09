@@ -38,7 +38,7 @@ function ShowProductDetails() {
         {t("dashboard.showProduct.productDetails")} <FaProductHunt />
       </h2>
       <table
-        className="user-table"
+        className="product-table"
         style={{ textAlign: i18n.language === "ar" ? "right" : "left" }}
       >
         <thead>
@@ -50,7 +50,7 @@ function ShowProductDetails() {
         <tbody>
           <tr>
             <td>{t("dashboard.showProduct.id")}</td>
-            <td data-label="ID">{product._id}</td>
+            <td data-label={t("dashboard.showProduct.id")}>{product._id}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showProduct.nameAr")}</td>
@@ -193,7 +193,7 @@ function ShowProductDetails() {
           </tr>
           <tr>
             <td>{t("dashboard.showProduct.createdAt")}</td>
-            <td data-label="Created At">
+            <td data-label={t("dashboard.showProduct.createdAt")}>
               {product.createdAt
                 ? new Date(product.createdAt).toLocaleDateString()
                 : t("dashboard.showProduct.notAvailable")}
@@ -201,7 +201,7 @@ function ShowProductDetails() {
           </tr>
           <tr>
             <td>{t("dashboard.showProduct.updatedAt")}</td>
-            <td data-label="Updated At">
+            <td data-label={t("dashboard.showProduct.updatedAt")}>
               {product.updatedAt
                 ? new Date(product.updatedAt).toLocaleDateString()
                 : t("dashboard.showProduct.notAvailable")}

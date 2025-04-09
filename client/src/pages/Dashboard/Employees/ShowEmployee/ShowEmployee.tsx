@@ -5,27 +5,12 @@ import { Axios } from "../../../../Api/axios";
 import { BASE_URL, USERS } from "../../../../Api/Api";
 import { FaUser } from "react-icons/fa";
 import { useTranslation } from "react-i18next";
+import { UserSchema } from "../../../../Types/app";
 
 function ShowEmployee() {
   const { id } = useParams();
-  const [user, setUser] = useState({
-    _id: "",
-    name: "",
-    email: "",
-    phone: "",
-    role: "",
-    active: false,
-    startShift: {
-      hour: 0,
-      minutes: 0,
-    },
-    endShift: {
-      hour: 0,
-      minutes: 0,
-    },
-    createdAt: null,
-    updatedAt: null,
-  });
+  const [user, setUser] = useState<UserSchema | null>(null);
+
 
   const { t, i18n } = useTranslation(); // إضافة الترجمة
 
@@ -94,29 +79,29 @@ function ShowEmployee() {
         <tbody>
           <tr>
             <td>{t("dashboard.showEmployee.id")}</td>
-            <td data-label="ID">{user._id}</td>
+            <td data-label={t("dashboard.showEmployee.id")}>{user._id}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.name")}</td>
-            <td data-label="Name">{user.name}</td>
+            <td data-label={t("dashboard.showEmployee.name")}>{user.name}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.email")}</td>
-            <td data-label="Email">{user.email}</td>
+            <td data-label={t("dashboard.showEmployee.email")}>{user.email}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.phone")}</td>
-            <td data-label="Phone">
+            <td data-label={t("dashboard.showEmployee.phone")}>
               {user.phone || t("dashboard.showEmployee.notProvided")}
             </td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.role")}</td>
-            <td data-label="Role">{user.role}</td>
+            <td data-label={t("dashboard.showEmployee.role")}>{user.role}</td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.active")}</td>
-            <td data-label="Active">
+            <td data-label={t("dashboard.showEmployee.active")}>
               {user.active
                 ? t("dashboard.showEmployee.yes")
                 : t("dashboard.showEmployee.no")}
@@ -124,25 +109,25 @@ function ShowEmployee() {
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.shiftStart")}</td>
-            <td data-label="Shift Start Time">
+            <td data-label={t("dashboard.showEmployee.shiftStart")}>
               {formatTime(user.startShift.hour, user.startShift.minutes)}
             </td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.shiftEnd")}</td>
-            <td data-label="Shift End Time">
+            <td data-label={t("dashboard.showEmployee.shiftEnd")}>
               {formatTime(user.endShift.hour, user.endShift.minutes)}
             </td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.workingHours")}</td>
-            <td data-label="Working Hours">
+            <td data-label={t("dashboard.showEmployee.workingHours")}>
               {calculateShiftHours(user.startShift, user.endShift)}
             </td>
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.createdAt")}</td>
-            <td data-label="Created At">
+            <td data-label={t("dashboard.showEmployee.createdAt")}>
               {user.createdAt
                 ? new Date(user.createdAt).toLocaleDateString()
                 : t("dashboard.showEmployee.notAvailable")}
@@ -150,7 +135,7 @@ function ShowEmployee() {
           </tr>
           <tr>
             <td>{t("dashboard.showEmployee.updatedAt")}</td>
-            <td data-label="Updated At">
+            <td data-label={t("dashboard.showEmployee.updatedAt")}>
               {user.updatedAt
                 ? new Date(user.updatedAt).toLocaleDateString()
                 : t("dashboard.showEmployee.notAvailable")}
