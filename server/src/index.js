@@ -1,4 +1,6 @@
 const path = require("path");
+const fs = require("fs");
+
 
 const express = require("express");
 const dotenv = require("dotenv");
@@ -17,6 +19,21 @@ require("./config/passport");
 const ApiError = require("./utils/apiError");
 const globalError = require("./middlewares/errorMiddleware");
 const dbConnection = require("./config/database");
+// Create uploads directory and subdirectories if they don't exist
+const baseUploadsPath = path.join(__dirname, "..", "uploads");
+const folders = ["brands", "categories", "products"];
+
+if (!fs.existsSync(baseUploadsPath)) {
+  fs.mkdirSync(baseUploadsPath);
+}
+
+folders.forEach((folder) => {
+  const folderPath = path.join(baseUploadsPath, folder);
+  if (!fs.existsSync(folderPath)) {
+    fs.mkdirSync(folderPath);
+  }
+});
+
 // Routes
 const mountRoutes = require("./routes");
 // Connect With DB
