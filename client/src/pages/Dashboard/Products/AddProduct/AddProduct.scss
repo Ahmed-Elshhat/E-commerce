@@ -161,7 +161,7 @@ $border-color: #ddd;
             color: white;
             &:hover {
               background: #1a7fdd;
-              background-color: darken(#2a3a47, 10%);
+              background-color: color.adjust(#2a3a47, $lightness: -10%);
             }
           }
         }
@@ -223,8 +223,8 @@ $border-color: #ddd;
             gap: 8px;
 
             &:hover {
-              background-color: darken(#007bff, 10%);
-              background-color: darken(#2a3a47, 10%);
+              background-color: color.adjust(#007bff, $lightness: 10%);
+              background-color: color.adjust(#2a3a47, $lightness: 10%);
             }
           }
 
