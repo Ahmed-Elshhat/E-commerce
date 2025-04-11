@@ -167,6 +167,29 @@
       "fileName": "اسم الملف",
       "size": "الحجم"
     },
+    "updateCategory": {
+      "errors": {
+        "nameEnRequired": "اسم الفئة باللغة الإنجليزية مطلوب.",
+        "nameEnMin": "يجب ألا يقل اسم الفئة باللغة الإنجليزية عن 3 أحرف.",
+        "nameEnMax": "يجب ألا يزيد اسم الفئة باللغة الإنجليزية عن 32 حرفًا.",
+        "nameArRequired": "اسم الفئة باللغة العربية مطلوب.",
+        "nameArMin": "يجب ألا يقل اسم الفئة باللغة العربية عن 3 أحرف.",
+        "nameArMax": "يجب ألا يزيد اسم الفئة باللغة العربية عن 32 حرفًا.",
+        "imageRequired": "الصورة مطلوبة."
+      },
+      "title": "تحديث الفئة",
+      "categoryNameLabelAr": "الاسم بالعربية",
+      "categoryNameLabelEn": "الاسم بالإنجليزية",
+      "categoryNamePlaceholderAr": "أدخل الاسم باللغة العربية",
+      "categoryNamePlaceholderEn": "أدخل الاسم باللغة الإنجليزية",
+      "uploadImage": "رفع صورة",
+      "submitButton": "تحديث الفئة",
+      "deleteImageButton": "حذف",
+      "fileName": "اسم الملف",
+      "size": "الحجم",
+      "image": "الصورة الحالية",
+      "viewImage": "عرض الصورة"
+    },
     "showCategory": {
       "loading": "جارٍ تحميل البيانات...",
       "categoryDetails": "تفاصيل الفئة",
@@ -205,6 +228,29 @@
       "deleteImageButton": "حذف",
       "fileName": "اسم الملف",
       "size": "الحجم"
+    },
+    "updateBrand": {
+      "errors": {
+        "nameEnRequired": "اسم الماركة بالإنجليزية مطلوب.",
+        "nameEnMin": "يجب أن يكون اسم الماركة بالإنجليزية 3 أحرف على الأقل.",
+        "nameEnMax": "يجب ألا يتجاوز اسم الماركة بالإنجليزية 32 حرفًا.",
+        "nameArRequired": "اسم الماركة بالعربية مطلوب.",
+        "nameArMin": "يجب أن يكون اسم الماركة بالعربية 3 أحرف على الأقل.",
+        "nameArMax": "يجب ألا يتجاوز اسم الماركة بالعربية 32 حرفًا.",
+        "imageRequired": "الصورة مطلوبة."
+      },
+      "title": "تحديث الماركة",
+      "brandNameLabelAr": "الاسم بالعربية",
+      "brandNameLabelEn": "الاسم بالإنجليزية",
+      "brandNamePlaceholderAr": "أدخل الاسم بالعربية",
+      "brandNamePlaceholderEn": "أدخل الاسم بالإنجليزية",
+      "uploadImage": "رفع صورة",
+      "submitButton": "تحديث الماركة",
+      "deleteImageButton": "حذف",
+      "fileName": "اسم الملف",
+      "size": "الحجم",
+      "image": "الصورة الحالية",
+      "viewImage": "عرض الصورة"
     },
     "showBrand": {
       "loading": "جارٍ تحميل البيانات...",

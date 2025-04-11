@@ -24,9 +24,12 @@ $border-color: #ddd;
     border-radius: 10px;
 
     h2 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
       margin-bottom: 20px;
       color: $primary-color;
-      text-align: center;
     }
 
     form {

@@ -7,6 +7,7 @@ import { CATEGORIES } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
+import { BiSolidCategoryAlt } from "react-icons/bi";
 
 function AddCategory() {
   const [form, setForm] = useState({
@@ -197,7 +198,9 @@ function AddCategory() {
   return (
     <div className="add-category">
       <div className="form-container">
-        <h2>{t("dashboard.addCategory.title")}</h2>
+        <h2>
+          {t("dashboard.addCategory.title")} <BiSolidCategoryAlt />
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nameAr">

@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { COUPONS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
+import { RiCoupon3Fill } from "react-icons/ri";
 
 function AddCoupon() {
   const [form, setForm] = useState({
@@ -172,7 +173,7 @@ function AddCoupon() {
   return (
     <div className="add-coupon">
       <div className="form-container">
-        <h2>{t("dashboard.addCoupon.title")}</h2>
+        <h2>{t("dashboard.addCoupon.title")} <RiCoupon3Fill /></h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">{t("dashboard.addCoupon.nameLabel")}</label>

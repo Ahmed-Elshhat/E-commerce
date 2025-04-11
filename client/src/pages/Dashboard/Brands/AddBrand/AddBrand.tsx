@@ -7,6 +7,7 @@ import { BRANDS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
+import { BsShop } from "react-icons/bs";
 
 function AddBrand() {
   const [form, setForm] = useState({
@@ -197,7 +198,7 @@ function AddBrand() {
   return (
     <div className="add-brand">
       <div className="form-container">
-        <h2>{t("dashboard.addBrand.title")}</h2>
+        <h2>{t("dashboard.addBrand.title")} <BsShop /></h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nameAr">

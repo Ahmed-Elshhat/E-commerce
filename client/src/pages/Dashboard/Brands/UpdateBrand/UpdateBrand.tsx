@@ -2,15 +2,15 @@ import { useEffect, useRef, useState } from "react";
 import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { CATEGORIES } from "../../../../Api/Api";
+import { BRANDS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
-import "./UpdateCategory.scss";
 import Skeleton from "react-loading-skeleton";
-import { BiSolidCategoryAlt } from "react-icons/bi";
+import "./UpdateBrand.scss";
+import { BsShop } from "react-icons/bs";
 
-function UpdateCategory() {
+function UpdateBrand() {
   const [form, setForm] = useState({
     nameEn: "",
     nameAr: "",
@@ -34,15 +34,15 @@ function UpdateCategory() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const isArabicNameNotUnique =
-    errors.general === "The category name in Arabic must be unique";
+    errors.general === "The brand name in Arabic must be unique";
   const isEnglishNameNotUnique =
-    errors.general === "The category name in English must be unique";
+    errors.general === "The brand name in English must be unique";
 
   useEffect(() => {
-    const fetchCategory = async () => {
+    const fetchBrand = async () => {
       setLoading({ state: true, type: "get" });
       try {
-        const res = await Axios.get(`${CATEGORIES}/${id}`);
+        const res = await Axios.get(`${BRANDS}/${id}`);
         if (res.status === 200) {
           setLoading({ state: false, type: "" });
           const data = res.data.data;
@@ -51,11 +51,11 @@ function UpdateCategory() {
         }
       } catch (error) {
         setLoading({ state: false, type: "" });
-        console.error("Error fetching category:", error);
+        console.error("Error fetching brand:", error);
       }
     };
 
-    fetchCategory();
+    fetchBrand();
   }, [id]);
 
   useEffect(() => {
@@ -82,17 +82,17 @@ function UpdateCategory() {
     // Validation for nameEn
     if (!form.nameEn.trim()) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameEnRequired"),
+        msg: t("dashboard.updateBrand.errors.nameEnRequired"),
         path: "nameEn",
       });
     } else if (form.nameEn.length < 3) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameEnMin"),
+        msg: t("dashboard.updateBrand.errors.nameEnMin"),
         path: "nameEn",
       });
     } else if (form.nameEn.length > 32) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameEnMax"),
+        msg: t("dashboard.updateBrand.errors.nameEnMax"),
         path: "nameEn",
       });
     }
@@ -100,17 +100,17 @@ function UpdateCategory() {
     // Validation for nameAr
     if (!form.nameAr.trim()) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameArRequired"),
+        msg: t("dashboard.updateBrand.errors.nameArRequired"),
         path: "nameAr",
       });
     } else if (form.nameAr.length < 3) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameArMin"),
+        msg: t("dashboard.updateBrand.errors.nameArMin"),
         path: "nameAr",
       });
     } else if (form.nameAr.length > 32) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.nameArMax"),
+        msg: t("dashboard.updateBrand.errors.nameArMax"),
         path: "nameAr",
       });
     }
@@ -118,7 +118,7 @@ function UpdateCategory() {
     // Image validation
     if (!image) {
       newErrors.push({
-        msg: t("dashboard.updateCategory.errors.imageRequired"),
+        msg: t("dashboard.updateBrand.errors.imageRequired"),
         path: "image",
       });
     }
@@ -174,10 +174,10 @@ function UpdateCategory() {
     }
 
     try {
-      const res = await Axios.put(`${CATEGORIES}/${id}`, formData);
+      const res = await Axios.put(`${BRANDS}/${id}`, formData);
       if (res.status === 200) {
         setLoading({ state: false, type: "" });
-        navigate(`/${lang}/dashboard/categories`);
+        navigate(`/${lang}/dashboard/brands`);
         console.log(res.data);
       }
     } catch (err) {
@@ -221,13 +221,15 @@ function UpdateCategory() {
   };
 
   return (
-    <div className="update-category">
+    <div className="update-brand">
       <div className="form-container">
-        <h2>{t("dashboard.updateCategory.title")} <BiSolidCategoryAlt /></h2>
+        <h2>
+          {t("dashboard.updateBrand.title")} <BsShop />
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="nameAr">
-              {t("dashboard.updateCategory.categoryNameLabelAr")}
+              {t("dashboard.updateBrand.brandNameLabelAr")}
             </label>
             {loading.state && loading.type === "get" ? (
               <Skeleton height={40} />
@@ -237,7 +239,7 @@ function UpdateCategory() {
                 id="nameAr"
                 name="nameAr"
                 placeholder={t(
-                  "dashboard.updateCategory.categoryNamePlaceholderAr"
+                  "dashboard.updateBrand.brandNamePlaceholderAr"
                 )}
                 value={form.nameAr}
                 onChange={handleChange}
@@ -259,7 +261,7 @@ function UpdateCategory() {
           </div>
           <div className="form-group">
             <label htmlFor="nameEn">
-              {t("dashboard.updateCategory.categoryNameLabelEn")}
+              {t("dashboard.updateBrand.brandNameLabelEn")}
             </label>
             {loading.state && loading.type === "get" ? (
               <Skeleton height={40} />
@@ -269,7 +271,7 @@ function UpdateCategory() {
                 id="nameEn"
                 name="nameEn"
                 placeholder={t(
-                  "dashboard.updateCategory.categoryNamePlaceholderEn"
+                  "dashboard.updateBrand.brandNamePlaceholderEn"
                 )}
                 value={form.nameEn}
                 onChange={handleChange}
@@ -312,7 +314,7 @@ function UpdateCategory() {
                     src={
                       image instanceof File ? URL.createObjectURL(image) : image
                     }
-                    alt={image instanceof File ? image.name : "Category Image"}
+                    alt={image instanceof File ? image.name : "Brand Image"}
                     className="preview-img"
                   />
                   {image && (
@@ -321,13 +323,13 @@ function UpdateCategory() {
                         <>
                           <p>
                             <strong>
-                              {t("dashboard.updateCategory.fileName")}:
+                              {t("dashboard.updateBrand.fileName")}:
                             </strong>{" "}
                             {image.name}
                           </p>
                           <p>
                             <strong>
-                              {t("dashboard.updateCategory.size")}:
+                              {t("dashboard.updateBrand.size")}:
                             </strong>{" "}
                             {(image.size / 1024).toFixed(2)} KB
                           </p>
@@ -335,7 +337,7 @@ function UpdateCategory() {
                       ) : (
                         <p>
                           <strong className="image-label">
-                            {t("dashboard.updateCategory.image")}:
+                            {t("dashboard.updateBrand.image")}:
                           </strong>{" "}
                           <a
                             href={image}
@@ -343,7 +345,7 @@ function UpdateCategory() {
                             rel="noopener noreferrer"
                             className="image-link"
                           >
-                            {t("dashboard.updateCategory.viewImage")}
+                            {t("dashboard.updateBrand.viewImage")}
                           </a>
                         </p>
                       )}
@@ -351,7 +353,7 @@ function UpdateCategory() {
                         className="remove-btn"
                         onClick={() => setImage(null)}
                       >
-                        ❌ {t("dashboard.updateCategory.deleteImageButton")}
+                        ❌ {t("dashboard.updateBrand.deleteImageButton")}
                       </button>
                     </div>
                   )}
@@ -362,7 +364,7 @@ function UpdateCategory() {
           {!image && !loading.state && loading.type !== "get" && (
             <div className="upload-image-btn" onClick={handleOpenImage}>
               <img src="/images/upload.png" alt="" />
-              <p>{t("dashboard.updateCategory.uploadImage")}</p>
+              <p>{t("dashboard.updateBrand.uploadImage")}</p>
             </div>
           )}
           {errors.image && (
@@ -384,7 +386,7 @@ function UpdateCategory() {
             className="btn-submit"
             disabled={loading.state && loading.type === "put"}
           >
-            {t("dashboard.updateCategory.submitButton")}{" "}
+            {t("dashboard.updateBrand.submitButton")}{" "}
             {loading.state && loading.type === "put" && (
               <LoadingButton width="20px" height="20px" />
             )}
@@ -395,4 +397,4 @@ function UpdateCategory() {
   );
 }
 
-export default UpdateCategory;
+export default UpdateBrand;

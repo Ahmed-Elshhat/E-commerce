@@ -18,7 +18,7 @@ exports.getBrandValidator = [
   validatorMiddleware,
 ];
 
-exports.createBrandValidator = [  
+exports.createBrandValidator = [
   validateExactFields(["nameAr", "nameEn", "image"], [], []),
   check("nameAr")
     .notEmpty()
@@ -38,14 +38,20 @@ exports.createBrandValidator = [
 ];
 
 exports.updateBrandValidator = [
-  validateExactFields(["name", "image"], ["id"]),
+  validateExactFields(["nameAr", "nameEn", "image"], ["id"]),
   check("id").isMongoId().withMessage("Invalid brand id format"),
-  body("name")
+  check("nameAr")
     .optional()
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
-      return true;
-    }),
+    .isLength({ min: 2 })
+    .withMessage("The name in Arabic is too short, min 2 chars")
+    .isLength({ max: 32 })
+    .withMessage("The name in Arabic is too long, max 32 chars"),
+  check("nameEn")
+    .optional()
+    .isLength({ min: 2 })
+    .withMessage("The name in English is too short, min 2 chars")
+    .isLength({ max: 32 })
+    .withMessage("The name in English is too long, max 32 chars"),
   validatorMiddleware,
 ];
 

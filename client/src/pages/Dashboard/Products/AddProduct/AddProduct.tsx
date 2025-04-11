@@ -8,7 +8,7 @@ import { BRANDS, CATEGORIES, PRODUCTS } from "../../../../Api/Api";
 import axios from "axios";
 import { BrandSchema, CategorySchema } from "../../../../Types/app";
 import { IoClose } from "react-icons/io5";
-import { FaImage, FaImages } from "react-icons/fa";
+import { FaImage, FaImages, FaProductHunt } from "react-icons/fa";
 
 function AddProduct() {
   const [form, setForm] = useState({
@@ -432,7 +432,7 @@ function AddProduct() {
   return (
     <div className="add-product">
       <div className="form-container">
-        <h2>{t("dashboard.addProduct.title")}</h2>
+        <h2>{t("dashboard.addProduct.title")} <FaProductHunt /></h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="category">

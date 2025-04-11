@@ -35,7 +35,7 @@ import ShowProductDetails from "./pages/Dashboard/Products/ShowProductDetails/Sh
 import Brands from "./pages/Dashboard/Brands/Brands";
 import ShowBrand from "./pages/Dashboard/Brands/ShowBrand/ShowBrand";
 import AddBrand from "./pages/Dashboard/Brands/AddBrand/AddBrand";
-import UpdateBrand from "./pages/Dashboard/Brands/UpdateBrand/UpdateCategory";
+import UpdateBrand from "./pages/Dashboard/Brands/UpdateBrand/UpdateBrand";
 import Coupons from "./pages/Dashboard/Coupons/Coupons";
 import ShowCoupon from "./pages/Dashboard/Coupons/ShowCoupon/ShowCoupon";
 import AddCoupon from "./pages/Dashboard/Coupons/AddCoupon/AddCoupon";

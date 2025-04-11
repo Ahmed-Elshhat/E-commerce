@@ -6,7 +6,7 @@ import { Axios } from "../../../../Api/axios";
 import { USERS } from "../../../../Api/Api";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 
 function AddEmployee() {
   const [form, setForm] = useState({
@@ -224,7 +224,7 @@ function AddEmployee() {
   return (
     <div className="add-employee">
       <div className="form-container">
-        <h2>{t("dashboard.addEmployee.title")}</h2>
+        <h2>{t("dashboard.addEmployee.title")} <FaUser /></h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">{t("dashboard.addEmployee.nameLabel")}</label>

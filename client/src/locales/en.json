@@ -166,6 +166,29 @@
       "fileName": "File Name",
       "size": "Size"
     },
+    "updateCategory": {
+      "errors": {
+        "nameEnRequired": "The category name in English is required.",
+        "nameEnMin": "The name in English must be at least 3 characters long.",
+        "nameEnMax": "The name in English must not exceed 32 characters.",
+        "nameArRequired": "The category name in Arabic is required.",
+        "nameArMin": "The name in Arabic must be at least 3 characters long.",
+        "nameArMax": "The name in Arabic must not exceed 32 characters.",
+        "imageRequired": "Image is required."
+      },
+      "title": "Update category",
+      "categoryNameLabelAr": "name in Arabic",
+      "categoryNameLabelEn": "name in English",
+      "categoryNamePlaceholderAr": "Enter the name in Arabic",
+      "categoryNamePlaceholderEn": "Enter the name in English",
+      "uploadImage": "Upload Image",
+      "submitButton": "Update Category",
+      "deleteImageButton": "Delete",
+      "fileName": "File Name",
+      "size": "Size",
+      "image": "Current Image",
+      "viewImage": "View Image"
+    },
     "showCategory": {
       "loading": "Loading data...",
       "categoryDetails": "Category Details",
@@ -204,6 +227,29 @@
       "deleteImageButton": "Delete",
       "fileName": "File Name",
       "size": "Size"
+    },
+    "updateBrand": {
+      "errors": {
+        "nameEnRequired": "The brand name in English is required.",
+        "nameEnMin": "The name in English must be at least 3 characters long.",
+        "nameEnMax": "The name in English must not exceed 32 characters.",
+        "nameArRequired": "The brand name in Arabic is required.",
+        "nameArMin": "The name in Arabic must be at least 3 characters long.",
+        "nameArMax": "The name in Arabic must not exceed 32 characters.",
+        "imageRequired": "Image is required."
+      },
+      "title": "Update brand",
+      "brandNameLabelAr": "name in Arabic",
+      "brandNameLabelEn": "name in English",
+      "brandNamePlaceholderAr": "Enter the name in Arabic",
+      "brandNamePlaceholderEn": "Enter the name in English",
+      "uploadImage": "Upload Image",
+      "submitButton": "Update Brand",
+      "deleteImageButton": "Delete",
+      "fileName": "File Name",
+      "size": "Size",
+      "image": "Current Image",
+      "viewImage": "View Image"
     },
     "showBrand": {
       "loading": "Loading data...",
