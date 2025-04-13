@@ -1,42 +1,48 @@
 import { useEffect, useRef, useState } from "react";
-import "./AddBrand.scss";
 import { useAppSelector } from "../../../../Redux/app/hooks";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import { BRANDS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
-import axios from "axios";
-import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
 import { BsShop } from "react-icons/bs";
+import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
+import axios from "axios";
+import "./AddBrand.scss";
 
 function AddBrand() {
+  // Initialize form state to hold brand names in both languages
   const [form, setForm] = useState({
     nameEn: "",
     nameAr: "",
   });
+
+  // Initialize state for image, loading state, and form errors
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-
   const [errors, setErrors] = useState({
     nameEn: "",
     nameAr: "",
     image: "",
     general: "",
   });
+
+  // Reference to open the file input when the user wants to upload an image
   const openImage = useRef<HTMLInputElement | null>(null);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
+
+  // Check if errors are related to unique name in Arabic or English
   const isArabicNameNotUnique =
     errors.general === "The brand name in Arabic must be unique";
   const isEnglishNameNotUnique =
     errors.general === "The brand name in English must be unique";
 
+  // Effect hook to clear errors once user starts typing or language changes
   useEffect(() => {
     if (isSubmitted) {
       const fields = ["nameEn", "nameAr", "image", "general"];
-
       const newErrors = validateForm().errors;
 
       fields.forEach((field) => {
@@ -47,14 +53,16 @@ function AddBrand() {
     }
   }, [form, image, i18n.language]);
 
+  // Handle input changes for both brand names
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Form validation function
   const validateForm = () => {
     const newErrors: { msg: string; path?: string }[] = [];
 
-    // Validation for nameEn
+    // Validation for nameEn (English name)
     if (!form.nameEn.trim()) {
       newErrors.push({
         msg: t("dashboard.addBrand.errors.nameEnRequired"),
@@ -72,7 +80,7 @@ function AddBrand() {
       });
     }
 
-    // Validation for nameAr
+    // Validation for nameAr (Arabic name)
     if (!form.nameAr.trim()) {
       newErrors.push({
         msg: t("dashboard.addBrand.errors.nameArRequired"),
@@ -90,7 +98,7 @@ function AddBrand() {
       });
     }
 
-    // Image validation
+    // Image validation (make sure an image is uploaded)
     if (!image) {
       newErrors.push({
         msg: t("dashboard.addBrand.errors.imageRequired"),
@@ -98,7 +106,7 @@ function AddBrand() {
       });
     }
 
-    // Create errors map
+    // Create errors map to update errors state
     const errorsMap = newErrors.reduce<Record<string, string>>((acc, error) => {
       if (error.path) {
         acc[error.path] = error.msg;
@@ -108,7 +116,7 @@ function AddBrand() {
       return acc;
     }, {});
 
-    // Set errors
+    // Set errors to be displayed
     setErrors((prevErrors) => ({
       ...prevErrors,
       ...errorsMap,
@@ -118,12 +126,14 @@ function AddBrand() {
     return { isValid: newErrors.length === 0, errors: errorsMap };
   };
 
+  // Open file input dialog when user clicks the button to upload image
   function handleOpenImage() {
     if (openImage.current !== null) {
       openImage.current.click();
     }
   }
 
+  // Handle form submission (send the data to API)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -136,11 +146,13 @@ function AddBrand() {
 
     setIsSubmitted(true);
 
+    // Check if the form is valid before submitting
     if (!validateForm().isValid) {
       setLoading(false);
       return;
     }
 
+    // Prepare form data to be sent in the request
     const formData = new FormData();
     formData.append("nameEn", form.nameEn);
     formData.append("nameAr", form.nameAr);
@@ -149,16 +161,17 @@ function AddBrand() {
     }
 
     try {
+      // Make API request to add the brand
       const res = await Axios.post(`${BRANDS}`, formData);
       if (res.status === 201) {
         setLoading(false);
-        navigate(`/${lang}/dashboard/brands`);
-        console.log(res.data);
+        navigate(`/${lang}/dashboard/brands`); // Redirect to brands list after successful submission
       }
     } catch (err) {
       setLoading(false);
       console.log(err);
       if (axios.isAxiosError(err) && err.response) {
+        // Handle API errors and set appropriate error messages
         if (err.response.data?.message) {
           setErrors((prevErrors) => ({
             ...prevErrors,
@@ -187,6 +200,7 @@ function AddBrand() {
         }
       } else {
         console.error("Unexpected error:", err);
+        // Display generic error message for unexpected errors
         setErrors((prevErrors) => ({
           ...prevErrors,
           general: "An unexpected error occurred. Please try again later.",
@@ -198,8 +212,11 @@ function AddBrand() {
   return (
     <div className="add-brand">
       <div className="form-container">
-        <h2>{t("dashboard.addBrand.title")} <BsShop /></h2>
+        <h2>
+          {t("dashboard.addBrand.title")} <BsShop />
+        </h2>
         <form onSubmit={handleSubmit}>
+          {/* Arabic name input */}
           <div className="form-group">
             <label htmlFor="nameAr">
               {t("dashboard.addBrand.brandNameLabelAr")}
@@ -214,11 +231,12 @@ function AddBrand() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  handleSubmit(e);
+                  handleSubmit(e); // Submit the form if Enter is pressed
                 }
               }}
             />
 
+            {/* Show error for Arabic name */}
             {(errors.nameAr || isArabicNameNotUnique) && (
               <p className="error-text">
                 <span className="error-star">*</span>{" "}
@@ -227,6 +245,7 @@ function AddBrand() {
             )}
           </div>
 
+          {/* English name input */}
           <div className="form-group">
             <label htmlFor="nameEn">
               {t("dashboard.addBrand.brandNameLabelEn")}
@@ -241,11 +260,12 @@ function AddBrand() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") {
                   e.preventDefault();
-                  handleSubmit(e);
+                  handleSubmit(e); // Submit the form if Enter is pressed
                 }
               }}
             />
 
+            {/* Show error for English name */}
             {(errors.nameEn || isEnglishNameNotUnique) && (
               <p className="error-text">
                 <span className="error-star">*</span>{" "}
@@ -254,6 +274,7 @@ function AddBrand() {
             )}
           </div>
 
+          {/* File input for image upload */}
           <div className="file-wrapper">
             <input
               type="file"
@@ -266,6 +287,7 @@ function AddBrand() {
             />
           </div>
 
+          {/* Show image preview after uploading */}
           {image && (
             <div className="image-preview">
               <img
@@ -289,6 +311,7 @@ function AddBrand() {
             </div>
           )}
 
+          {/* Upload button when no image is uploaded */}
           <div
             className="upload-image-btn"
             onClick={handleOpenImage}
@@ -298,12 +321,14 @@ function AddBrand() {
             <p>{t("dashboard.addBrand.uploadImage")}</p>
           </div>
 
+          {/* Show error for image validation */}
           {errors.image && (
             <p className="error-text image-err">
               <span className="error-star">*</span> {errors.image}
             </p>
           )}
 
+          {/* Show general error message */}
           {errors.general &&
             !isArabicNameNotUnique &&
             !isEnglishNameNotUnique && (
@@ -314,6 +339,7 @@ function AddBrand() {
               </div>
             )}
 
+          {/* Submit button */}
           <button type="submit" className="btn-submit" disabled={loading}>
             {t("dashboard.addBrand.submitButton")}{" "}
             {loading && <LoadingButton width="20px" height="20px" />}

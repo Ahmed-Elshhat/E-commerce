@@ -1,98 +1,104 @@
 .show-brand {
-  background-color: #f4f6f8;
-  width: 100%;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #f4f6f8; /* Light background color for the container */
+  width: 100%; /* Full width */
+  padding: 20px; /* Padding inside the container */
+  border-radius: 8px; /* Rounded corners */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for 3D effect */
 
   h2 {
-    color: #333;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    text-align: center;
+    color: #333; /* Dark color for the heading */
+    display: flex; /* Flexbox for centering */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    gap: 10px; /* Space between the title and icon */
+    margin-bottom: 20px; /* Margin at the bottom */
+    text-align: center; /* Center the text */
   }
 
+  /* Styling for the table */
   .brand-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 0 auto;
+    width: 100%; /* Table width to fill the container */
+    border-collapse: collapse; /* Ensure borders collapse for a clean look */
+    margin: 0 auto; /* Center table horizontally */
 
     th,
     td {
-      padding: 12px 20px;
-      border: 1px solid #ddd;
+      padding: 12px 20px; /* Cell padding */
+      border: 1px solid #ddd; /* Border around each cell */
     }
 
+    /* Table header styling */
     thead {
       th {
-        background-color: #2a3a47;
-        color: white;
+        background-color: #2a3a47; /* Dark background for header */
+        color: white; /* White text for header */
       }
     }
 
+    /* Table body styling */
     tbody {
       tr {
         td {
-          font-weight: 300;
+          font-weight: 300; /* Lighter font weight for data cells */
           &:first-child {
-            font-weight: bold;
+            font-weight: bold; /* Bold for first column (labels) */
           }
           img {
-            width: 100px;
+            width: 100px; /* Set image width */
           }
         }
       }
     }
   }
 
+  /* Responsive design for tablets (max-width: 768px) */
   @media (max-width: 768px) {
-    padding: 10px;
+    padding: 10px; /* Less padding for smaller screens */
 
     h2 {
-      font-size: 1.2rem;
+      font-size: 1.2rem; /* Smaller font size for headings */
     }
 
     .brand-table {
-      width: 100%;
-      font-size: 0.9rem;
-      overflow-x: auto;
+      width: 100%; /* Table still takes full width */
+      font-size: 0.9rem; /* Smaller font size */
+      overflow-x: auto; /* Allow horizontal scrolling if necessary */
       tr {
-        background-color: #1d2937;
-        color: white;
-        display: block;
-        margin-bottom: 15px;
-        border-radius: 5px;
+        background-color: #1d2937; /* Dark background for table rows */
+        color: white; /* White text for rows */
+        display: block; /* Stack table rows for mobile view */
+        margin-bottom: 15px; /* Margin between rows */
+        border-radius: 5px; /* Rounded corners for rows */
         th,
         td {
-          padding: 10px;
+          padding: 10px; /* Adjust padding for mobile */
         }
       }
 
+      /* Hide table headers in mobile view */
       thead {
         tr {
           th {
-            display: none;
+            display: none; /* Hide column headers */
           }
         }
       }
 
+      /* Adjust table body for mobile */
       tbody {
         tr {
           td {
-            display: block;
-            padding: 10px 15px;
-            border: none;
-            border-bottom: 1px solid #ddd;
+            display: block; /* Stack data cells vertically */
+            padding: 10px 15px; /* Adjust padding */
+            border: none; /* Remove border between cells */
+            border-bottom: 1px solid #ddd; /* Border at the bottom of each row */
             &:first-child {
-              font-weight: bold;
-              border-bottom: 1px solid rgb(209, 205, 205);
+              font-weight: bold; /* Bold the first column */
+              border-bottom: 1px solid rgb(209, 205, 205); /* Border for the first column */
             }
             img {
-              display: block;
-              margin: 0 auto;
+              display: block; /* Display image as block for centering */
+              margin: 0 auto; /* Center the image */
             }
           }
         }
@@ -100,17 +106,18 @@
     }
   }
 
+  /* Further adjustments for smaller screens (max-width: 480px) */
   @media (max-width: 480px) {
     h2 {
-      font-size: 1rem;
+      font-size: 1rem; /* Smaller font size for headings */
     }
 
     .brand-table {
-      font-size: 0.8rem;
+      font-size: 0.8rem; /* Even smaller font size */
     }
 
     .brand-table td {
-      padding: 8px;
+      padding: 8px; /* Adjust padding for small screens */
     }
   }
 }

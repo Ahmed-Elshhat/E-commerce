@@ -1,184 +1,186 @@
 @use "sass:color";
 
-$primary-color: #3498db;
-$primary-color: #2a3a47;
-$secondary-color: #2ecc71;
-$bg-color: #f8f9fa;
-$text-color: #333;
-$border-color: #ddd;
+// Define primary, secondary, and other essential colors for the application
+$primary-color: #3498db;  // Blue color used for primary elements like buttons
+$primary-color: #2a3a47;  // Darker blue shade (might be an error, since it's overwriting the previous color)
+$secondary-color: #2ecc71; // Green color for secondary buttons or elements
+$bg-color: #f8f9fa; // Light background color for the form container and overall background
+$text-color: #333; // Default text color, dark gray
+$border-color: #ddd; // Light border color for inputs and containers
 
 .add-brand {
-  background-color: $bg-color;
+  background-color: $bg-color;  // Apply the background color to the main container
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: center;  // Center the form horizontally
+  align-items: center;  // Center the form vertically
   width: 100%;
-  min-height: 100vh;
-  max-height: 100%;
-  font-family: "Cairo", sans-serif;
+  min-height: 100vh;  // Ensure the container takes up the full height of the viewport
+  max-height: 100%;  // Prevent exceeding the container height
+  font-family: "Cairo", sans-serif;  // Set custom font for the page
 
   .form-container {
-    max-width: 600px;
-    width: 100%;
-    padding: 30px;
-    border-radius: 10px;
+    max-width: 600px;  // Set maximum width of the form container
+    width: 100%;  // Ensure the form container takes up 100% of available space
+    padding: 30px;  // Add padding around the form container for better spacing
+    border-radius: 10px;  // Rounded corners for the form container
 
     h2 {
       display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 5px;
-      margin-bottom: 20px;
-      color: $primary-color;
+      justify-content: center;  // Center the heading horizontally
+      align-items: center;  // Center the heading vertically
+      gap: 5px;  // Space between the text and icon
+      margin-bottom: 20px;  // Add margin below the heading
+      color: $primary-color;  // Use the primary color for the heading
     }
 
     form {
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 15px;  // Add space between form fields
 
         label {
-          color: $text-color;
-          margin-bottom: 5px;
-          font-weight: bold;
+          color: $text-color;  // Use dark gray for label text
+          margin-bottom: 5px;  // Add margin below the label
+          font-weight: bold;  // Make the label text bold
         }
 
         input {
-          width: 100%;
-          padding: 10px;
-          font-size: 16px;
-          outline: none;
-          border-radius: 5px;
-          border: 1px solid $border-color;
-          transition: border 0.3s;
+          width: 100%;  // Ensure inputs take up full width of the form
+          padding: 10px;  // Add padding inside the input for better spacing
+          font-size: 16px;  // Set font size for input text
+          outline: none;  // Remove default outline on focus
+          border-radius: 5px;  // Rounded corners for the inputs
+          border: 1px solid $border-color;  // Light border around inputs
+          transition: border 0.3s;  // Smooth transition for border color when focused
 
           &:focus {
-            border-color: $primary-color;
+            border-color: $primary-color;  // Change border color to primary on focus
           }
         }
       }
 
       .file-wrapper {
-        display: none;
+        display: none;  // Hide the file input element
       }
 
       .image-preview {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        padding: 10px;
-        gap: 10px;
-        border: 1px solid #ddd;
-        border-radius: 10px;
-        background: #f9f9f9;
-        margin-bottom: 15px;
-        transition: all 0.3s ease-in-out;
+        display: flex;  // Use flexbox to align image preview and details
+        align-items: center;  // Vertically align the items inside the preview
+        width: 100%;  // Ensure the preview takes up full width
+        padding: 10px;  // Padding for the preview container
+        gap: 10px;  // Space between image and text
+        border: 1px solid #ddd;  // Light border around the preview
+        border-radius: 10px;  // Rounded corners for the preview box
+        background: #f9f9f9;  // Light background color
+        margin-bottom: 15px;  // Add margin below the image preview
+        transition: all 0.3s ease-in-out;  // Smooth transition for image preview
 
         .preview-img {
-          width: 80px;
-          height: 80px;
-          object-fit: cover;
-          border-radius: 8px;
-          margin-right: 15px;
-          transition: all 0.3s ease-in-out;
+          width: 80px;  // Set width of the preview image
+          height: 80px;  // Set height of the preview image
+          object-fit: cover;  // Ensure the image covers the container area
+          border-radius: 8px;  // Rounded corners for the image
+          margin-right: 15px;  // Space between image and details
+          transition: all 0.3s ease-in-out;  // Smooth transition for image properties
         }
 
         .image-details {
-          flex-grow: 1;
-          font-size: 14px;
-          color: #333;
+          flex-grow: 1;  // Allow the details to take up remaining space
+          font-size: 14px;  // Set font size for image details
+          color: #333;  // Set color of the text to dark gray
 
           p {
-            margin: 3px 0;
-            word-break: break-word;
+            margin: 3px 0;  // Add margin to paragraphs inside the details
+            word-break: break-word;  // Ensure long text breaks into the next line
           }
         }
 
         .remove-btn {
-          background: #ff4d4f;
-          color: white;
-          border: none;
-          padding: 7px 12px;
-          border-radius: 5px;
-          cursor: pointer;
-          transition: 0.3s;
-          font-size: 14px;
+          background: #ff4d4f;  // Red background for the remove button
+          color: white;  // White text color
+          border: none;  // Remove border for the button
+          padding: 7px 12px;  // Add padding inside the button
+          border-radius: 5px;  // Rounded corners for the button
+          cursor: pointer;  // Change cursor to pointer to indicate it's clickable
+          transition: 0.3s;  // Smooth transition for hover effect
+          font-size: 14px;  // Font size for button text
 
           &:hover {
-            background: #d9363e;
+            background: #d9363e;  // Darker red color when the button is hovered
           }
         }
       }
 
       @media (max-width: 768px) {
         .image-preview {
-          flex-direction: column;
-          text-align: center;
-          padding: 15px;
+          flex-direction: column;  // Stack the image and details vertically on smaller screens
+          text-align: center;  // Center align the content
+          padding: 15px;  // Add more padding for smaller screens
 
           .preview-img {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 10px;
+            width: 100px;  // Increase the preview image size
+            height: 100px;  // Increase the preview image height
+            margin: 0 auto 10px;  // Center the image horizontally
           }
 
           .image-details {
-            font-size: 13px;
+            font-size: 13px;  // Reduce font size for smaller screens
           }
 
           .remove-btn {
-            margin-top: 10px;
-            width: 100%;
-            padding: 8px;
+            margin-top: 10px;  // Add margin above the button
+            width: 100%;  // Make the remove button take up the full width
+            padding: 8px;  // Add more padding to the remove button
           }
         }
       }
 
       .upload-image-btn {
-        width: 100%;
-        text-align: center;
-        border: 2px dashed rgb(28 138 219);
-        border: 2px dashed #2a3a47;
-        padding: 10px;
-        margin-bottom: 20px;
-        background-color: #eee;
-        border-radius: 5px;
+        width: 100%;  // Make the upload button take up the full width
+        text-align: center;  // Center align the button text
+        border: 2px dashed rgb(28 138 219);  // Dashed border for upload area
+        border: 2px dashed #2a3a47;  // Darker dashed border for upload area
+        padding: 10px;  // Add padding around the upload button
+        margin-bottom: 20px;  // Add margin below the upload area
+        background-color: #eee;  // Light background for the button
+        border-radius: 5px;  // Rounded corners for the button
+
         img {
-          width: 70px;
-          height: 67px;
+          width: 70px;  // Set width of the image inside the button
+          height: 67px;  // Set height of the image inside the button
         }
 
         p {
-          color: rgb(28 138 219);
-          color: #2a3a47;
-          margin-top: -10px;
-          font-weight: bold;
-          font-size: 20px;
+          color: rgb(28 138 219);  // Use primary color for text inside the upload button
+          color: #2a3a47;  // Use dark blue for the text
+          margin-top: -10px;  // Adjust position of text
+          font-weight: bold;  // Make the text bold
+          font-size: 20px;  // Increase the font size for the button text
         }
       }
 
       .image-err,
       .error-box {
-        margin-top: -15px;
-        margin-bottom: 10px;
+        margin-top: -15px;  // Adjust the spacing above the error messages
+        margin-bottom: 10px;  // Add margin below error messages
       }
 
       .btn-submit {
-        background-color: $primary-color;
-        color: white;
+        background-color: $primary-color;  // Use the primary color for the submit button
+        color: white;  // Set text color to white
         display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 10px;
-        width: 100%;
-        padding: 12px;
-        font-size: 18px;
-        border: none;
-        border-radius: 5px;
-        cursor: pointer;
-        transition: background 0.3s;
+        justify-content: center;  // Center the content inside the button
+        align-items: center;  // Align the items vertically inside the button
+        gap: 10px;  // Add space between text and icon
+        width: 100%;  // Make the button take up the full width
+        padding: 12px;  // Add padding inside the button
+        font-size: 18px;  // Set the font size for the button text
+        border: none;  // Remove the default border
+        border-radius: 5px;  // Rounded corners for the button
+        cursor: pointer;  // Change cursor to pointer to indicate it's clickable
+        transition: background 0.3s;  // Smooth transition for background color
 
         &:hover {
-          background-color: color.adjust($primary-color, $lightness: -10%);
+          background-color: color.adjust($primary-color, $lightness: -10%);  // Darken the primary color on hover
         }
       }
     }
@@ -186,26 +188,26 @@ $border-color: #ddd;
 
   @media (max-width: 480px) {
     .form-container {
-      padding: 20px;
+      padding: 20px;  // Reduce padding for very small screens
     }
 
     .btn-submit {
-      padding: 10px;
-      font-size: 16px;
+      padding: 10px;  // Adjust padding for the submit button on smaller screens
+      font-size: 16px;  // Reduce font size for the submit button
     }
   }
 
   .error-box {
-    margin-bottom: 10px;
+    margin-bottom: 10px;  // Add space below error box
   }
 
   .error-text {
-    color: red;
-    font-size: 14px;
+    color: red;  // Set error message text to red
+    font-size: 14px;  // Font size for error messages
   }
 
   .error-star {
-    color: red;
-    font-weight: bold;
+    color: red;  // Make the asterisk symbol red for errors
+    font-weight: bold;  // Bold the asterisk symbol
   }
 }

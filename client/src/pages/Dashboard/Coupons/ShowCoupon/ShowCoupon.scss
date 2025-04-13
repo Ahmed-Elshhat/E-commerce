@@ -1,4 +1,5 @@
 .show-coupon {
+  // Container styles for the coupon display section
   background-color: #f4f6f8;
   width: 100%;
   padding: 20px;
@@ -6,6 +7,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
   h2 {
+    // Main heading styles
     color: #333;
     display: flex;
     justify-content: center;
@@ -16,18 +18,21 @@
   }
 
   .coupon-table {
+    // Table container styles
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
 
     th,
     td {
+      // Cell padding and border
       padding: 12px 20px;
       border: 1px solid #ddd;
     }
 
     thead {
       th {
+        // Table header background and text color
         background-color: #2a3a47;
         color: white;
       }
@@ -36,11 +41,16 @@
     tbody {
       tr {
         td {
+          // Body cell text weight
           font-weight: 300;
+
           &:first-child {
+            // Make the first cell in each row bold
             font-weight: bold;
           }
+
           img {
+            // Styling for images inside table cells
             width: 100px;
           }
         }
@@ -48,25 +58,31 @@
     }
   }
 
+  // Responsive styles for tablets and smaller screens
   @media (max-width: 768px) {
     padding: 10px;
 
     h2 {
+      // Reduce heading size
       font-size: 1.2rem;
     }
 
     .coupon-table {
       width: 100%;
       font-size: 0.9rem;
-      overflow-x: auto;
+      overflow-x: auto; // Allow horizontal scroll on small screens
+
       tr {
+        // Make each row look like a card
         background-color: #1d2937;
         color: white;
         display: block;
         margin-bottom: 15px;
         border-radius: 5px;
+
         th,
         td {
+          // Adjust cell padding
           padding: 10px;
         }
       }
@@ -74,6 +90,7 @@
       thead {
         tr {
           th {
+            // Hide table headers on small screens
             display: none;
           }
         }
@@ -82,15 +99,20 @@
       tbody {
         tr {
           td {
+            // Stack table cells vertically
             display: block;
             padding: 10px 15px;
             border: none;
             border-bottom: 1px solid #ddd;
+
             &:first-child {
+              // Emphasize the first cell
               font-weight: bold;
               border-bottom: 1px solid rgb(209, 205, 205);
             }
+
             img {
+              // Center images inside cells
               display: block;
               margin: 0 auto;
             }
@@ -100,6 +122,7 @@
     }
   }
 
+  // Further reduce sizes for very small screens (mobile)
   @media (max-width: 480px) {
     h2 {
       font-size: 1rem;

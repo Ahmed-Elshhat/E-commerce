@@ -1,27 +1,29 @@
-@use "sass:color";
+@use "sass:color"; // Importing the 'color' module for color manipulation
 
+// Defining color variables for easier future updates or theme changes
 $primary-color: #3498db;
-$primary-color: #2a3a47;
+$primary-color: #2a3a47; // Note: This overrides the previous primary color, double-check for intended color choice
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
 $text-color: #333;
 $border-color: #ddd;
 
 .update-brand {
+  // Main container style to center the form and fill the entire viewport
   background-color: $bg-color;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100vh; // Ensures the container takes full screen height
   max-height: 100%;
-  font-family: "Cairo", sans-serif;
+  font-family: "Cairo", sans-serif; // Make sure the 'Cairo' font is included in the project
 
   .form-container {
-    max-width: 600px;
+    max-width: 600px; // Restricting the form width for better readability
     width: 100%;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 10px; // Rounded corners for the form container
 
     h2 {
       display: flex;
@@ -29,17 +31,17 @@ $border-color: #ddd;
       align-items: center;
       gap: 5px;
       margin-bottom: 20px;
-      color: $primary-color;
+      color: $primary-color; // Header color to match the primary theme
     }
 
     form {
       .form-group {
-        margin-bottom: 15px;
+        margin-bottom: 15px; // Space between form groups
 
         label {
-          color: $text-color;
+          color: $text-color; // Text color for labels
           margin-bottom: 5px;
-          font-weight: bold;
+          font-weight: bold; // Bold labels for better visibility
         }
 
         input {
@@ -48,17 +50,17 @@ $border-color: #ddd;
           font-size: 16px;
           outline: none;
           border-radius: 5px;
-          border: 1px solid $border-color;
-          transition: border 0.3s;
+          border: 1px solid $border-color; // Border with a soft color for inputs
+          transition: border 0.3s; // Smooth transition for border color on focus
 
           &:focus {
-            border-color: $primary-color;
+            border-color: $primary-color; // Highlighting input field with primary color on focus
           }
         }
       }
 
       .file-wrapper {
-        display: none;
+        display: none; // Hide the file input initially, show via JavaScript later if needed
       }
 
       .image-preview {
@@ -69,27 +71,27 @@ $border-color: #ddd;
         gap: 10px;
         border: 1px solid #ddd;
         border-radius: 10px;
-        background: #f9f9f9;
+        background: #f9f9f9; // Light background to highlight the image preview
         margin-bottom: 15px;
-        transition: all 0.3s ease-in-out;
+        transition: all 0.3s ease-in-out; // Smooth transition for hover or changes
 
         .preview-img {
           width: 80px;
           height: 80px;
-          object-fit: cover;
+          object-fit: cover; // Ensures the image scales correctly
           border-radius: 8px;
           margin-right: 15px;
-          transition: all 0.3s ease-in-out;
+          transition: all 0.3s ease-in-out; // Transition for smooth hover effects
         }
 
         .image-details {
           flex-grow: 1;
           font-size: 14px;
-          color: #333;
+          color: #333; // Default text color
 
           p {
             margin: 3px 0;
-            word-break: break-word;
+            word-break: break-word; // Prevent text overflow by breaking words
           }
           .image-link {
             display: inline-block;
@@ -97,12 +99,14 @@ $border-color: #ddd;
             font-weight: bold;
             color: #007bff;
             text-decoration: none;
-            transition: color 0.3s ease;
+            transition: color 0.3s ease; // Smooth color change on hover
+
             &:hover {
-              color: #0056b3;
-              text-decoration: underline;
+              color: #0056b3; // Darker blue on hover for links
+              text-decoration: underline; // Underline on hover for links
             }
           }
+
           .image-label {
             font-size: 16px;
             color: #333;
@@ -110,7 +114,7 @@ $border-color: #ddd;
         }
 
         .remove-btn {
-          background: #ff4d4f;
+          background: #ff4d4f; // Red background for remove button
           color: white;
           border: none;
           padding: 7px 12px;
@@ -120,11 +124,12 @@ $border-color: #ddd;
           font-size: 14px;
 
           &:hover {
-            background: #d9363e;
+            background: #d9363e; // Darker red on hover for remove button
           }
         }
       }
 
+      // Responsive design: Adjusting the layout for screens smaller than 768px
       @media (max-width: 768px) {
         .image-preview {
           flex-direction: column;
@@ -134,7 +139,7 @@ $border-color: #ddd;
           .preview-img {
             width: 100px;
             height: 100px;
-            margin: 0 auto 10px;
+            margin: 0 auto 10px; // Center image in mobile view
           }
 
           .image-details {
@@ -143,7 +148,7 @@ $border-color: #ddd;
 
           .remove-btn {
             margin-top: 10px;
-            width: 100%;
+            width: 100%; // Make the remove button full width on small screens
             padding: 8px;
           }
         }
@@ -153,11 +158,12 @@ $border-color: #ddd;
         width: 100%;
         text-align: center;
         border: 2px dashed rgb(28 138 219);
-        border: 2px dashed #2a3a47;
+        border: 2px dashed #2a3a47; // Border color for upload button
         padding: 10px;
         margin-bottom: 20px;
         background-color: #eee;
         border-radius: 5px;
+
         img {
           width: 70px;
           height: 67px;
@@ -179,7 +185,7 @@ $border-color: #ddd;
       }
 
       .btn-submit {
-        background-color: $primary-color;
+        background-color: $primary-color; // Primary color for the submit button
         color: white;
         display: flex;
         justify-content: center;
@@ -194,15 +200,19 @@ $border-color: #ddd;
         transition: background 0.3s;
 
         &:hover {
-          background-color: color.adjust($primary-color, $lightness: -10%);
+          background-color: color.adjust(
+            $primary-color,
+            $lightness: -10%
+          ); // Darken the color on hover
         }
       }
     }
   }
 
+  // Responsive design for smaller devices (480px and below)
   @media (max-width: 480px) {
     .form-container {
-      padding: 20px;
+      padding: 20px; // Reduce padding on small screens for better space utilization
     }
 
     .btn-submit {
@@ -222,6 +232,6 @@ $border-color: #ddd;
 
   .error-star {
     color: red;
-    font-weight: bold;
+    font-weight: bold; // Highlight error fields with a red star
   }
 }

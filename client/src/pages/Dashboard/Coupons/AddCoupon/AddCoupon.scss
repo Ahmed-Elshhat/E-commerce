@@ -1,13 +1,14 @@
 @use "sass:color";
 
-$primary-color: #3498db;
-$primary-color: #2a3a47;
-$secondary-color: #2ecc71;
-$bg-color: #f8f9fa;
-$text-color: #333;
-$border-color: #ddd;
+// Define primary and secondary theme colors
+$primary-color: #2a3a47; // Main primary color used throughout the form
+$secondary-color: #2ecc71; // Can be used for success or secondary actions
+$bg-color: #f8f9fa; // Light background color for page
+$text-color: #333; // Default text color
+$border-color: #ddd; // Border color for form fields
 
 .add-coupon {
+  // Fullscreen center-aligned wrapper for the coupon form
   background-color: $bg-color;
   display: flex;
   justify-content: center;
@@ -18,12 +19,14 @@ $border-color: #ddd;
   font-family: "Cairo", sans-serif;
 
   .form-container {
+    // Main container for the form card
     max-width: 600px;
     width: 100%;
     padding: 30px;
     border-radius: 10px;
 
     h2 {
+      // Form title styling
       display: flex;
       justify-content: center;
       align-items: center;
@@ -34,9 +37,11 @@ $border-color: #ddd;
 
     form {
       .form-group {
+        // Grouping input fields and their labels
         margin-bottom: 15px;
 
         label {
+          // Label styling
           color: $text-color;
           margin-bottom: 5px;
           font-weight: bold;
@@ -44,6 +49,7 @@ $border-color: #ddd;
 
         input,
         select {
+          // Common styling for inputs and select dropdowns
           width: 100%;
           padding: 10px;
           font-size: 16px;
@@ -53,20 +59,24 @@ $border-color: #ddd;
           transition: border 0.3s;
 
           &:focus {
+            // Highlight border when field is focused
             border-color: $primary-color;
           }
         }
-        select {
-          padding: 10px;
 
+        select {
+          // Ensures consistent padding for select elements
+          padding: 10px;
         }
       }
 
       .file-wrapper {
+        // Hidden input for file uploads (used programmatically)
         display: none;
       }
 
       .image-preview {
+        // Container to preview uploaded image with remove button and info
         display: flex;
         align-items: center;
         width: 100%;
@@ -79,6 +89,7 @@ $border-color: #ddd;
         transition: all 0.3s ease-in-out;
 
         .preview-img {
+          // Preview thumbnail of uploaded image
           width: 80px;
           height: 80px;
           object-fit: cover;
@@ -88,6 +99,7 @@ $border-color: #ddd;
         }
 
         .image-details {
+          // Shows file name and size of uploaded image
           flex-grow: 1;
           font-size: 14px;
           color: #333;
@@ -99,6 +111,7 @@ $border-color: #ddd;
         }
 
         .remove-btn {
+          // Button to remove the uploaded image
           background: #ff4d4f;
           color: white;
           border: none;
@@ -115,6 +128,7 @@ $border-color: #ddd;
       }
 
       @media (max-width: 768px) {
+        // Responsive styling for image preview on tablets and smaller screens
         .image-preview {
           flex-direction: column;
           text-align: center;
@@ -139,6 +153,7 @@ $border-color: #ddd;
       }
 
       .upload-image-btn {
+        // Styled area prompting the user to upload an image
         width: 100%;
         text-align: center;
         border: 2px dashed rgb(28 138 219);
@@ -146,12 +161,15 @@ $border-color: #ddd;
         margin-bottom: 20px;
         background-color: #eee;
         border-radius: 5px;
+
         img {
+          // Icon or preview inside upload box
           width: 70px;
           height: 67px;
         }
 
         p {
+          // Instructional text under the upload icon
           color: rgb(28 138 219);
           margin-top: -10px;
           font-weight: bold;
@@ -161,10 +179,12 @@ $border-color: #ddd;
 
       .image-err,
       .error-box {
+        // Used for image upload and field validation error messages
         margin-top: -20px;
       }
 
       .btn-submit {
+        // Submit button styling for form
         background-color: $primary-color;
         color: white;
         display: flex;
@@ -180,6 +200,7 @@ $border-color: #ddd;
         transition: background 0.3s;
 
         &:hover {
+          // Slightly darken the button on hover
           background-color: color.adjust($primary-color, $lightness: -10%);
         }
       }
@@ -187,6 +208,7 @@ $border-color: #ddd;
   }
 
   @media (max-width: 480px) {
+    // Adjustments for mobile screens
     .form-container {
       padding: 20px;
     }
@@ -198,15 +220,18 @@ $border-color: #ddd;
   }
 
   .error-box {
+    // General error container styling
     margin-bottom: 10px;
   }
 
   .error-text {
+    // Text color and size for form validation errors
     color: red;
     font-size: 14px;
   }
 
   .error-star {
+    // Red asterisk for required fields
     color: red;
     font-weight: bold;
   }

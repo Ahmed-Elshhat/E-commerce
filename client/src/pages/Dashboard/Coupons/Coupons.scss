@@ -1,35 +1,36 @@
 @use "sass:color";
 
-$primary-color: #3498db;
+// Primary theme color used throughout the UI (headers, highlights, etc.)
 $primary-color: #2a3a47;
-$bg-color: #f8f9fa;
-$text-color: #333;
-$border-color: #ddd;
+$bg-color: #f8f9fa; // Light background color for containers
+$text-color: #333; // Default text color
+$border-color: #ddd; // Default border color
 
 .coupons {
   position: relative;
   width: 100%;
-  overflow-x: hidden;
+  overflow-x: hidden; // Prevent horizontal scroll due to table overflow
+
   .coupons-container {
     background-color: $bg-color;
     display: flex;
     width: 100%;
     min-height: 100vh;
     padding: 20px;
-    font-family: "Cairo", sans-serif;
+    font-family: "Cairo", sans-serif; // Arabic-friendly font
 
     .table-wrapper {
       background: white;
       width: 100%;
       padding: 20px;
-      overflow-x: auto;
+      overflow-x: auto; // Allow horizontal scroll on small screens
       border-radius: 8px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1); // Light elevation
 
       .custom-table {
         width: 100%;
         border-collapse: collapse;
-        text-align: center;
+        text-align: center; // Align all table text to center
 
         thead {
           background-color: $primary-color;
@@ -38,7 +39,7 @@ $border-color: #ddd;
           th {
             padding: 12px;
             font-size: 15px;
-            text-wrap: nowrap;
+            text-wrap: nowrap; // Prevent table headers from breaking
           }
         }
 
@@ -47,15 +48,16 @@ $border-color: #ddd;
             transition: background 0.3s ease;
             border-bottom: 1px solid $border-color;
 
+            // Add alternating row colors for better readability
             &:nth-child(even) {
               background-color: #f2f2f2;
             }
 
-
-
             td {
               padding: 12px;
               font-size: 16px;
+
+              // Action buttons (View/Edit/Delete)
               .action-buttons {
                 display: flex;
                 justify-content: center;
@@ -69,6 +71,7 @@ $border-color: #ddd;
                   font-size: 18px;
                   transition: 0.3s;
 
+                  // View button style
                   &-view {
                     color: #3498db;
                     &:hover {
@@ -76,6 +79,7 @@ $border-color: #ddd;
                     }
                   }
 
+                  // Edit button style
                   &-edit {
                     color: #f39c12;
                     &:hover {
@@ -83,6 +87,7 @@ $border-color: #ddd;
                     }
                   }
 
+                  // Delete button style
                   &-delete {
                     color: #e74c3c;
                     margin-top: 2px;
@@ -93,18 +98,21 @@ $border-color: #ddd;
                 }
               }
 
+              // Center content for ID column
               &[data-label="ID"] {
                 display: flex;
                 justify-content: center;
                 align-items: center;
               }
 
+              // Force minimum width for expiration column
               &.expire {
                 min-width: 112px;
               }
             }
           }
 
+          // Styling for "No data" state when table is empty
           .no-data {
             text-align: center;
             padding: 20px;
@@ -112,15 +120,17 @@ $border-color: #ddd;
             font-weight: bold;
             color: $text-color;
             text-align: center;
+
             td {
               justify-content: center;
             }
           }
         }
 
+        // Mobile responsive layout for small screens
         @media (max-width: 710px) {
           thead {
-            display: none;
+            display: none; // Hide table head for mobile
           }
 
           tbody {
@@ -131,10 +141,8 @@ $border-color: #ddd;
               border-radius: 8px;
               padding: 10px;
               background: white;
-              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+              box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); // Slight shadow for cards
             }
-
-
 
             td {
               display: flex;
@@ -145,10 +153,12 @@ $border-color: #ddd;
               border-bottom: 1px solid $border-color;
               position: relative;
 
+              // Keep ID cell aligned correctly
               &[data-label="ID"] {
                 justify-content: space-between !important;
               }
 
+              // Add label before each value for accessibility
               &::before {
                 content: attr(data-label);
                 font-weight: bold;
@@ -162,6 +172,7 @@ $border-color: #ddd;
       }
     }
 
+    // Responsive tweaks for tablet screens
     @media (max-width: 768px) {
       .table-wrapper {
         padding: 10px;
@@ -181,6 +192,7 @@ $border-color: #ddd;
     }
   }
 
+  // Spinner shown during loading (e.g., while fetching more coupons)
   .loading-bottom {
     width: 50px;
     height: 50px;
@@ -191,6 +203,7 @@ $border-color: #ddd;
     animation: spin 1s linear infinite;
   }
 
+  // Keyframes for spinner animation
   @keyframes spin {
     to {
       transform: rotate(360deg);

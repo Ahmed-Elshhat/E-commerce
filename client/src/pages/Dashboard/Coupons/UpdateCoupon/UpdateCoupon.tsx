@@ -1,38 +1,53 @@
 import { ChangeEvent, useEffect, useState } from "react";
-import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import { useAppSelector } from "../../../../Redux/app/hooks";
+import { RiCoupon3Fill } from "react-icons/ri";
 import { COUPONS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
-import { RiCoupon3Fill } from "react-icons/ri";
-import "./UpdateCoupon.scss";
 import Skeleton from "react-loading-skeleton";
 import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
+import "./UpdateCoupon.scss";
 
 function UpdateCoupon() {
+  // Form state initialization
   const [form, setForm] = useState({
     name: "",
     expire: "",
     discount: 5,
   });
 
+  // Errors state for form validation
   const [errors, setErrors] = useState({
     name: "",
     expire: "",
     discount: "",
     general: "",
   });
+
+  // Fetching coupon ID from URL params
   const { id } = useParams();
+
+  // Loading state for showing progress
   const [loading, setLoading] = useState({
     state: false,
     type: "",
   });
+
+  // To track if the form was submitted
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  // Language setting from Redux state
   const { lang } = useAppSelector((state) => state.language);
+
+  // Hook for navigation
   const navigate = useNavigate();
+
+  // For translations based on the current language
   const { t, i18n } = useTranslation();
 
+  // Fetch coupon data when the component mounts or the coupon ID changes
   useEffect(() => {
     const fetchCoupon = async () => {
       setLoading({ state: true, type: "get" });
@@ -47,8 +62,6 @@ function UpdateCoupon() {
             expire: localExpire,
             discount: data.discount,
           });
-          console.log(data);
-          console.log(localExpire);
         }
       } catch (error) {
         setLoading({ state: false, type: "" });
@@ -59,6 +72,7 @@ function UpdateCoupon() {
     fetchCoupon();
   }, [id]);
 
+  // Reset error messages when form fields or language changes
   useEffect(() => {
     if (isSubmitted) {
       const fields = ["name", "expire", "discount", "general"];
@@ -73,15 +87,18 @@ function UpdateCoupon() {
     }
   }, [form.name, form.expire, form.discount, i18n.language]);
 
+  // Handle input field changes
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Form validation
   const validateForm = () => {
     const newErrors: { msg: string; path?: string }[] = [];
 
+    // Validate coupon name
     if (!form.name.trim()) {
       newErrors.push({
         msg: t("dashboard.updateCoupon.errors.nameRequired"),
@@ -99,15 +116,17 @@ function UpdateCoupon() {
       });
     }
 
+    // Validate expiration date
     if (!form.expire) {
       newErrors.push({
         msg: t("dashboard.updateCoupon.errors.expireRequired"),
         path: "expire",
       });
     } else {
-      const selectedDateTime = new Date(form.expire).getTime(); // تحويل المدخلات إلى Milliseconds
-      const currentDateTime = new Date().getTime(); // الوقت الحالي
+      const selectedDateTime = new Date(form.expire).getTime();
+      const currentDateTime = new Date().getTime();
 
+      // Check if expiration date is in the past
       if (selectedDateTime < currentDateTime) {
         newErrors.push({
           msg: t("dashboard.updateCoupon.errors.expirePast"),
@@ -116,6 +135,7 @@ function UpdateCoupon() {
       }
     }
 
+    // Validate discount value
     const allowedDiscounts = [
       5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95,
       100,
@@ -130,6 +150,7 @@ function UpdateCoupon() {
       });
     }
 
+    // Map errors to respective fields
     const errorsMap = newErrors.reduce<Record<string, string>>((acc, error) => {
       if (error.path) {
         acc[error.path] = error.msg;
@@ -147,6 +168,7 @@ function UpdateCoupon() {
     return { isValid: newErrors.length === 0, errors: errorsMap };
   };
 
+  // Convert date to local format for input field
   const toLocalDateTimeString = (date: Date) =>
     new Date(date)
       .toLocaleString("sv-SE", {
@@ -155,6 +177,7 @@ function UpdateCoupon() {
       .replace(" ", "T")
       .slice(0, 16);
 
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading({ state: true, type: "put" });
@@ -167,11 +190,13 @@ function UpdateCoupon() {
 
     setIsSubmitted(true);
 
+    // If form is invalid, stop submission
     if (!validateForm().isValid) {
       setLoading({ state: true, type: "" });
       return;
     }
 
+    // Attempt to update the coupon
     try {
       const res = await Axios.put(`${COUPONS}/${id}`, {
         name: form.name,
@@ -180,8 +205,7 @@ function UpdateCoupon() {
       });
       if (res.status === 200) {
         setLoading({ state: false, type: "" });
-        navigate(`/${lang}/dashboard/coupons`);
-        console.log("put", res.data);
+        navigate(`/${lang}/dashboard/coupons`); // Navigate back to coupons page
       }
     } catch (err) {
       setLoading({ state: false, type: "" });
@@ -230,6 +254,7 @@ function UpdateCoupon() {
           {t("dashboard.updateCoupon.title")} <RiCoupon3Fill />
         </h2>
         <form onSubmit={handleSubmit}>
+          {/* Coupon name input */}
           <div className="form-group">
             <label htmlFor="name">
               {t("dashboard.updateCoupon.nameLabel")}
@@ -246,7 +271,6 @@ function UpdateCoupon() {
                 onChange={handleChange}
               />
             )}
-
             {errors.name && (
               <p className="error-text">
                 <span className="error-star">*</span> {errors.name}
@@ -254,11 +278,11 @@ function UpdateCoupon() {
             )}
           </div>
 
+          {/* Expiration date input */}
           <div className="form-group">
             <label htmlFor="expire">
               {t("dashboard.updateCoupon.expireLabel")}
             </label>
-
             {loading.state && loading.type === "get" ? (
               <Skeleton height={40} />
             ) : (
@@ -270,7 +294,6 @@ function UpdateCoupon() {
                 onChange={handleChange}
               />
             )}
-
             {errors.expire && (
               <p className="error-text">
                 <span className="error-star">*</span> {errors.expire}
@@ -278,11 +301,11 @@ function UpdateCoupon() {
             )}
           </div>
 
+          {/* Discount input */}
           <div className="form-group">
             <label htmlFor="discount">
               {t("dashboard.updateCoupon.discountLabel")}
             </label>
-
             {loading.state && loading.type === "get" ? (
               <Skeleton height={40} />
             ) : (
@@ -314,7 +337,6 @@ function UpdateCoupon() {
                 <option value="95">100</option>
               </select>
             )}
-
             {errors.discount && (
               <p className="error-text">
                 <span className="error-star">*</span> {errors.discount}
@@ -322,6 +344,7 @@ function UpdateCoupon() {
             )}
           </div>
 
+          {/* General error message */}
           {errors.general && (
             <div className="error-box">
               <p className="error-text">
@@ -330,6 +353,7 @@ function UpdateCoupon() {
             </div>
           )}
 
+          {/* Submit button */}
           <button
             type="submit"
             className="btn-submit"
