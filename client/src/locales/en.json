@@ -105,11 +105,28 @@
       "noEmployeesFound": "No Employees Found"
     },
     "addEmployee": {
+      "errors": {
+        "nameRequired": "Name is required.",
+        "nameMin": "Name must be at least 4 characters long.",
+        "emailRequired": "Email is required.",
+        "emailInvalid": "Invalid email format.",
+        "passwordRequired": "Password is required.",
+        "passwordMin": "Password must be at least 6 characters long.",
+        "confirmPasswordRequired": "Confirm password is required.",
+        "confirmPasswordMismatch": "Passwords do not match.",
+        "phoneRequired": "Phone number is required.",
+        "phoneInvalid": "Invalid Egyptian phone number.",
+        "startShiftInvalid": "Invalid start shift format (HH:MM).",
+        "endShiftInvalid": "Invalid end shift format (HH:MM).",
+        "shiftSame": "Start and end shift times cannot be the same."
+      },
       "title": "Add a new employee",
       "nameLabel": "Name",
-      "namePlaceholder": "Name",
+      "namePlaceholder": "Enter the name",
       "emailLabel": "Email",
-      "emailPlaceholder": "Email",
+      "emailPlaceholder": "Enter the email",
+      "phoneLabel": "Phone",
+      "phonePlaceholder": "Enter the phone number",
       "passwordLabel": "Password",
       "confirmPasswordLabel": "Confirm password",
       "startShiftLabel": "Shift Start Time",
@@ -176,7 +193,7 @@
         "nameArMax": "The name in Arabic must not exceed 32 characters.",
         "imageRequired": "Image is required."
       },
-      "title": "Update category",
+      "title": "Update Category",
       "categoryNameLabelAr": "name in Arabic",
       "categoryNameLabelEn": "name in English",
       "categoryNamePlaceholderAr": "Enter the name in Arabic",
@@ -238,7 +255,7 @@
         "nameArMax": "The name in Arabic must not exceed 32 characters.",
         "imageRequired": "Image is required."
       },
-      "title": "Update brand",
+      "title": "Update Brand",
       "brandNameLabelAr": "name in Arabic",
       "brandNameLabelEn": "name in English",
       "brandNamePlaceholderAr": "Enter the name in Arabic",
@@ -357,6 +374,14 @@
       "noCouponsFound": "No Coupons Found"
     },
     "addCoupon": {
+      "errors": {
+        "nameRequired": "The name is required.",
+        "nameMin": "The name must be at least 8 characters long.",
+        "nameMax": "The name must not exceed 20 characters.",
+        "expireRequired": "Expiration date is required.",
+        "expirePast": "Expiration date and time cannot be in the past.",
+        "discountInvalid": "Discount must be one of the following values: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100."
+      },
       "title": "Add a new coupon",
       "nameLabel": "Coupon name",
       "namePlaceholder": "Name",
@@ -365,6 +390,24 @@
       "discountLabel": "Discount",
       "discountPlaceholder": "Discount",
       "submitButton": "Add coupon"
+    },
+    "updateCoupon": {
+      "errors": {
+        "nameRequired": "The name is required.",
+        "nameMin": "The name must be at least 8 characters long.",
+        "nameMax": "The name must not exceed 20 characters.",
+        "expireRequired": "Expiration date is required.",
+        "expirePast": "Expiration date and time cannot be in the past.",
+        "discountInvalid": "Discount must be one of the following values: 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100."
+      },
+      "title": "Update Coupon",
+      "nameLabel": "Coupon name",
+      "namePlaceholder": "Name",
+      "expireLabel": "Expire",
+      "expirePlaceholder": "Expire",
+      "discountLabel": "Discount",
+      "discountPlaceholder": "Discount",
+      "submitButton": "Update Coupon"
     },
     "showCoupon": {
       "loading": "Loading data...",

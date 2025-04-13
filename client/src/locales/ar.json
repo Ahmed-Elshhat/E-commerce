@@ -106,15 +106,32 @@
       "noEmployeesFound": "لم يتم العثور على موظفين"
     },
     "addEmployee": {
+      "errors": {
+        "nameRequired": "الاسم مطلوب.",
+        "nameMin": "يجب ألا يقل الاسم عن 4 أحرف.",
+        "emailRequired": "البريد الإلكتروني مطلوب.",
+        "emailInvalid": "تنسيق البريد الإلكتروني غير صالح.",
+        "passwordRequired": "كلمة المرور مطلوبة.",
+        "passwordMin": "يجب ألا تقل كلمة المرور عن 6 أحرف.",
+        "confirmPasswordRequired": "تأكيد كلمة المرور مطلوب.",
+        "confirmPasswordMismatch": "كلمتا المرور غير متطابقتين.",
+        "phoneRequired": "رقم الهاتف مطلوب.",
+        "phoneInvalid": "رقم الهاتف المصري غير صالح.",
+        "startShiftInvalid": "تنسيق وقت بدء الدوام غير صالح (HH:MM).",
+        "endShiftInvalid": "تنسيق وقت نهاية الدوام غير صالح (HH:MM).",
+        "shiftSame": "لا يمكن أن يكون وقتا بدء وانتهاء الدوام متماثلين."
+      },
       "title": "إضافة موظف جديد",
       "nameLabel": "الاسم",
-      "namePlaceholder": "الاسم",
+      "namePlaceholder": "أدخل الاسم",
       "emailLabel": "البريد الإلكتروني",
-      "emailPlaceholder": "البريد الإلكتروني",
+      "emailPlaceholder": "أدخل البريد الإلكتروني",
+      "phoneLabel": "رقم الهاتف",
+      "phonePlaceholder": "أدخل رقم الهاتف",
       "passwordLabel": "كلمة المرور",
       "confirmPasswordLabel": "تأكيد كلمة المرور",
-      "startShiftLabel": "وقت بدء الوردية",
-      "endShiftLabel": "وقت انتهاء الوردية",
+      "startShiftLabel": "بداية وقت العمل",
+      "endShiftLabel": "نهاية وقت العمل",
       "submitButton": "إضافة الموظف"
     },
     "showEmployee": {
@@ -373,6 +390,14 @@
       "noCouponsFound": "لم يتم العثور على قسائم"
     },
     "addCoupon": {
+      "errors": {
+        "nameRequired": "الاسم مطلوب.",
+        "nameMin": "يجب ألا يقل الاسم عن 8 أحرف.",
+        "nameMax": "يجب ألا يزيد الاسم عن 20 حرفًا.",
+        "expireRequired": "تاريخ الانتهاء مطلوب.",
+        "expirePast": "لا يمكن أن يكون تاريخ ووقت الانتهاء في الماضي.",
+        "discountInvalid": "يجب أن تكون قيمة الخصم واحدة من القيم التالية: 5، 10، 15، 20، 25، 30، 35، 40، 45، 50، 55، 60، 65، 70، 75، 80، 85، 90، 95، 100."
+      },
       "title": "إضافة قسيمة جديدة",
       "nameLabel": "اسم القسيمة",
       "namePlaceholder": "اسم القسيمة",
@@ -381,6 +406,24 @@
       "discountLabel": "نسبة الخصم",
       "discountPlaceholder": "نسبة الخصم",
       "submitButton": "إضافة القسيمة"
+    },
+    "updateCoupon": {
+      "errors": {
+        "nameRequired": "الاسم مطلوب.",
+        "nameMin": "يجب ألا يقل الاسم عن 8 أحرف.",
+        "nameMax": "يجب ألا يزيد الاسم عن 20 حرفًا.",
+        "expireRequired": "تاريخ الانتهاء مطلوب.",
+        "expirePast": "لا يمكن أن يكون تاريخ ووقت الانتهاء في الماضي.",
+        "discountInvalid": "يجب أن تكون قيمة الخصم واحدة من القيم التالية: 5، 10، 15، 20، 25، 30، 35، 40، 45، 50، 55، 60، 65، 70، 75، 80، 85، 90، 95، 100."
+      },
+      "title": "تحديث الكوبون",
+      "nameLabel": "اسم الكوبون",
+      "namePlaceholder": "الاسم",
+      "expireLabel": "تاريخ الانتهاء",
+      "expirePlaceholder": "تاريخ الانتهاء",
+      "discountLabel": "قيمة الخصم",
+      "discountPlaceholder": "الخصم",
+      "submitButton": "تحديث الكوبون"
     },
     "showCoupon": {
       "loading": "جاري تحميل البيانات...",

@@ -1,6 +1,6 @@
 @use "sass:color";
 
-$primary-color: #3498db;
+// Color Variables
 $primary-color: #2a3a47;
 $secondary-color: #2ecc71;
 $bg-color: #f8f9fa;
@@ -8,6 +8,7 @@ $text-color: #333;
 $border-color: #ddd;
 
 .add-employee {
+  // Set the base layout and background for the Add Employee page
   background-color: $bg-color;
   display: flex;
   justify-content: center;
@@ -18,22 +19,25 @@ $border-color: #ddd;
   font-family: "Cairo", sans-serif;
 
   .form-container {
-    max-width: 600px;
+    // Container styling for the form
     width: 100%;
+    max-width: 600px;
     padding: 30px;
     border-radius: 10px;
 
     h2 {
+      // Title styling
+      color: $primary-color;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 5px;
       margin-bottom: 20px;
-      color: $primary-color;
     }
 
     form {
       .form-group {
+        // General styling for input fields and labels
         margin-bottom: 15px;
 
         label {
@@ -51,6 +55,7 @@ $border-color: #ddd;
           border: 1px solid $border-color;
           transition: border 0.3s;
 
+          // Highlight input on focus
           &:focus {
             border-color: $primary-color;
           }
@@ -58,8 +63,10 @@ $border-color: #ddd;
       }
 
       .cover {
+        // Wrapper for password or text visibility toggle
         position: relative;
         width: 100%;
+
         button {
           background: none;
           position: absolute;
@@ -67,6 +74,7 @@ $border-color: #ddd;
           font-size: 20px;
           border: none;
           cursor: pointer;
+
           svg {
             fill: rgb(134, 134, 134);
           }
@@ -74,14 +82,18 @@ $border-color: #ddd;
       }
 
       .shifts {
+        // Layout for shift input fields
         display: flex;
         justify-content: space-between;
         align-items: center;
         gap: 10px;
         margin-top: 20px;
+
         .form-group {
           width: 100%;
+
           @media (max-width: 565px) {
+            // Center error text on small screens
             .error-text {
               text-align: center;
             }
@@ -90,8 +102,13 @@ $border-color: #ddd;
       }
 
       .btn-submit {
+        // Styling for the submit button
         background-color: $primary-color;
         color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
         width: 100%;
         padding: 12px;
         font-size: 18px;
@@ -100,6 +117,7 @@ $border-color: #ddd;
         cursor: pointer;
         transition: background 0.3s;
 
+        // Darken button on hover
         &:hover {
           background-color: color.adjust($primary-color, $lightness: -10%);
         }
@@ -107,6 +125,7 @@ $border-color: #ddd;
     }
   }
 
+  // Responsive styles for smaller devices
   @media (max-width: 480px) {
     .form-container {
       padding: 20px;
@@ -118,6 +137,7 @@ $border-color: #ddd;
     }
   }
 
+  // Error message styles
   .error-box {
     margin-bottom: 10px;
   }

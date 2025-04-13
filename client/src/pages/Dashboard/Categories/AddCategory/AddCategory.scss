@@ -1,11 +1,12 @@
 @use "sass:color";
 
-$primary-color: #3498db;
-$primary-color: #2a3a47;
-$secondary-color: #2ecc71;
-$bg-color: #f8f9fa;
-$text-color: #333;
-$border-color: #ddd;
+// === Color Variables ===
+$primary-color: #3498db; // Previous primary color (overwritten below)
+$primary-color: #2a3a47; // Main color used for buttons and highlights
+$secondary-color: #2ecc71; // Secondary accent color (currently not used)
+$bg-color: #f8f9fa; // Page background color
+$text-color: #333; // Default text color
+$border-color: #ddd; // Default border color for inputs and previews
 
 .add-category {
   background-color: $bg-color;
@@ -18,10 +19,10 @@ $border-color: #ddd;
   font-family: "Cairo", sans-serif;
 
   .form-container {
-    max-width: 600px;
+    max-width: 600px; // Max width for the form
     width: 100%;
     padding: 30px;
-    border-radius: 10px;
+    border-radius: 10px; // Rounded corners for the form container
 
     h2 {
       display: flex;
@@ -29,7 +30,7 @@ $border-color: #ddd;
       align-items: center;
       gap: 5px;
       margin-bottom: 20px;
-      color: $primary-color;
+      color: $primary-color; // Title color
     }
 
     form {
@@ -39,7 +40,7 @@ $border-color: #ddd;
         label {
           color: $text-color;
           margin-bottom: 5px;
-          font-weight: bold;
+          font-weight: bold; // Emphasize field labels
         }
 
         input {
@@ -49,16 +50,16 @@ $border-color: #ddd;
           outline: none;
           border-radius: 5px;
           border: 1px solid $border-color;
-          transition: border 0.3s;
+          transition: border 0.3s; // Smooth border transition on focus
 
           &:focus {
-            border-color: $primary-color;
+            border-color: $primary-color; // Highlight input on focus
           }
         }
       }
 
       .file-wrapper {
-        display: none;
+        display: none; // Hidden native file input
       }
 
       .image-preview {
@@ -79,7 +80,7 @@ $border-color: #ddd;
           object-fit: cover;
           border-radius: 8px;
           margin-right: 15px;
-          transition: all 0.3s ease-in-out;
+          transition: all 0.3s ease-in-out; // Smooth transition on hover/effects
         }
 
         .image-details {
@@ -89,12 +90,12 @@ $border-color: #ddd;
 
           p {
             margin: 3px 0;
-            word-break: break-word;
+            word-break: break-word; // Prevent text overflow
           }
         }
 
         .remove-btn {
-          background: #ff4d4f;
+          background: #ff4d4f; // Red background for delete button
           color: white;
           border: none;
           padding: 7px 12px;
@@ -104,11 +105,12 @@ $border-color: #ddd;
           font-size: 14px;
 
           &:hover {
-            background: #d9363e;
+            background: #d9363e; // Darker red on hover
           }
         }
       }
 
+      // === Responsive Design for Image Preview ===
       @media (max-width: 768px) {
         .image-preview {
           flex-direction: column;
@@ -118,7 +120,7 @@ $border-color: #ddd;
           .preview-img {
             width: 100px;
             height: 100px;
-            margin: 0 auto 10px;
+            margin: 0 auto 10px; // Center image on small screens
           }
 
           .image-details {
@@ -127,7 +129,7 @@ $border-color: #ddd;
 
           .remove-btn {
             margin-top: 10px;
-            width: 100%;
+            width: 100%; // Full width delete button on mobile
             padding: 8px;
           }
         }
@@ -136,20 +138,21 @@ $border-color: #ddd;
       .upload-image-btn {
         width: 100%;
         text-align: center;
-        border: 2px dashed rgb(28 138 219);
-        border: 2px dashed #2a3a47;
+        border: 2px dashed rgb(28 138 219); // Initial dashed border color
+        border: 2px dashed #2a3a47; // Final applied border color (overrides above)
         padding: 10px;
         margin-bottom: 20px;
         background-color: #eee;
         border-radius: 5px;
+
         img {
           width: 70px;
           height: 67px;
         }
 
         p {
-          color: rgb(28 138 219);
-          color: #2a3a47;
+          color: rgb(28 138 219); // First color (overwritten)
+          color: #2a3a47; // Final applied text color
           margin-top: -10px;
           font-weight: bold;
           font-size: 20px;
@@ -159,7 +162,7 @@ $border-color: #ddd;
       .image-err,
       .error-box {
         margin-top: -15px;
-        margin-bottom: 10px;
+        margin-bottom: 10px; // Space for image validation error messages
       }
 
       .btn-submit {
@@ -178,23 +181,25 @@ $border-color: #ddd;
         transition: background 0.3s;
 
         &:hover {
-          background-color: color.adjust($primary-color, $lightness: -10%);
+          background-color: color.adjust($primary-color, $lightness: -10%); // Darker on hover
         }
       }
     }
   }
 
+  // === Mobile Layout Adjustments ===
   @media (max-width: 480px) {
     .form-container {
-      padding: 20px;
+      padding: 20px; // Reduce padding for small screens
     }
 
     .btn-submit {
       padding: 10px;
-      font-size: 16px;
+      font-size: 16px; // Adjust button size for mobile
     }
   }
 
+  // === Error Message Styling ===
   .error-box {
     margin-bottom: 10px;
   }
@@ -206,6 +211,6 @@ $border-color: #ddd;
 
   .error-star {
     color: red;
-    font-weight: bold;
+    font-weight: bold; // Used to indicate required fields
   }
 }

@@ -7,6 +7,7 @@ import { COUPONS } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
 import axios from "axios";
 import { RiCoupon3Fill } from "react-icons/ri";
+import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
 
 function AddCoupon() {
   const [form, setForm] = useState({
@@ -21,10 +22,11 @@ function AddCoupon() {
     discount: "",
     general: "",
   });
+  const [loading, setLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   useEffect(() => {
     if (isSubmitted) {
@@ -38,7 +40,7 @@ function AddCoupon() {
         }
       });
     }
-  }, [form.name, form.expire, form.discount]);
+  }, [form.name, form.expire, form.discount, i18n.language]);
 
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -50,28 +52,34 @@ function AddCoupon() {
     const newErrors: { msg: string; path?: string }[] = [];
 
     if (!form.name.trim()) {
-      newErrors.push({ msg: "Name is required", path: "name" });
+      newErrors.push({
+        msg: t("dashboard.addCoupon.errors.nameRequired"),
+        path: "name",
+      });
     } else if (form.name.length < 8) {
       newErrors.push({
-        msg: "Name must be at least 8 characters",
+        msg: t("dashboard.addCoupon.errors.nameMin"),
         path: "name",
       });
     } else if (form.name.length > 20) {
       newErrors.push({
-        msg: "Name must be less than 20 characters",
+        msg: t("dashboard.addCoupon.errors.nameMax"),
         path: "name",
       });
     }
 
     if (!form.expire) {
-      newErrors.push({ msg: "Expiration date is required", path: "expire" });
+      newErrors.push({
+        msg: t("dashboard.addCoupon.errors.expireRequired"),
+        path: "expire",
+      });
     } else {
       const selectedDateTime = new Date(form.expire).getTime(); // تحويل المدخلات إلى Milliseconds
       const currentDateTime = new Date().getTime(); // الوقت الحالي
 
       if (selectedDateTime < currentDateTime) {
         newErrors.push({
-          msg: "Expiration date and time cannot be in the past",
+          msg: t("dashboard.addCoupon.errors.expirePast"),
           path: "expire",
         });
       }
@@ -85,7 +93,7 @@ function AddCoupon() {
     if (!allowedDiscounts.includes(+form.discount)) {
       newErrors.push({
         msg:
-          "Discount must be one of the following values: " +
+          t("dashboard.addCoupon.errors.discountInvalid") +
           allowedDiscounts.join(", "),
         path: "discount",
       });
@@ -110,6 +118,7 @@ function AddCoupon() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
     setErrors({
       name: "",
       expire: "",
@@ -119,7 +128,10 @@ function AddCoupon() {
 
     setIsSubmitted(true);
 
-    if (!validateForm().isValid) return;
+    if (!validateForm().isValid) {
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await Axios.post(`${COUPONS}`, {
@@ -128,10 +140,12 @@ function AddCoupon() {
         discount: form.discount,
       });
       if (res.status === 201) {
+        setLoading(false);
         navigate(`/${lang}/dashboard/coupons`);
         console.log(res.data);
       }
     } catch (err) {
+      setLoading(false);
       console.log(err);
       if (axios.isAxiosError(err) && err.response) {
         if (err.response.data?.message) {
@@ -173,7 +187,9 @@ function AddCoupon() {
   return (
     <div className="add-coupon">
       <div className="form-container">
-        <h2>{t("dashboard.addCoupon.title")} <RiCoupon3Fill /></h2>
+        <h2>
+          {t("dashboard.addCoupon.title")} <RiCoupon3Fill />
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="name">{t("dashboard.addCoupon.nameLabel")}</label>
@@ -260,8 +276,9 @@ function AddCoupon() {
             </div>
           )}
 
-          <button type="submit" className="btn-submit">
+          <button type="submit" className="btn-submit" disabled={loading}>
             {t("dashboard.addCoupon.submitButton")}
+            {loading && <LoadingButton width="20px" height="20px" />}
           </button>
         </form>
       </div>

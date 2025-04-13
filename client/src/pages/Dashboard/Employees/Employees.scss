@@ -3,6 +3,7 @@
 $primary-color: #3498db;
 $primary-color: #2a3a47;
 $bg-color: #f8f9fa;
+$bg-white: white;
 $text-color: #333;
 $border-color: #ddd;
 
@@ -38,7 +39,7 @@ $border-color: #ddd;
     }
 
     .table-wrapper {
-      background: white;
+      background: $bg-white;
       width: 100%;
       padding: 20px;
       overflow-x: auto;
@@ -57,30 +58,30 @@ $border-color: #ddd;
 
           tbody {
             tr {
+              background: $bg-white;
               display: block;
+              padding: 10px;
               margin-bottom: 10px;
               border: 1px solid $border-color;
               border-radius: 8px;
-              padding: 10px;
-              background: white;
               box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             }
 
             td {
               display: flex;
               justify-content: space-between;
+              position: relative;
               padding: 10px;
               font-size: 14px;
               font-weight: bold;
               border-bottom: 1px solid $border-color;
-              position: relative;
 
               &::before {
                 content: attr(data-label);
-                font-weight: bold;
-                text-transform: uppercase;
                 color: $primary-color;
                 margin-right: 10px;
+                font-weight: bold;
+                text-transform: uppercase;
               }
             }
           }
@@ -88,7 +89,7 @@ $border-color: #ddd;
 
         thead {
           background-color: $primary-color;
-          color: white;
+          color: $bg-white;
 
           th {
             padding: 12px;

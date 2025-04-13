@@ -1,4 +1,5 @@
 .show-employee {
+  // Container styling for the employee details section
   background-color: #f4f6f8;
   width: 100%;
   padding: 20px;
@@ -6,28 +7,31 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
   h2 {
+    // Title styling with icon alignment
     color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-bottom: 20px;
-    text-align: center;
   }
 
   .user-table {
+    // Table styling for desktop view
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
 
     th,
     td {
+      // General cell padding and border
       padding: 12px 20px;
       border: 1px solid #ddd;
     }
 
     thead {
       th {
+        // Header background and text color
         background-color: #2a3a47;
         color: white;
       }
@@ -36,8 +40,10 @@
     tbody {
       tr {
         td {
+          // Default font weight for content rows
           font-weight: 300;
           &:first-child {
+            // Make field name bold
             font-weight: bold;
           }
         }
@@ -46,24 +52,31 @@
   }
 
   @media (max-width: 768px) {
+    // Tablet view adjustments
     padding: 10px;
 
     h2 {
+      // Smaller title on smaller screens
       font-size: 1.2rem;
     }
 
     .user-table {
+      // Responsive layout for table on smaller screens
       width: 100%;
       font-size: 0.9rem;
       overflow-x: auto;
+
       tr {
+        // Stack rows as blocks
         background-color: #1d2937;
         color: white;
         display: block;
         margin-bottom: 15px;
         border-radius: 5px;
+
         th,
         td {
+          // Adjust padding for small screens
           padding: 10px;
         }
       }
@@ -71,6 +84,7 @@
       thead {
         tr {
           th {
+            // Hide table headers in mobile layout
             display: none;
           }
         }
@@ -79,11 +93,14 @@
       tbody {
         tr {
           td {
+            // Display each field as a separate block
             display: block;
             padding: 10px 15px;
             border: none;
             border-bottom: 1px solid #ddd;
+
             &:first-child {
+              // Bold label and add border
               font-weight: bold;
               border-bottom: 1px solid rgb(209, 205, 205);
             }
@@ -94,15 +111,19 @@
   }
 
   @media (max-width: 480px) {
+    // Phone view adjustments
     h2 {
+      // Even smaller title for mobile
       font-size: 1rem;
     }
 
     .user-table {
+      // Smaller table text for narrow screens
       font-size: 0.8rem;
     }
 
     .user-table td {
+      // Reduce cell padding on small devices
       padding: 8px;
     }
   }

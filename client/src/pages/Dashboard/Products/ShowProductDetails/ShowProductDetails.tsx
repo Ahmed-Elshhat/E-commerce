@@ -101,7 +101,7 @@ function ShowProductDetails() {
           <tr>
             <td>{t("dashboard.showProduct.ratingsAverage")}</td>
             <td data-label={t("dashboard.showProduct.ratingsAverage")}>
-              {product.ratingsAverage}
+              {product?.ratingsAverage || 0}
             </td>
           </tr>
           <tr>
@@ -113,24 +113,30 @@ function ShowProductDetails() {
               </Link>
             </td>
           </tr>
-          <tr>
-            <td>{t("dashboard.showProduct.categoryId")}</td>
-            <td data-label={t("dashboard.showProduct.categoryId")}>
-              {product.category._id}
-            </td>
-          </tr>
-          <tr>
-            <td>{t("dashboard.showProduct.categoryNameAr")}</td>
-            <td data-label={t("dashboard.showProduct.categoryNameAr")}>
-              {product.category.nameAr}
-            </td>
-          </tr>
-          <tr>
-            <td>{t("dashboard.showProduct.categoryNameEn")}</td>
-            <td data-label={t("dashboard.showProduct.categoryNameEn")}>
-              {product.category.nameEn}
-            </td>
-          </tr>
+          {product.category && (
+            <>
+              <tr>
+                <td>{t("dashboard.showProduct.categoryId")}</td>
+                <td data-label={t("dashboard.showProduct.categoryId")}>
+                  {product?._id || t("dashboard.showProduct.notAvailable")}
+                </td>
+              </tr>
+              <tr>
+                <td>{t("dashboard.showProduct.categoryNameAr")}</td>
+                <td data-label={t("dashboard.showProduct.categoryNameAr")}>
+                  {product.category.nameAr}
+                </td>
+              </tr>
+
+              <tr>
+                <td>{t("dashboard.showProduct.categoryNameEn")}</td>
+                <td data-label={t("dashboard.showProduct.categoryNameEn")}>
+                  {product.category.nameEn}
+                </td>
+              </tr>
+            </>
+          )}
+
           {product.brand && (
             <>
               <tr>

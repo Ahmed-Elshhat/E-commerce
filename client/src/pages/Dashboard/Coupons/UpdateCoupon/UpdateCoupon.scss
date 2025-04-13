@@ -1,0 +1,213 @@
+@use "sass:color";
+
+$primary-color: #3498db;
+$primary-color: #2a3a47;
+$secondary-color: #2ecc71;
+$bg-color: #f8f9fa;
+$text-color: #333;
+$border-color: #ddd;
+
+.add-coupon {
+  background-color: $bg-color;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  max-height: 100%;
+  font-family: "Cairo", sans-serif;
+
+  .form-container {
+    max-width: 600px;
+    width: 100%;
+    padding: 30px;
+    border-radius: 10px;
+
+    h2 {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 5px;
+      margin-bottom: 20px;
+      color: $primary-color;
+    }
+
+    form {
+      .form-group {
+        margin-bottom: 15px;
+
+        label {
+          color: $text-color;
+          margin-bottom: 5px;
+          font-weight: bold;
+        }
+
+        input,
+        select {
+          width: 100%;
+          padding: 10px;
+          font-size: 16px;
+          outline: none;
+          border-radius: 5px;
+          border: 1px solid $border-color;
+          transition: border 0.3s;
+
+          &:focus {
+            border-color: $primary-color;
+          }
+        }
+        select {
+          padding: 10px;
+
+        }
+      }
+
+      .file-wrapper {
+        display: none;
+      }
+
+      .image-preview {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        padding: 10px;
+        gap: 10px;
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        background: #f9f9f9;
+        margin-bottom: 15px;
+        transition: all 0.3s ease-in-out;
+
+        .preview-img {
+          width: 80px;
+          height: 80px;
+          object-fit: cover;
+          border-radius: 8px;
+          margin-right: 15px;
+          transition: all 0.3s ease-in-out;
+        }
+
+        .image-details {
+          flex-grow: 1;
+          font-size: 14px;
+          color: #333;
+
+          p {
+            margin: 3px 0;
+            word-break: break-word;
+          }
+        }
+
+        .remove-btn {
+          background: #ff4d4f;
+          color: white;
+          border: none;
+          padding: 7px 12px;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: 0.3s;
+          font-size: 14px;
+
+          &:hover {
+            background: #d9363e;
+          }
+        }
+      }
+
+      @media (max-width: 768px) {
+        .image-preview {
+          flex-direction: column;
+          text-align: center;
+          padding: 15px;
+
+          .preview-img {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 10px;
+          }
+
+          .image-details {
+            font-size: 13px;
+          }
+
+          .remove-btn {
+            margin-top: 10px;
+            width: 100%;
+            padding: 8px;
+          }
+        }
+      }
+
+      .upload-image-btn {
+        width: 100%;
+        text-align: center;
+        border: 2px dashed rgb(28 138 219);
+        padding: 10px;
+        margin-bottom: 20px;
+        background-color: #eee;
+        border-radius: 5px;
+        img {
+          width: 70px;
+          height: 67px;
+        }
+
+        p {
+          color: rgb(28 138 219);
+          margin-top: -10px;
+          font-weight: bold;
+          font-size: 20px;
+        }
+      }
+
+      .image-err,
+      .error-box {
+        margin-top: -20px;
+      }
+
+      .btn-submit {
+        background-color: $primary-color;
+        color: white;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 12px;
+        font-size: 18px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+
+        &:hover {
+          background-color: color.adjust($primary-color, $lightness: -10%);
+        }
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    .form-container {
+      padding: 20px;
+    }
+
+    .btn-submit {
+      padding: 10px;
+      font-size: 16px;
+    }
+  }
+
+  .error-box {
+    margin-bottom: 10px;
+  }
+
+  .error-text {
+    color: red;
+    font-size: 14px;
+  }
+
+  .error-star {
+    color: red;
+    font-weight: bold;
+  }
+}

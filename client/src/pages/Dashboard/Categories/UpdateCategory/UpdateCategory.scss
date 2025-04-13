@@ -1,13 +1,15 @@
 @use "sass:color";
 
-$primary-color: #3498db;
-$primary-color: #2a3a47;
-$secondary-color: #2ecc71;
-$bg-color: #f8f9fa;
-$text-color: #333;
-$border-color: #ddd;
+// Define color variables for consistent theming across the component
+$primary-color: #3498db; // [Unused] - Old value, could be removed
+$primary-color: #2a3a47; // Primary theme color (dark blue-gray)
+$secondary-color: #2ecc71; // Secondary color (green)
+$bg-color: #f8f9fa; // Background color for the page
+$text-color: #333; // Default text color
+$border-color: #ddd; // Default border color for inputs and previews
 
 .update-category {
+  // Center the form on the screen with full height
   background-color: $bg-color;
   display: flex;
   justify-content: center;
@@ -18,12 +20,14 @@ $border-color: #ddd;
   font-family: "Cairo", sans-serif;
 
   .form-container {
+    // Main container for the form
     max-width: 600px;
     width: 100%;
     padding: 30px;
     border-radius: 10px;
 
     h2 {
+      // Form title
       display: flex;
       justify-content: center;
       align-items: center;
@@ -34,15 +38,18 @@ $border-color: #ddd;
 
     form {
       .form-group {
+        // Wrapper for each input group
         margin-bottom: 15px;
 
         label {
+          // Label for input fields
           color: $text-color;
           margin-bottom: 5px;
           font-weight: bold;
         }
 
         input {
+          // Input field styles
           width: 100%;
           padding: 10px;
           font-size: 16px;
@@ -52,16 +59,19 @@ $border-color: #ddd;
           transition: border 0.3s;
 
           &:focus {
+            // Highlight input on focus
             border-color: $primary-color;
           }
         }
       }
 
       .file-wrapper {
+        // Hidden file input (will be triggered manually)
         display: none;
       }
 
       .image-preview {
+        // Container to show selected image preview
         display: flex;
         align-items: center;
         width: 100%;
@@ -74,6 +84,7 @@ $border-color: #ddd;
         transition: all 0.3s ease-in-out;
 
         .preview-img {
+          // Thumbnail of selected image
           width: 80px;
           height: 80px;
           object-fit: cover;
@@ -83,6 +94,7 @@ $border-color: #ddd;
         }
 
         .image-details {
+          // Text and links beside the image preview
           flex-grow: 1;
           font-size: 14px;
           color: #333;
@@ -91,27 +103,30 @@ $border-color: #ddd;
             margin: 3px 0;
             word-break: break-word;
           }
+
           .image-link {
+            // Link to view or access the image
             display: inline-block;
             margin-right: 5px 8px 0;
             font-weight: bold;
             color: #007bff;
             text-decoration: none;
             transition: color 0.3s ease;
+
             &:hover {
               color: #0056b3;
               text-decoration: underline;
             }
           }
+
           .image-label {
             font-size: 16px;
             color: #333;
-
           }
-          
         }
 
         .remove-btn {
+          // Button to remove the selected image
           background: #ff4d4f;
           color: white;
           border: none;
@@ -128,6 +143,7 @@ $border-color: #ddd;
       }
 
       @media (max-width: 768px) {
+        // Responsive design for tablets and small screens
         .image-preview {
           flex-direction: column;
           text-align: center;
@@ -152,21 +168,24 @@ $border-color: #ddd;
       }
 
       .upload-image-btn {
+        // Dropzone-style button to upload images
         width: 100%;
         text-align: center;
-        border: 2px dashed rgb(28 138 219);
-        border: 2px dashed #2a3a47;
+        border: 2px dashed rgb(28 138 219); // [Overwritten by next line]
+        border: 2px dashed #2a3a47; // Final border style
         padding: 10px;
         margin-bottom: 20px;
         background-color: #eee;
         border-radius: 5px;
+
         img {
           width: 70px;
           height: 67px;
         }
 
         p {
-          color: rgb(28 138 219);
+          // Text inside the upload button
+          color: rgb(28 138 219); // [Overwritten by next line]
           color: #2a3a47;
           margin-top: -10px;
           font-weight: bold;
@@ -176,11 +195,13 @@ $border-color: #ddd;
 
       .image-err,
       .error-box {
+        // Error messages related to image upload or form validation
         margin-top: -15px;
         margin-bottom: 10px;
       }
 
       .btn-submit {
+        // Submit button for the form
         background-color: $primary-color;
         color: white;
         display: flex;
@@ -196,6 +217,7 @@ $border-color: #ddd;
         transition: background 0.3s;
 
         &:hover {
+          // Slightly darken button on hover
           background-color: color.adjust($primary-color, $lightness: -10%);
         }
       }
@@ -203,6 +225,7 @@ $border-color: #ddd;
   }
 
   @media (max-width: 480px) {
+    // Responsive tweaks for mobile devices
     .form-container {
       padding: 20px;
     }
@@ -214,15 +237,18 @@ $border-color: #ddd;
   }
 
   .error-box {
+    // General error box outside the form (duplicate class, might be reused)
     margin-bottom: 10px;
   }
 
   .error-text {
+    // Styling for error messages
     color: red;
     font-size: 14px;
   }
 
   .error-star {
+    // Asterisk for required fields
     color: red;
     font-weight: bold;
   }

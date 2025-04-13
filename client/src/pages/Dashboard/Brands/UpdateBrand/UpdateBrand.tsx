@@ -32,7 +32,7 @@ function UpdateBrand() {
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const isArabicNameNotUnique =
     errors.general === "The brand name in Arabic must be unique";
   const isEnglishNameNotUnique =
@@ -70,7 +70,7 @@ function UpdateBrand() {
         }
       });
     }
-  }, [form, image]);
+  }, [form, image, i18n.language]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });

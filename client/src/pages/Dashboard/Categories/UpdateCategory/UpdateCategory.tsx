@@ -1,43 +1,61 @@
 import { useEffect, useRef, useState } from "react";
-import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useNavigate, useParams } from "react-router-dom";
+import { BiSolidCategoryAlt } from "react-icons/bi";
+import { useAppSelector } from "../../../../Redux/app/hooks";
 import { useTranslation } from "react-i18next";
 import { CATEGORIES } from "../../../../Api/Api";
 import { Axios } from "../../../../Api/axios";
-import axios from "axios";
 import LoadingButton from "../../../../components/LoadingButton/LoadingButton";
-import "./UpdateCategory.scss";
 import Skeleton from "react-loading-skeleton";
-import { BiSolidCategoryAlt } from "react-icons/bi";
+import axios from "axios";
+import "./UpdateCategory.scss";
 
 function UpdateCategory() {
+  // Form state for English and Arabic category names
   const [form, setForm] = useState({
     nameEn: "",
     nameAr: "",
   });
+
+  // Image state (can be a File or URL string)
   const [image, setImage] = useState<File | string | null>(null);
+
+  // Get category ID from URL params
   const { id } = useParams();
+
+  // Loading state for both get and put operations
   const [loading, setLoading] = useState({
     state: false,
     type: "",
   });
 
+  // Validation error messages for form fields
   const [errors, setErrors] = useState({
     nameEn: "",
     nameAr: "",
     image: "",
     general: "",
   });
+
+  // File input reference to trigger file picker
   const openImage = useRef<HTMLInputElement | null>(null);
+
+  // Track whether the form has been submitted to trigger validation
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+
+  // Get selected language from Redux store
   const { lang } = useAppSelector((state) => state.language);
+
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+
+  // Boolean flags for specific error types (uniqueness)
   const isArabicNameNotUnique =
     errors.general === "The category name in Arabic must be unique";
   const isEnglishNameNotUnique =
     errors.general === "The category name in English must be unique";
 
+  // Fetch existing category data on mount (for editing)
   useEffect(() => {
     const fetchCategory = async () => {
       setLoading({ state: true, type: "get" });
@@ -58,10 +76,10 @@ function UpdateCategory() {
     fetchCategory();
   }, [id]);
 
+  // Re-validate inputs after submission and on change
   useEffect(() => {
     if (isSubmitted) {
       const fields = ["nameEn", "nameAr", "image", "general"];
-
       const newErrors = validateForm().errors;
 
       fields.forEach((field) => {
@@ -70,16 +88,18 @@ function UpdateCategory() {
         }
       });
     }
-  }, [form, image]);
+  }, [form, image, i18n.language]);
 
+  // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  // Validate form inputs and return error object
   const validateForm = () => {
     const newErrors: { msg: string; path?: string }[] = [];
 
-    // Validation for nameEn
+    // English name validation
     if (!form.nameEn.trim()) {
       newErrors.push({
         msg: t("dashboard.updateCategory.errors.nameEnRequired"),
@@ -97,7 +117,7 @@ function UpdateCategory() {
       });
     }
 
-    // Validation for nameAr
+    // Arabic name validation
     if (!form.nameAr.trim()) {
       newErrors.push({
         msg: t("dashboard.updateCategory.errors.nameArRequired"),
@@ -115,7 +135,7 @@ function UpdateCategory() {
       });
     }
 
-    // Image validation
+    // Image required
     if (!image) {
       newErrors.push({
         msg: t("dashboard.updateCategory.errors.imageRequired"),
@@ -123,7 +143,7 @@ function UpdateCategory() {
       });
     }
 
-    // Create errors map
+    // Convert array to object keyed by path
     const errorsMap = newErrors.reduce<Record<string, string>>((acc, error) => {
       if (error.path) {
         acc[error.path] = error.msg;
@@ -133,24 +153,26 @@ function UpdateCategory() {
       return acc;
     }, {});
 
-    // Set errors
+    // Update error state
     setErrors((prevErrors) => ({
       ...prevErrors,
       ...errorsMap,
     }));
 
-    // Return validation status and errors
     return { isValid: newErrors.length === 0, errors: errorsMap };
   };
 
+  // Trigger file input click
   function handleOpenImage() {
     if (openImage.current !== null) {
       openImage.current.click();
     }
   }
 
+  // Form submission handler
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setLoading({ state: true, type: "put" });
     setErrors({
       nameEn: "",
@@ -166,6 +188,7 @@ function UpdateCategory() {
       return;
     }
 
+    // Build form data for API call
     const formData = new FormData();
     formData.append("nameEn", form.nameEn);
     formData.append("nameAr", form.nameAr);
@@ -178,11 +201,10 @@ function UpdateCategory() {
       if (res.status === 200) {
         setLoading({ state: false, type: "" });
         navigate(`/${lang}/dashboard/categories`);
-        console.log(res.data);
       }
     } catch (err) {
       setLoading({ state: false, type: "" });
-      console.log(err);
+
       if (axios.isAxiosError(err) && err.response) {
         if (err.response.data?.message) {
           setErrors((prevErrors) => ({
@@ -223,8 +245,14 @@ function UpdateCategory() {
   return (
     <div className="update-category">
       <div className="form-container">
-        <h2>{t("dashboard.updateCategory.title")} <BiSolidCategoryAlt /></h2>
+        {/* Title */}
+        <h2>
+          {t("dashboard.updateCategory.title")} <BiSolidCategoryAlt />
+        </h2>
+
+        {/* Form start */}
         <form onSubmit={handleSubmit}>
+          {/* Arabic name input */}
           <div className="form-group">
             <label htmlFor="nameAr">
               {t("dashboard.updateCategory.categoryNameLabelAr")}
@@ -249,7 +277,6 @@ function UpdateCategory() {
                 }}
               />
             )}
-
             {(errors.nameAr || isArabicNameNotUnique) && (
               <p className="error-text">
                 <span className="error-star">*</span>{" "}
@@ -257,6 +284,8 @@ function UpdateCategory() {
               </p>
             )}
           </div>
+
+          {/* English name input */}
           <div className="form-group">
             <label htmlFor="nameEn">
               {t("dashboard.updateCategory.categoryNameLabelEn")}
@@ -281,7 +310,6 @@ function UpdateCategory() {
                 }}
               />
             )}
-
             {(errors.nameEn || isEnglishNameNotUnique) && (
               <p className="error-text">
                 <span className="error-star">*</span>{" "}
@@ -289,6 +317,8 @@ function UpdateCategory() {
               </p>
             )}
           </div>
+
+          {/* Hidden file input */}
           <div className="file-wrapper">
             <input
               type="file"
@@ -300,6 +330,8 @@ function UpdateCategory() {
               }}
             />
           </div>
+
+          {/* Image preview */}
           {loading.state && loading.type === "get" ? (
             <div style={{ marginBottom: "20px" }}>
               <Skeleton height={200} />
@@ -315,61 +347,62 @@ function UpdateCategory() {
                     alt={image instanceof File ? image.name : "Category Image"}
                     className="preview-img"
                   />
-                  {image && (
-                    <div className="image-details">
-                      {image instanceof File ? (
-                        <>
-                          <p>
-                            <strong>
-                              {t("dashboard.updateCategory.fileName")}:
-                            </strong>{" "}
-                            {image.name}
-                          </p>
-                          <p>
-                            <strong>
-                              {t("dashboard.updateCategory.size")}:
-                            </strong>{" "}
-                            {(image.size / 1024).toFixed(2)} KB
-                          </p>
-                        </>
-                      ) : (
+                  <div className="image-details">
+                    {image instanceof File ? (
+                      <>
                         <p>
-                          <strong className="image-label">
-                            {t("dashboard.updateCategory.image")}:
+                          <strong>
+                            {t("dashboard.updateCategory.fileName")}:
                           </strong>{" "}
-                          <a
-                            href={image}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="image-link"
-                          >
-                            {t("dashboard.updateCategory.viewImage")}
-                          </a>
+                          {image.name}
                         </p>
-                      )}
-                      <button
-                        className="remove-btn"
-                        onClick={() => setImage(null)}
-                      >
-                        ❌ {t("dashboard.updateCategory.deleteImageButton")}
-                      </button>
-                    </div>
-                  )}
+                        <p>
+                          <strong>{t("dashboard.updateCategory.size")}:</strong>{" "}
+                          {(image.size / 1024).toFixed(2)} KB
+                        </p>
+                      </>
+                    ) : (
+                      <p>
+                        <strong className="image-label">
+                          {t("dashboard.updateCategory.image")}:
+                        </strong>{" "}
+                        <a
+                          href={image}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="image-link"
+                        >
+                          {t("dashboard.updateCategory.viewImage")}
+                        </a>
+                      </p>
+                    )}
+                    <button
+                      className="remove-btn"
+                      onClick={() => setImage(null)}
+                    >
+                      ❌ {t("dashboard.updateCategory.deleteImageButton")}
+                    </button>
+                  </div>
                 </div>
               )}
             </>
           )}
+
+          {/* Upload image button if image is not present */}
           {!image && !loading.state && loading.type !== "get" && (
             <div className="upload-image-btn" onClick={handleOpenImage}>
               <img src="/images/upload.png" alt="" />
               <p>{t("dashboard.updateCategory.uploadImage")}</p>
             </div>
           )}
+
+          {/* Error messages */}
           {errors.image && (
             <p className="error-text image-err">
               <span className="error-star">*</span> {errors.image}
             </p>
           )}
+
           {errors.general &&
             !isArabicNameNotUnique &&
             !isEnglishNameNotUnique && (
@@ -379,6 +412,8 @@ function UpdateCategory() {
                 </p>
               </div>
             )}
+
+          {/* Submit button */}
           <button
             type="submit"
             className="btn-submit"

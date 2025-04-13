@@ -1,4 +1,5 @@
 .show-category {
+  // Container styling for the category details section
   background-color: #f4f6f8;
   width: 100%;
   padding: 20px;
@@ -6,6 +7,7 @@
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 
   h2 {
+    // Style for the page title (icon + text)
     color: #333;
     display: flex;
     justify-content: center;
@@ -16,18 +18,21 @@
   }
 
   .category-table {
+    // Main table styling
     width: 100%;
     border-collapse: collapse;
     margin: 0 auto;
 
     th,
     td {
+      // General cell padding and border
       padding: 12px 20px;
       border: 1px solid #ddd;
     }
 
     thead {
       th {
+        // Header row background and text color
         background-color: #2a3a47;
         color: white;
       }
@@ -36,11 +41,16 @@
     tbody {
       tr {
         td {
+          // Default text style for table data
           font-weight: 300;
+
           &:first-child {
+            // First column is the label: make it bold
             font-weight: bold;
           }
+
           img {
+            // Image size inside the table
             width: 100px;
           }
         }
@@ -48,23 +58,28 @@
     }
   }
 
+  // Responsive styles for tablets and below
   @media (max-width: 768px) {
     padding: 10px;
 
     h2 {
+      // Reduce heading size on smaller screens
       font-size: 1.2rem;
     }
 
     .category-table {
       width: 100%;
       font-size: 0.9rem;
-      overflow-x: auto;
+      overflow-x: auto; // Enable scrolling for table if needed
+
       tr {
+        // Make each row a block for mobile layout
         background-color: #1d2937;
         color: white;
         display: block;
         margin-bottom: 15px;
         border-radius: 5px;
+
         th,
         td {
           padding: 10px;
@@ -74,6 +89,7 @@
       thead {
         tr {
           th {
+            // Hide table headers for mobile view
             display: none;
           }
         }
@@ -82,15 +98,20 @@
       tbody {
         tr {
           td {
+            // Display table data as blocks with spacing
             display: block;
             padding: 10px 15px;
             border: none;
             border-bottom: 1px solid #ddd;
+
             &:first-child {
+              // Bold label and separator for first field in block view
               font-weight: bold;
               border-bottom: 1px solid rgb(209, 205, 205);
             }
+
             img {
+              // Center the image in mobile view
               display: block;
               margin: 0 auto;
             }
@@ -100,6 +121,7 @@
     }
   }
 
+  // Responsive styles for small phones
   @media (max-width: 480px) {
     h2 {
       font-size: 1rem;
