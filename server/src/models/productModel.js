@@ -67,6 +67,13 @@ const productSchema = new mongoose.Schema(
       type: Number,
     },
     colors: [String],
+    sizes: [
+      {
+        size: String,
+        quantity: Number,
+        price: Number,
+      },
+    ],
     coverImage: {
       type: String,
       required: [true, "Product Image cover is required"],
@@ -118,7 +125,7 @@ productSchema.pre(/^find/, function (next) {
     {
       path: "brand",
       select: "-__v",
-    }
+    },
   ]);
   next();
 });

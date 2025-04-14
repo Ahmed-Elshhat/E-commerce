@@ -1,7 +1,6 @@
 const path = require("path");
 const fs = require("fs");
 
-
 const express = require("express");
 const dotenv = require("dotenv");
 // To Logging API Requests

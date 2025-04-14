@@ -309,7 +309,13 @@
         "coverImageRequired": "صورة الغلاف مطلوبة.",
         "categoryRequired": "يجب اختيار فئة المنتج.",
         "priceZeroPadding": "السعر لا يمكن أن يبدأ بصفر.",
-        "priceAfterDiscountZeroPadding": "السعر بعد الخصم لا يمكن أن يبدأ بصفر."
+        "priceAfterDiscountZeroPadding": "السعر بعد الخصم لا يمكن أن يبدأ بصفر.",
+        "sizeRequired": "يجب إدخال المقاس.",
+        "sizeQuantityMin": "الكمية يجب أن تكون عددًا صحيحًا موجبًا.",
+        "sizeQuantityZeroPadding": "الكمية لا يمكن أن تبدأ بصفر.",
+        "sizePriceMin": "السعر يجب أن يكون رقمًا موجبًا.",
+        "sizePriceZeroPadding": "السعر لا يمكن أن يبدأ بصفر.",
+        "discountPriceTooHigh": "يجب أن يكون السعر بعد الخصم أقل من السعر الأصلي"
       },
       "title": "إضافة منتج جديد",
       "categoryLabel": "الفئة",
@@ -332,6 +338,11 @@
       "priceAfterDiscountPlaceholder": "أدخل السعر بعد الخصم",
       "colorsLabel": "الألوان",
       "addColor": "إضافة لون",
+      "sizesLabel": "الحجم",
+      "sizePlaceholder": "أدخل الحجم",
+      "sizeQuantityPlaceholder": "أدخل الكمية",
+      "sizePricePlaceholder": "أدخل السعر",
+      "addSize": "إضافة حجم",
       "choseCoverImage": "اختر صورة الغلاف",
       "choseImages": "اختر صورًا إضافية",
       "submitButton": "إضافة المنتج"

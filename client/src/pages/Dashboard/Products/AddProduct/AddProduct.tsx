@@ -10,6 +10,12 @@ import { BrandSchema, CategorySchema } from "../../../../Types/app";
 import { IoClose } from "react-icons/io5";
 import { FaImage, FaImages, FaProductHunt } from "react-icons/fa";
 
+type Size = {
+  size: string;
+  quantity: number;
+  price: number;
+};
+
 function AddProduct() {
   const [form, setForm] = useState({
     titleEn: "",
@@ -19,7 +25,7 @@ function AddProduct() {
     quantity: 1,
     price: 10,
     priceAfterDiscount: 0,
-    sizes: [],
+    sizes: [] as Size[],
     colors: [] as string[],
     coverImage: null as File | null,
     images: [] as File[],
@@ -32,6 +38,11 @@ function AddProduct() {
   const [previewCover, setPreviewCover] = useState<string | null>(null);
   const [previewImages, setPreviewImages] = useState<string[]>([]);
   const [colorInput, setColorInput] = useState("#0000ff");
+  const [sizeInputs, setSizeInputs] = useState({
+    size: "",
+    quantity: "",
+    price: "",
+  });
 
   const [errors, setErrors] = useState({
     titleEn: "",
@@ -42,12 +53,17 @@ function AddProduct() {
     price: "",
     priceAfterDiscount: "",
     coverImage: "",
+    sizes: "",
+    sizeName: "",
+    sizePrice: "",
+    sizeQuantity: "",
     images: "",
     category: "",
     brand: "",
     general: "",
   });
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [sizeSubmitted, setSizeSubmitted] = useState<boolean>(false);
   const { lang } = useAppSelector((state) => state.language);
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
@@ -81,6 +97,7 @@ function AddProduct() {
         "quantity",
         "price",
         "priceAfterDiscount",
+        "sizes",
         "coverImage",
         "images",
         "category",
@@ -104,13 +121,17 @@ function AddProduct() {
         price: "",
         priceAfterDiscount: "",
         coverImage: "",
+        sizes: "",
+        sizeName: "",
+        sizePrice: "",
+        sizeQuantity: "",
         images: "",
         category: "",
         brand: "",
         general: "",
       });
     }
-  }, [form]);
+  }, [form, i18n.language, sizeInputs]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -233,6 +254,13 @@ function AddProduct() {
       });
     }
 
+    if (+form.priceAfterDiscount >= +form.price) {
+      newErrors.push({
+        msg: t("dashboard.addProduct.errors.discountPriceTooHigh"),
+        path: "priceAfterDiscount",
+      });
+    }
+
     if (zeroPaddingRegex.test(form.priceAfterDiscount.toString())) {
       newErrors.push({
         msg: t("dashboard.addProduct.errors.priceAfterDiscountZeroPadding"),
@@ -340,6 +368,146 @@ function AddProduct() {
     }));
   };
 
+  const handleSizeInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+
+    if (name === "size") {
+      setSizeInputs((prevForm) => ({
+        ...prevForm,
+        [name]: value,
+      }));
+      return;
+    }
+
+    if (name === "quantity") {
+      if (value === "" || (!isNaN(Number(value)) && Number(value) % 1 === 0)) {
+        setSizeInputs((prevForm) => ({
+          ...prevForm,
+          [name]: value === "" ? "" : String(Number(value)), // تحويل القيمة إلى string
+        }));
+      }
+      return;
+    }
+
+    if (name === "price") {
+      if (
+        value === "" ||
+        (!isNaN(Number(value)) && /^(\d+(\.\d*)?|\.\d+)$/.test(value))
+      ) {
+        setSizeInputs((prevForm) => ({
+          ...prevForm,
+          [name]: value === "" ? "" : String(value), // تحويل القيمة إلى string
+        }));
+      }
+      return;
+    }
+
+    setSizeInputs((prevForm) => ({
+      ...prevForm,
+      [name]: value,
+    }));
+  };
+
+  useEffect(() => {
+    // تحقق من الأخطاء عند تغيير قيمة sizeInputs
+    const sizeErrors: { [key: string]: string } = {};
+
+    if (!sizeInputs.size.trim()) {
+      sizeErrors.size = t("dashboard.addProduct.errors.sizeRequired");
+    }
+
+    const sizeQuantity = Number(sizeInputs.quantity);
+    if (
+      !sizeInputs.quantity ||
+      isNaN(sizeQuantity) ||
+      sizeQuantity <= 0 ||
+      !Number.isInteger(sizeQuantity)
+    ) {
+      sizeErrors.quantity = t("dashboard.addProduct.errors.sizeQuantityMin");
+    }
+
+    const sizePrice = Number(sizeInputs.price);
+    if (!sizeInputs.price || isNaN(sizePrice) || sizePrice <= 0) {
+      sizeErrors.price = t("dashboard.addProduct.errors.sizePriceMin");
+    }
+
+    // تحديث حالة errors بناءً على الأخطاء
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      sizeName: sizeErrors.size || "",
+      sizeQuantity: sizeErrors.quantity || "",
+      sizePrice: sizeErrors.price || "",
+    }));
+  }, [sizeInputs]);
+
+  const handleAddSize = () => {
+    setSizeSubmitted(true);
+
+    // التحقق من الأخطاء قبل إضافة الحجم
+    const sizeErrors: { [key: string]: string } = {};
+
+    if (!sizeInputs.size.trim()) {
+      sizeErrors.size = t("dashboard.addProduct.errors.sizeRequired");
+    }
+
+    const sizeQuantity = Number(sizeInputs.quantity);
+    if (
+      !sizeInputs.quantity ||
+      isNaN(sizeQuantity) ||
+      sizeQuantity <= 0 ||
+      !Number.isInteger(sizeQuantity)
+    ) {
+      sizeErrors.quantity = t("dashboard.addProduct.errors.sizeQuantityMin");
+    }
+
+    const sizePrice = Number(sizeInputs.price);
+    if (!sizeInputs.price || isNaN(sizePrice) || sizePrice <= 0) {
+      sizeErrors.price = t("dashboard.addProduct.errors.sizePriceMin");
+    }
+
+    // إذا كان هناك أخطاء، فلا تتم إضافة الحجم
+    if (Object.keys(sizeErrors).length > 0) {
+      console.log(sizeErrors);
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        sizeName: sizeErrors.size,
+        sizeQuantity: sizeErrors.quantity,
+        sizePrice: sizeErrors.price,
+      }));
+      return;
+    }
+
+    // إذا كانت المدخلات صحيحة، أضف الحجم إلى القائمة
+    setSizeSubmitted(false);
+    const quantity = Number(sizeInputs.quantity);
+    const price = Number(sizeInputs.price);
+    setForm((prevForm) => ({
+      ...prevForm,
+      sizes: [
+        ...prevForm.sizes,
+        {
+          size: sizeInputs.size,
+          quantity,
+          price,
+        },
+      ],
+    }));
+
+    // إعادة تعيين المدخلات بعد إضافة الحجم
+    setSizeInputs({
+      size: "",
+      quantity: "",
+      price: "",
+    });
+  };
+
+  const handleRemoveSize = (index: number) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      sizes: prevForm.sizes.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({
@@ -350,6 +518,10 @@ function AddProduct() {
       quantity: "",
       price: "",
       priceAfterDiscount: "",
+      sizes: "",
+      sizeName: "",
+      sizePrice: "",
+      sizeQuantity: "",
       coverImage: "",
       images: "",
       category: "",
@@ -382,8 +554,10 @@ function AddProduct() {
     });
 
     form.colors.forEach((color) => {
-      formData.append(`colors`, color);
+      formData.append(`colors[]`, color);
     });
+
+    formData.append("sizes", JSON.stringify(form.sizes));
 
     try {
       const res = await Axios.post(`${PRODUCTS}`, formData);
@@ -432,7 +606,9 @@ function AddProduct() {
   return (
     <div className="add-product">
       <div className="form-container">
-        <h2>{t("dashboard.addProduct.title")} <FaProductHunt /></h2>
+        <h2>
+          {t("dashboard.addProduct.title")} <FaProductHunt />
+        </h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="category">
@@ -664,6 +840,92 @@ function AddProduct() {
                   </button>
                 </div>
               ))}
+            </div>
+          </div>
+          <div className="form-group">
+            <label htmlFor="sizes">
+              {t("dashboard.addProduct.sizesLabel")}
+            </label>
+            <div className="size-input-container">
+              <div className="size-input-group">
+                <input
+                  type="text"
+                  id="size"
+                  name="size"
+                  placeholder={t("dashboard.addProduct.sizePlaceholder")}
+                  value={sizeInputs.size}
+                  onChange={handleSizeInputChange}
+                  className="size-input"
+                  disabled={isDisabled}
+                />
+                {errors.sizeName && sizeSubmitted && (
+                  <p className="error-text">
+                    <span className="error-star">*</span> {errors.sizeName}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  id="quantity"
+                  name="quantity"
+                  placeholder={t(
+                    "dashboard.addProduct.sizeQuantityPlaceholder"
+                  )}
+                  value={sizeInputs.quantity}
+                  onChange={handleSizeInputChange}
+                  className="size-input"
+                  disabled={isDisabled}
+                />
+                {errors.sizeQuantity && sizeSubmitted && (
+                  <p className="error-text">
+                    <span className="error-star">*</span> {errors.sizeQuantity}
+                  </p>
+                )}
+                <input
+                  type="text"
+                  id="price"
+                  name="price"
+                  placeholder={t("dashboard.addProduct.sizePricePlaceholder")}
+                  value={sizeInputs.price}
+                  onChange={handleSizeInputChange}
+                  className="size-input"
+                  disabled={isDisabled}
+                />
+                {errors.sizePrice && sizeSubmitted && (
+                  <p className="error-text">
+                    <span className="error-star">*</span> {errors.sizePrice}
+                  </p>
+                )}
+                {errors.sizes && (
+                  <p className="error-text">
+                    <span className="error-star">*</span> {errors.sizes}
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="add-size-btn"
+                onClick={handleAddSize}
+                disabled={isDisabled}
+              >
+                {t("dashboard.addProduct.addSize")}
+              </button>
+
+              <div className="size-list">
+                {form.sizes.map((size, index) => (
+                  <div key={index} className="size-item">
+                    <span>
+                      {size.size} - {size.quantity} units - {size.price} EGP
+                    </span>
+                    <button
+                      type="button"
+                      className="remove-size-btn"
+                      onClick={() => handleRemoveSize(index)}
+                    >
+                      <IoClose />
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
           <div className="form-group">

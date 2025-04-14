@@ -20,6 +20,7 @@ exports.createProductValidator = [
     "price",
     "priceAfterDiscount",
     "colors",
+    "sizes",
     "coverImage",
     "images",
     "category",
@@ -92,6 +93,7 @@ exports.createProductValidator = [
     .optional()
     .isArray()
     .withMessage("availableColors should be array of string"),
+  check("sizes").optional(),
   check("coverImage").notEmpty().withMessage("Product cover image is required"),
   check("images")
     .optional()
@@ -118,9 +120,7 @@ exports.createProductValidator = [
     .custom((brandId) =>
       Brand.findById(brandId).then((brand) => {
         if (!brand) {
-          return Promise.reject(
-            new Error(`No brand for this id: ${brandId}`)
-          );
+          return Promise.reject(new Error(`No brand for this id: ${brandId}`));
         }
       })
     ),

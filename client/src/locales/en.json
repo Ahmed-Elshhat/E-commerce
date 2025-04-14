@@ -308,7 +308,13 @@
         "coverImageRequired": "Cover image is required.",
         "categoryRequired": "Category is required.",
         "priceZeroPadding": "Price cannot start with zero.",
-        "priceAfterDiscountZeroPadding": "Discounted price cannot start with zero."
+        "priceAfterDiscountZeroPadding": "Discounted price cannot start with zero.",
+        "sizeRequired": "Size is required.",
+        "sizeQuantityMin": "Quantity must be a positive integer.",
+        "sizeQuantityZeroPadding": "Quantity cannot start with zero.",
+        "sizePriceMin": "Price must be a positive number.",
+        "sizePriceZeroPadding": "Price cannot start with zero.",
+        "discountPriceTooHigh": "The discounted price must be less than the original price"
       },
       "title": "Add a New Product",
       "categoryLabel": "Category",
@@ -331,6 +337,11 @@
       "priceAfterDiscountPlaceholder": "Enter the discounted price",
       "colorsLabel": "Colors",
       "addColor": "Add a color",
+      "sizesLabel": "Size",
+      "sizePlaceholder": "Enter the size",
+      "sizeQuantityPlaceholder": "Enter the quantity",
+      "sizePricePlaceholder": "Enter the price",
+      "addSize": "Add Size",
       "choseCoverImage": "Choose a cover image",
       "choseImages": "Choose additional images",
       "submitButton": "Add Product"

@@ -139,7 +139,7 @@ exports.getProduct = factory.getOne(Product, "reviews");
 // @desc    Create product
 // @route    POST /api/v1/products
 // @access    Private
-exports.createProduct = factory.createOne(Product);
+exports.createProduct = factory.createOne(Product, "product");
 
 // @desc    Update specific product
 // @route    PUT /api/v1/products/:id
