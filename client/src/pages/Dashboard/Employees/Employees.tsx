@@ -384,7 +384,7 @@ function Employees() {
                     <td data-label="ID">
                       <CopyButton couponId={emp._id} /> {/* Copy Button for Employee ID */}
                     </td>
-                    <td data-label={t("dashboard.employees.name")}>{emp.name}</td>
+                    <td data-label={t("dashboard.employees.name")} onDoubleClick={() => console.log("double")}>{emp.name}</td>
                     <td data-label={t("dashboard.employees.role")}>
                       {emp.role === "employee" && t("dashboard.employees.employee")}
                     </td>

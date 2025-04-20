@@ -1,11 +1,10 @@
-// const { param } = require("express-validator");
 const { check, body } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const { validateExactFields } = require("../validateFields");
 const Cart = require("../../models/cartModel");
 
 exports.createCartValidator = [
-  validateExactFields(["productId", "color"], [], []),
+  validateExactFields(["productId", "color", "size"], [], []),
   check("productId")
     .notEmpty()
     .withMessage("Product Id is required")

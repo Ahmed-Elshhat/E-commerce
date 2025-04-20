@@ -1,6 +1,5 @@
 // const { param } = require("express-validator");
-const { check, body } = require("express-validator");
-const slugify = require("slugify");
+const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const { validateExactFields } = require("../validateFields");
 

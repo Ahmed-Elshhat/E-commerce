@@ -2,9 +2,6 @@ const asyncHandler = require("express-async-handler");
 const { v4: uuidv4 } = require("uuid");
 const sharp = require("sharp");
 
-// const slugify = require("slugify");
-// const ApiError = require("../utils/apiError");
-// const ApiFeatures = require("../utils/apiFeatures");
 const factory = require("./handlersFactory");
 const Product = require("../models/productModel");
 const { uploadMixOfImages } = require("../middlewares/uploadImageMiddleware");
@@ -67,69 +64,6 @@ exports.resizeProductImages = asyncHandler(async (req, res, next) => {
 // @route    GET /api/v1/products
 // @access    Public
 exports.getProducts = factory.getAll(Product, "Products", "reviews");
-// exports.getProducts = asyncHandler(async (req, res) => {
-//   // // 1) Filtering
-//   // const queryStringObj = { ...req.query };
-//   // const excludesFields = ["page", "sort", "limit", "fields", "keyword"];
-//   // excludesFields.forEach((field) => delete queryStringObj[field]);
-
-//   // // Apply Filtration using [gte, gt, lte, lt]
-//   // let queryStr = JSON.stringify(queryStringObj);
-//   // queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
-
-//   // // 1) Pagination
-//   // const page = +req.query.page;
-//   // const limit = +req.query.limit;
-//   // const skip = (page - 1) * limit;
-
-//   // 2) Build query
-//   const documentsCounts = await Product.countDocuments();
-//   const apiFeatures = new ApiFeatures(Product.find(), req.query)
-//     .Paginate(documentsCounts)
-//     .filter()
-//     .search("Products")
-//     .limitFields()
-//     .sort();
-
-//   // 6) Execute query
-//   const { mongooseQuery, paginationResults } = apiFeatures;
-//   const products = await mongooseQuery;
-//   res
-//     .status(200)
-//     .json({ results: products.length, paginationResults, data: products });
-
-//   // let mongooseQuery = Product.find(JSON.parse(queryStr))
-//   //   // .where("price")
-//   //   // .equals(req.query.price)
-//   //   // .where("ratingsAverage")
-//   //   // .equals(req.query.ratingsAverage)
-
-//   // // 3) Sorting
-//   // if (req.query.sort) {
-//   //   const sortBy = req.query.sort.split(",").join(" ");
-//   //   mongooseQuery = mongooseQuery.sort(sortBy);
-//   // } else {
-//   //   mongooseQuery = mongooseQuery.sort("-createAt");
-//   // }
-
-//   // 4) Fields Limiting
-//   // if (req.query.fields) {
-//   //   const fields = req.query.fields.split(",").join(" ");
-//   //   mongooseQuery = mongooseQuery.select(`${fields}`);
-//   // } else {
-//   //   mongooseQuery = mongooseQuery.select(`-__v`);
-//   // }
-
-//   // // 5) Search
-//   // if (req.query.keyword) {
-//   //   let query = {};
-//   //   query.$or = [
-//   //     { title: { $regex: req.query.keyword, $options: "i" } },
-//   //     { description: { $regex: req.query.keyword, $options: "i" } },
-//   //   ];
-//   //   mongooseQuery = mongooseQuery.find(query);
-//   // }
-// });
 
 // @desc    Get specific product by id
 // @route    GET /api/v1/products/:id

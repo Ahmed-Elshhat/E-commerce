@@ -72,6 +72,7 @@ const productSchema = new mongoose.Schema(
         size: String,
         quantity: Number,
         price: Number,
+        priceAfterDiscount: Number,
       },
     ],
     coverImage: {

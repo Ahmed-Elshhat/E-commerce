@@ -12,7 +12,6 @@ function ShowProductDetails() {
   const { id } = useParams();
   const [product, setProduct] = useState<ProductSchema | null>(null);
   const { lang } = useAppSelector((state) => state.language);
-
   const { t, i18n } = useTranslation();
 
   useEffect(() => {
@@ -91,7 +90,7 @@ function ShowProductDetails() {
           <tr>
             <td>{t("dashboard.showProduct.priceAfterDiscount")}</td>
             <td data-label={t("dashboard.showProduct.priceAfterDiscount")}>
-              {product.priceAfterDiscount}
+              {product?.priceAfterDiscount || 0}
             </td>
           </tr>
           <tr>

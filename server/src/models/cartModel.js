@@ -12,6 +12,7 @@ const cartSchema = mongoose.Schema({
         default: 1,
       },
       color: String,
+      size: String,
       price: Number,
     },
   ],
@@ -29,6 +30,12 @@ cartSchema.pre(/^find/, function (next) {
   this.populate("cartItems.product");
   next();
 });
+
+cartSchema.post("save", async (doc, next) => {
+  await doc.populate("cartItems.product");
+  next();
+});
+
 
 const CartModel = mongoose.model("Cart", cartSchema);
 
