@@ -17,15 +17,13 @@ exports.getCartValidator = [validateExactFields(), validatorMiddleware];
 
 exports.updateCartItemQuantityValidator = [
   validateExactFields(["quantity"], ["itemId"]),
-  check("quantity").custom((val, { req }) => {
-    if (val === "") {
-      throw Error("Quantity must be not empty");
-    }
-    if (val < 0) {
-      throw Error("Quantity must be not negative number");
-    }
-    return true;
-  }),
+  check("itemId")
+  .isMongoId().withMessage("Invalid item ID format"),
+  check("quantity")
+    .notEmpty()
+    .withMessage("Quantity must be not empty")
+    .isInt({ gt: 0 })
+    .withMessage("Quantity must be a positive integer"),
   validatorMiddleware,
 ];
 

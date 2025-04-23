@@ -66,13 +66,24 @@ const productSchema = new mongoose.Schema(
     priceAfterDiscount: {
       type: Number,
     },
-    colors: [String],
+    colors: [
+      {
+        color: String,
+        quantity: Number,
+      },
+    ],
     sizes: [
       {
         size: String,
         quantity: Number,
         price: Number,
         priceAfterDiscount: Number,
+        colors: [
+          {
+            color: String,
+            quantity: Number,
+          },
+        ],
       },
     ],
     coverImage: {

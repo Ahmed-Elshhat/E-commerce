@@ -20,163 +20,280 @@ const calcTotalCartPrice = (cart) => {
 // @route   POST /api/v1/cart
 // @access  Private/User
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
-  // Extract productId, color, size from the request body
   const { productId, color, size } = req.body;
 
-  // Search for the product in the database using the productId
   const product = await Product.findById(productId);
-
-  // If the product is not found in the database, return an error that the product doesn't exist
   if (!product) {
-    return next(new ApiError("Product not found", 404)); // Return 404 error: Product not found
+    return next(new ApiError("Product not found", 404));
   }
 
-  // Check if the product has available colors
   const hasColors = product.colors && product.colors.length > 0;
-
-  // If the product has available colors
-  if (hasColors) {
-    // If no color is provided by the user, return an error that color is required
-    if (!color) {
-      return next(
-        new ApiError("This product requires a color to be selected", 400) // Return 400 error: Color is required
-      );
-    }
-    // Check if the color selected by the user is available for this product
-    if (!product.colors.includes(color)) {
-      return next(
-        new ApiError(`Color '${color}' is not available for this product`, 400) // Return 400 error: Color not available
-      );
-    }
-  }
-  // If the product does not support colors, but a color is selected by the user
-  else if (color) {
-    return next(new ApiError("This product does not support colors", 400)); // Return 400 error: Product does not support colors
-  }
-
-  // Check if the product has available sizes
   const hasSizes = product.sizes && product.sizes.length > 0;
+
   let finalPrice;
   let availableQuantity;
 
-  // If the product has sizes
   if (hasSizes) {
-    // If no size is selected by the user, return an error that size is required
     if (!size) {
       return next(
-        new ApiError("This product requires a size to be selected", 400) // Return 400 error: Size is required
+        new ApiError("This product requires a size to be selected", 400)
       );
     }
 
-    // Find the selected size in the product's available sizes
     const selectedSize = product.sizes.find((s) => s.size === size);
-    // If the selected size is not available for the product, return an error
     if (!selectedSize) {
       return next(
-        new ApiError(`Size '${size}' is not available for this product`, 400) // Return 400 error: Size not available
+        new ApiError(`Size '${size}' is not available for this product`, 400)
       );
     }
 
-    // Determine the final price of the product based on discount (if available), otherwise use the regular price
     finalPrice =
       selectedSize.priceAfterDiscount != null
         ? selectedSize.priceAfterDiscount
         : selectedSize.price;
 
-    // Determine the available quantity for this size
-    availableQuantity = selectedSize.quantity ?? 0; // If quantity is not available, assume 0
-  } else {
-    // If the product does not have sizes but a size is provided by the user
-    if (size) {
-      return next(new ApiError("This product does not support sizes", 400)); // Return 400 error: Product does not support sizes
-    }
+    // التعامل مع ألوان خاصة بالمقاس
+    if (selectedSize.colors && selectedSize.colors.length > 0) {
+      if (!color) {
+        return next(new ApiError("You must select a color for this size", 400));
+      }
 
-    // Determine the final price of the product based on discount (if available), otherwise use the regular price
-    finalPrice =
-      product.priceAfterDiscount != null
-        ? product.priceAfterDiscount
-        : product.price;
-
-    // Determine the available quantity of the product
-    availableQuantity = product.quantity ?? 0; // If quantity is not available, assume 0
-  }
-
-  // Search for the user's cart in the database
-  let cart = await Cart.findOne({ user: req.user.id });
-
-  // If no cart is found for the user
-  if (!cart) {
-    // If the available quantity is less than 1 (i.e., product is out of stock), return an error
-    if (availableQuantity < 1) {
-      return next(
-        new ApiError("This product is out of stock and cannot be added", 400) // Return 400 error: Product out of stock
-      );
-    }
-
-    // Create a new cart for the user and add the product to it
-    cart = await Cart.create({
-      user: req.user.id, // Set the user for whom the cart is being created
-      cartItems: [{ product: productId, color, size, price: finalPrice }], // Add the product to the cart
-    });
-  } else {
-    // If the cart exists, check if the product is already in the cart
-    const productIndex = cart.cartItems.findIndex((item) => {
-      // Compare the productId of the product in the cart with the productId of the product the user wants to add
-      const itemProductId = item.product._id
-        ? item.product._id.toString()
-        : item.product.toString();
-      return (
-        itemProductId === productId && // Match the productId
-        item.color === color && // Match the color
-        (item.size === size || (!item.size && !size)) // Match the size (or if sizes are not supported)
-      );
-    });
-
-    // If the product is already in the cart
-    if (productIndex > -1) {
-      // Get the current quantity of the product in the cart
-      const currentQty = cart.cartItems[productIndex].quantity;
-
-      // If the quantity to be added exceeds the available quantity, return an error
-      if (currentQty + 1 > availableQuantity) {
+      const selectedColor = selectedSize.colors.find((c) => c.color === color);
+      if (!selectedColor) {
         return next(
           new ApiError(
-            `Cannot add more than ${availableQuantity} items of this product`, // Return 400 error: Cannot add more than the available quantity
+            `Color '${color}' is not available for size '${size}'`,
             400
           )
         );
       }
 
-      // If the quantity is valid, increase the quantity in the cart
-      cart.cartItems[productIndex].quantity += 1;
+      availableQuantity = selectedColor.quantity ?? 0;
     } else {
-      // If the product is not already in the cart
-      if (availableQuantity < 1) {
+      if (color) {
+        return next(new ApiError("This size does not support colors", 400));
+      }
+
+      availableQuantity = selectedSize.quantity ?? 0;
+    }
+  } else {
+    if (size) {
+      return next(new ApiError("This product does not support sizes", 400));
+    }
+
+    finalPrice =
+      product.priceAfterDiscount != null
+        ? product.priceAfterDiscount
+        : product.price;
+
+    if (hasColors) {
+      if (!color) {
         return next(
-          new ApiError("This product is out of stock and cannot be added", 400) // Return 400 error: Product out of stock
+          new ApiError("You must select a color for this product", 400)
         );
       }
 
-      // Add the new product to the cart
+      const selectedColor = product.colors.find((c) => c.color === color);
+      if (!selectedColor) {
+        return next(
+          new ApiError(
+            `Color '${color}' is not available for this product`,
+            400
+          )
+        );
+      }
+
+      availableQuantity = selectedColor.quantity ?? 0;
+    } else {
+      if (color) {
+        return next(new ApiError("This product does not support colors", 400));
+      }
+
+      availableQuantity = product.quantity ?? 0;
+    }
+  }
+
+  let cart = await Cart.findOne({ user: req.user.id });
+
+  if (!cart) {
+    if (availableQuantity < 1) {
+      return next(
+        new ApiError("This product is out of stock and cannot be added", 400)
+      );
+    }
+
+    cart = await Cart.create({
+      user: req.user.id,
+      cartItems: [
+        { product: productId, color, size, price: finalPrice, quantity: 1 },
+      ],
+    });
+  } else {
+    const productIndex = cart.cartItems.findIndex((item) => {
+      const itemProductId = item.product._id
+        ? item.product._id.toString()
+        : item.product.toString();
+      return (
+        itemProductId === productId &&
+        item.color === color &&
+        (item.size === size || (!item.size && !size))
+      );
+    });
+
+    if (productIndex > -1) {
+      const currentQty = cart.cartItems[productIndex].quantity;
+      if (currentQty + 1 > availableQuantity) {
+        return next(
+          new ApiError(
+            `Cannot add more than ${availableQuantity} items of this product with color '${color}'${size ? ` and size '${size}'` : ""}`,
+            400
+          )
+        );
+      }
+
+      cart.cartItems[productIndex].quantity += 1;
+    } else {
+      if (availableQuantity < 1) {
+        return next(
+          new ApiError("This product is out of stock and cannot be added", 400)
+        );
+      }
+
       cart.cartItems.push({
         product: productId,
         color,
         size,
         price: finalPrice,
+        quantity: 1,
       });
     }
   }
 
-  // Calculate the total price of the cart after adding the product
   calcTotalCartPrice(cart);
-
-  // Save the updated cart in the database
   await cart.save();
 
-  // Send a response to the user indicating the success of the operation with the number of items in the cart and the updated cart data
   res.status(201).json({
     status: "success",
     message: "Product added to cart successfully",
+    numOfCartItems: cart.cartItems.length,
+    data: cart,
+  });
+});
+
+// @desc    Update specific cart item quantity
+// @route   PUT /api/v1/cart/:itemId
+// @access  Private/User
+exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
+  const { quantity } = req.body;
+
+  // 1) Get Cart for logged user
+  let cart = await Cart.findOne({ user: req.user.id });
+
+  if (!cart) {
+    return next(new ApiError(`There is no cart for user ${req.user._id}`, 404));
+  }
+
+  // 2) Find the product in cart by itemId
+  const productIndex = cart.cartItems.findIndex(
+    (item) => item._id.toString() === req.params.itemId
+  );
+
+  if (productIndex === -1) {
+    return next(
+      new ApiError(`There is no item for this id: ${req.params.itemId}`, 404)
+    );
+  }
+
+  const cartItem = cart.cartItems[productIndex];
+
+  // 3) Get the product data from the cartItem
+  const product = cartItem.product;
+  if (!product) {
+    return next(new ApiError("Product not found", 404));
+  }
+
+  // 4) Determine available quantity
+  let availableQuantity;
+  if (cartItem.size) {
+    const selectedSize = product.sizes.find((s) => s.size === cartItem.size);
+    if (!selectedSize) {
+      return next(
+        new ApiError(`Size '${cartItem.size}' is no longer available`, 400)
+      );
+    }
+
+    const hasSizeColors = selectedSize.colors && selectedSize.colors.length > 0;
+
+    if (hasSizeColors && cartItem.color) {
+      const selectedColor = selectedSize.colors.find(
+        (c) => c.color === cartItem.color
+      );
+
+      if (!selectedColor) {
+        return next(
+          new ApiError(
+            `Color '${cartItem.color}' is not available for size '${cartItem.size}'`,
+            400
+          )
+        );
+      }
+
+      availableQuantity = selectedColor.quantity ?? 0;
+    } else if (hasSizeColors && !cartItem.color) {
+      return next(
+        new ApiError(`This size requires a color to be selected`, 400)
+      );
+    } else if (!hasSizeColors && cartItem.color) {
+      return next(new ApiError("This size does not support colors", 400));
+    } else {
+      availableQuantity = selectedSize.quantity ?? 0;
+    }
+  } else if (cartItem.color) {
+    const hasColors = product.colors && product.colors.length > 0;
+
+    if (!hasColors) {
+      return next(new ApiError("This product does not support colors", 400));
+    }
+
+    const selectedColor = product.colors.find(
+      (c) => c.color === cartItem.color
+    );
+
+    if (!selectedColor) {
+      return next(
+        new ApiError(
+          `Color '${cartItem.color}' is not available for this product`,
+          400
+        )
+      );
+    }
+
+    availableQuantity = selectedColor.quantity ?? 0;
+  } else {
+    availableQuantity = product.quantity ?? 0;
+  }
+
+  // 5) Check if requested quantity is allowed
+  if (quantity > availableQuantity) {
+    return next(
+      new ApiError(
+        `Cannot set quantity more than available: ${availableQuantity}`,
+        400
+      )
+    );
+  }
+
+  // 6) Update the quantity
+  cartItem.quantity = quantity;
+  cart.cartItems[productIndex] = cartItem;
+
+  // 7) Recalculate cart total
+  calcTotalCartPrice(cart);
+  await cart.save();
+
+  res.status(200).json({
+    status: "success",
+    message: "Cart item quantity updated successfully",
     numOfCartItems: cart.cartItems.length,
     data: cart,
   });
@@ -198,66 +315,6 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
 
   res.status(200).json({
     status: "success",
-    numOfCartItems: cart.cartItems.length,
-    data: cart,
-  });
-});
-
-// @desc    clear logged user cart
-// @route   DELETE /api/v1/cart
-// @access  Private/User
-exports.clearCart = asyncHandler(async (req, res, next) => {
-    // Find the cart associated with the user and delete it
-  const cart = await Cart.findOneAndDelete(
-    { user: req.user.id }, // Search for the cart by user ID
-    { new: true } // Ensure the new document is returned (not needed here, as we're deleting)
-  );
-
-  // If no cart was found for the user
-  if (!cart) {
-    return next(
-      new ApiError(`There is no cart for this user id : ${req.user.id}`, 404)
-    );
-  }
-
-  res.status(204).send();
-});
-
-// @desc    Update specific cart item quantity
-// @route   PUT /api/v1/cart/:itemId
-// @access  Private/User
-exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
-  const { quantity } = req.body;
-
-  // 1) Get Cart for logged user
-  let cart = await Cart.findOne({ user: req.user.id });
-
-  if (!cart) {
-    return next(new ApiError(`there is no cart for user ${req.user._id}`, 404));
-  }
-
-  // check if product already exists in cart
-  const productIndex = cart.cartItems.findIndex(
-    (item) => item._id.toString() === req.params.itemId
-  );
-
-  if (productIndex > -1) {
-    // product exist in cart, update product quantity
-    const cartItem = cart.cartItems[productIndex];
-    cartItem.quantity = quantity;
-    cart.cartItems[productIndex] = cartItem;
-  } else {
-    return next(
-      new ApiError(`there is no item for this id :${req.params.itemId}`, 404)
-    );
-  }
-
-  // Calculate total cart price
-  calcTotalCartPrice(cart);
-  await cart.save();
-  res.status(200).json({
-    status: "success",
-    message: "Product updated to cart successfully",
     numOfCartItems: cart.cartItems.length,
     data: cart,
   });
@@ -289,6 +346,26 @@ exports.removeSpecificCartItem = asyncHandler(async (req, res, next) => {
     numOfCartItems: cart.cartItems.length,
     data: cart,
   });
+});
+
+// @desc    clear logged user cart
+// @route   DELETE /api/v1/cart
+// @access  Private/User
+exports.clearCart = asyncHandler(async (req, res, next) => {
+  // Find the cart associated with the user and delete it
+  const cart = await Cart.findOneAndDelete(
+    { user: req.user.id }, // Search for the cart by user ID
+    { new: true } // Ensure the new document is returned (not needed here, as we're deleting)
+  );
+
+  // If no cart was found for the user
+  if (!cart) {
+    return next(
+      new ApiError(`There is no cart for this user id : ${req.user.id}`, 404)
+    );
+  }
+
+  res.status(204).send();
 });
 
 // @desc    Apply coupon on logged user cart
