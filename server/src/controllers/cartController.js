@@ -236,52 +236,63 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
 // @route   PUT /api/v1/cart/:itemId
 // @access  Private/User
 exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
-  const { quantity } = req.body;
+  const { quantity } = req.body; // Step 1: Extract the quantity from the request body
 
-  // 1) Get Cart for logged user
+  // Step 2: Get Cart for the logged-in user
   let cart = await Cart.findOne({ user: req.user.id });
 
   if (!cart) {
+    // Error: No cart found for the user
     return next(new ApiError(`There is no cart for user ${req.user._id}`, 404));
   }
 
-  // 2) Find the product in cart by itemId
+  // Step 3: Find the product in the cart by itemId (using req.params.itemId)
   const productIndex = cart.cartItems.findIndex(
     (item) => item._id.toString() === req.params.itemId
   );
 
   if (productIndex === -1) {
+    // Error: Product item not found in the cart
     return next(
       new ApiError(`There is no item for this id: ${req.params.itemId}`, 404)
     );
   }
 
+  // Step 4: Get the specific cart item based on the found product index
   const cartItem = cart.cartItems[productIndex];
 
-  // 3) Get the product data from the cartItem
+  // Step 5: Get the product data from the cartItem
   const product = cartItem.product;
   if (!product) {
+    // Error: Product not found in the cart item
     return next(new ApiError("Product not found", 404));
   }
 
-  // 4) Determine available quantity
+  // Determine the available quantity of the product
   let availableQuantity;
+
+  // Case 1: Product has sizes
   if (cartItem.size) {
+    // Step 5.1: Find the selected size in the product's sizes array
     const selectedSize = product.sizes.find((s) => s.size === cartItem.size);
     if (!selectedSize) {
+      // Error: Size no longer available
       return next(
         new ApiError(`Size '${cartItem.size}' is no longer available`, 400)
       );
     }
 
+    // Step 5.2: Check if the selected size supports color variations
     const hasSizeColors = selectedSize.colors && selectedSize.colors.length > 0;
 
+    // Case 1.1: Product size has color options
     if (hasSizeColors && cartItem.color) {
       const selectedColor = selectedSize.colors.find(
         (c) => c.color === cartItem.color
       );
 
       if (!selectedColor) {
+        // Error: Selected color is not available for the selected size
         return next(
           new ApiError(
             `Color '${cartItem.color}' is not available for size '${cartItem.size}'`,
@@ -290,20 +301,32 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
         );
       }
 
-      availableQuantity = selectedColor.quantity ?? 0;
-    } else if (hasSizeColors && !cartItem.color) {
+      availableQuantity = selectedColor.quantity ?? 0; // Step 5.3: Get available quantity for the selected color
+    }
+    // Case 1.2: Size requires color selection but none selected
+    else if (hasSizeColors && !cartItem.color) {
+      // Error: Color must be selected for this size
       return next(
         new ApiError(`This size requires a color to be selected`, 400)
       );
-    } else if (!hasSizeColors && cartItem.color) {
-      return next(new ApiError("This size does not support colors", 400));
-    } else {
-      availableQuantity = selectedSize.quantity ?? 0;
     }
-  } else if (cartItem.color) {
+    // Case 1.3: Size does not support color but color is selected
+    else if (!hasSizeColors && cartItem.color) {
+      // Error: Size does not support color
+      return next(new ApiError("This size does not support colors", 400));
+    }
+    // Case 1.4: Size does not require color, proceed with the size quantity
+    else {
+      availableQuantity = selectedSize.quantity ?? 0; // Step 5.4: Get available quantity for the selected size
+    }
+  }
+  // Case 2: Product has a color but no size
+  else if (cartItem.color) {
+    // Step 5.5: Check if the product supports color variations
     const hasColors = product.colors && product.colors.length > 0;
 
     if (!hasColors) {
+      // Error: Product does not support colors
       return next(new ApiError("This product does not support colors", 400));
     }
 
@@ -312,6 +335,7 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
     );
 
     if (!selectedColor) {
+      // Error: Selected color is not available for this product
       return next(
         new ApiError(
           `Color '${cartItem.color}' is not available for this product`,
@@ -320,13 +344,16 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
       );
     }
 
-    availableQuantity = selectedColor.quantity ?? 0;
-  } else {
-    availableQuantity = product.quantity ?? 0;
+    availableQuantity = selectedColor.quantity ?? 0; // Step 5.6: Get available quantity for the selected color
+  }
+  // Case 3: Product has no size and no color (regular product)
+  else {
+    availableQuantity = product.quantity ?? 0; // Step 5.7: Use the general product quantity
   }
 
-  // 5) Check if requested quantity is allowed
+  // Step 6: Check if the requested quantity is allowed (not exceeding available stock)
   if (quantity > availableQuantity) {
+    // Error: Quantity exceeds available stock
     return next(
       new ApiError(
         `Cannot set quantity more than available: ${availableQuantity}`,
@@ -335,14 +362,17 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
     );
   }
 
-  // 6) Update the quantity
+  // Step 7: Update the quantity of the product in the cart
   cartItem.quantity = quantity;
   cart.cartItems[productIndex] = cartItem;
 
-  // 7) Recalculate cart total
+  // Step 8: Recalculate the total price of the cart
   calcTotalCartPrice(cart);
+
+  // Step 9: Save the updated cart to the database
   await cart.save();
 
+  // Step 10: Send a success response with the updated cart information
   res.status(200).json({
     status: "success",
     message: "Cart item quantity updated successfully",
@@ -376,22 +406,29 @@ exports.getLoggedUserCart = asyncHandler(async (req, res, next) => {
 // @route   DELETE /api/v1/cart/:itemId
 // @access  Private/User
 exports.removeSpecificCartItem = asyncHandler(async (req, res, next) => {
-  const { itemId } = req.params;
+  const { itemId } = req.params; // Step 1: Get the itemId from the request parameters
+
+  // Step 2: Find the cart for the logged-in user and remove the specific item
   let cart = await Cart.findOneAndUpdate(
-    { user: req.user.id, "cartItems._id": itemId },
+    { user: req.user.id, "cartItems._id": itemId }, // Find cart where the item matches the itemId
     {
-      $pull: { cartItems: { _id: itemId } },
+      $pull: { cartItems: { _id: itemId } }, // Remove the item from cartItems array
     },
-    { new: true }
+    { new: true } // Return the updated cart
   );
 
+  // Step 3: If no cart found, return an error
   if (!cart) {
     return next(new ApiError(`there is no item for this id :${itemId}`, 404));
   }
 
-  // Calculate total cart price
+  // Step 4: Recalculate the total price of the cart after item removal
   calcTotalCartPrice(cart);
+
+  // Step 5: Save the updated cart in the database
   await cart.save();
+
+  // Step 6: Send a success response with the updated cart information
   res.status(200).json({
     status: "success",
     message: "Product deleted to cart successfully",
