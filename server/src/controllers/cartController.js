@@ -20,46 +20,60 @@ const calcTotalCartPrice = (cart) => {
 // @route   POST /api/v1/cart
 // @access  Private/User
 exports.addProductToCart = asyncHandler(async (req, res, next) => {
+  // Step 1: Extract productId, color, and size from the request body
   const { productId, color, size } = req.body;
 
+  // Step 2: Fetch the product from the database using the provided productId
   const product = await Product.findById(productId);
   if (!product) {
+    // Error: Product not found in the database
     return next(new ApiError("Product not found", 404));
   }
 
+  // Step 3: Determine if the product supports colors or sizes
   const hasColors = product.colors && product.colors.length > 0;
   const hasSizes = product.sizes && product.sizes.length > 0;
 
-  let finalPrice;
-  let availableQuantity;
+  let finalPrice; // Stores the final price or discounted price if available
+  let availableQuantity; // Stores available quantity for the selected size/color
 
+  // Step 4: Handle products that have size variations
   if (hasSizes) {
+    // Step 4.1: Ensure the user selected a size
     if (!size) {
+      // Error: Product requires size selection
       return next(
         new ApiError("This product requires a size to be selected", 400)
       );
     }
 
+    // Step 4.2: Find the selected size inside the product's sizes array
     const selectedSize = product.sizes.find((s) => s.size === size);
     if (!selectedSize) {
+      // Error: Invalid size selected by the user
       return next(
         new ApiError(`Size '${size}' is not available for this product`, 400)
       );
     }
 
+    // Step 4.3: Determine the price for this size (with discount if available)
     finalPrice =
       selectedSize.priceAfterDiscount != null
         ? selectedSize.priceAfterDiscount
         : selectedSize.price;
 
-    // التعامل مع ألوان خاصة بالمقاس
+    // Step 4.4: Check if this size supports color variations
     if (selectedSize.colors && selectedSize.colors.length > 0) {
+      // Step 4.4.1: Require user to select a color for this size
       if (!color) {
+        // Error: Color is required for the selected size
         return next(new ApiError("You must select a color for this size", 400));
       }
 
+      // Step 4.4.2: Validate that the selected color exists
       const selectedColor = selectedSize.colors.find((c) => c.color === color);
       if (!selectedColor) {
+        // Error: Invalid color selected for the specified size
         return next(
           new ApiError(
             `Color '${color}' is not available for size '${size}'`,
@@ -68,33 +82,44 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         );
       }
 
+      // Step 4.4.3: Get quantity available for the selected color
       availableQuantity = selectedColor.quantity ?? 0;
     } else {
+      // Step 4.5: If size doesn't support colors, reject if color is provided
       if (color) {
+        // Error: Color should not be provided for this size
         return next(new ApiError("This size does not support colors", 400));
       }
 
+      // Step 4.5.1: Get quantity available for the selected size
       availableQuantity = selectedSize.quantity ?? 0;
     }
   } else {
+    // Step 5: Handle products that do not have sizes
     if (size) {
+      // Error: Size should not be provided for this product
       return next(new ApiError("This product does not support sizes", 400));
     }
 
+    // Step 5.1: Determine product-level price (with discount if available)
     finalPrice =
       product.priceAfterDiscount != null
         ? product.priceAfterDiscount
         : product.price;
 
     if (hasColors) {
+      // Step 5.2: Require user to select a color
       if (!color) {
+        // Error: Color is required for this product
         return next(
           new ApiError("You must select a color for this product", 400)
         );
       }
 
+      // Step 5.2.1: Validate the selected color
       const selectedColor = product.colors.find((c) => c.color === color);
       if (!selectedColor) {
+        // Error: Invalid color selected
         return next(
           new ApiError(
             `Color '${color}' is not available for this product`,
@@ -103,25 +128,33 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         );
       }
 
+      // Step 5.2.2: Get quantity available for the selected color
       availableQuantity = selectedColor.quantity ?? 0;
     } else {
+      // Step 5.3: Reject color if product doesn't support colors
       if (color) {
+        // Error: Color should not be provided
         return next(new ApiError("This product does not support colors", 400));
       }
 
+      // Step 5.3.1: Use general product quantity
       availableQuantity = product.quantity ?? 0;
     }
   }
 
+  // Step 6: Look for an existing cart for the user
   let cart = await Cart.findOne({ user: req.user.id });
 
   if (!cart) {
+    // Step 6.1: No cart exists, create a new cart if item is in stock
     if (availableQuantity < 1) {
+      // Error: No stock available
       return next(
         new ApiError("This product is out of stock and cannot be added", 400)
       );
     }
 
+    // Step 6.2: Create a new cart with the product
     cart = await Cart.create({
       user: req.user.id,
       cartItems: [
@@ -129,10 +162,13 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
       ],
     });
   } else {
+    // Step 7: Cart exists, check if the same product (with same size/color) is already in the cart
     const productIndex = cart.cartItems.findIndex((item) => {
       const itemProductId = item.product._id
         ? item.product._id.toString()
         : item.product.toString();
+
+      // Match product by ID, color, and size (if applicable)
       return (
         itemProductId === productId &&
         item.color === color &&
@@ -141,8 +177,14 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
     });
 
     if (productIndex > -1) {
+      // Step 7.1: Product with same options already exists in the cart
+
+      // Get current quantity of this product in the cart
       const currentQty = cart.cartItems[productIndex].quantity;
+
+      // Step 7.1.1: Prevent adding more than available stock
       if (currentQty + 1 > availableQuantity) {
+        //  Error: User is trying to add more items than are available in stock for the selected color and size
         return next(
           new ApiError(
             `Cannot add more than ${availableQuantity} items of this product with color '${color}'${size ? ` and size '${size}'` : ""}`,
@@ -151,14 +193,20 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         );
       }
 
+      // Step 7.1.2: Increase the quantity by 1
       cart.cartItems[productIndex].quantity += 1;
     } else {
+      // Step 7.2: Product not in cart yet, attempt to add it
+
+      // Step 7.2.1: Check if item is in stock before adding
       if (availableQuantity < 1) {
+        // Error: Product is not in stock, prevent adding it to the cart
         return next(
           new ApiError("This product is out of stock and cannot be added", 400)
         );
       }
 
+      // Step 7.2.2: Add new product entry to the cart
       cart.cartItems.push({
         product: productId,
         color,
@@ -169,9 +217,13 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
     }
   }
 
+  // Step 8: Recalculate the total price of the cart
   calcTotalCartPrice(cart);
+
+  // Step 9: Save the updated cart to the database
   await cart.save();
 
+  // Step 10: Send a success response with cart info
   res.status(201).json({
     status: "success",
     message: "Product added to cart successfully",

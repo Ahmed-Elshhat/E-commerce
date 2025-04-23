@@ -17,8 +17,7 @@ exports.getCartValidator = [validateExactFields(), validatorMiddleware];
 
 exports.updateCartItemQuantityValidator = [
   validateExactFields(["quantity"], ["itemId"]),
-  check("itemId")
-  .isMongoId().withMessage("Invalid item ID format"),
+  check("itemId").isMongoId().withMessage("Invalid item ID format"),
   check("quantity")
     .notEmpty()
     .withMessage("Quantity must be not empty")
