@@ -467,6 +467,7 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
     expire: { $gt: Date.now() },
   });
 
+  // Error: If no valid coupon is found, it could be either invalid or expired
   if (!coupon) {
     return next(new ApiError(`Coupon is invalid or expired`));
   }
@@ -474,6 +475,7 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
   // 2) Get logged user cart to get total cart price
   const cart = await Cart.findOne({ user: req.user.id });
 
+  // Error: If no cart is found for the user, it indicates that the cart is empty
   if (!cart) {
     return next(new ApiError("Empty cart", 404));
   }
@@ -484,7 +486,7 @@ exports.applyCoupon = asyncHandler(async (req, res, next) => {
   const totalPriceAfterDiscount = (
     totalPrice -
     (totalPrice * coupon.discount) / 100
-  ).toFixed(2); // 99.23
+  ).toFixed(2);
 
   cart.totalPriceAfterDiscount = Number(totalPriceAfterDiscount);
   await cart.save();
