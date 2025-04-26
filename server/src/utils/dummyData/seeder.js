@@ -9,23 +9,23 @@ const Brand = require('../../models/brandModel');
 const Product = require('../../models/productModel');
 const dbConnection = require("../../config/database");
 
-dotenv.config({ path: "../../config.env" });
+dotenv.config({ path: "../../../config.env" });
 
 // connect to DB
 dbConnection();
 
 // Read data
-const categories = JSON.parse(fs.readFileSync("./categories.json"));
-const subCategories = JSON.parse(fs.readFileSync('./subCategories.json'));
-const brands = JSON.parse(fs.readFileSync('./brands.json'));
+// const categories = JSON.parse(fs.readFileSync("./categories.json"));
+// const subCategories = JSON.parse(fs.readFileSync('./subCategories.json'));
+// const brands = JSON.parse(fs.readFileSync('./brands.json'));
 const products = JSON.parse(fs.readFileSync('./products.json'));
 
 // Insert data into DB
 const insertData = async () => {
   try {
-    await Category.create(categories);
-    await SubCategory.create(subCategories);
-    await Brand.create(brands);
+    // await Category.create(categories);
+    // await SubCategory.create(subCategories);
+    // await Brand.create(brands);
     await Product.create(products);
 
     console.log("Data Inserted".green.inverse);

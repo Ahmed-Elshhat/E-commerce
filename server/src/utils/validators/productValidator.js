@@ -10,6 +10,7 @@ exports.getProductValidator = [
   check("id").isMongoId().withMessage("Invalid ID formate"),
   validatorMiddleware,
 ];
+
 exports.createProductValidator = [
   validateExactFields([
     "titleEn",
@@ -63,17 +64,19 @@ exports.createProductValidator = [
       "Product description in Arabic must not exceed 2000 characters."
     ),
   check("quantity")
-    .notEmpty()
-    .withMessage("Product quantity is required")
-    .isNumeric()
-    .withMessage("Product quantity must be a number"),
-  check("sold")
+    // .notEmpty()
+    // .withMessage("Product quantity is required")
     .optional()
     .isNumeric()
     .withMessage("Product quantity must be a number"),
+  // check("sold")
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("Product quantity must be a number"),
   check("price")
-    .notEmpty()
-    .withMessage("Product price is required")
+    // .notEmpty()
+    // .withMessage("Product price is required")
+    .optional()
     .isNumeric()
     .withMessage("Product price must be a number")
     .isLength({ max: 32 })
@@ -124,6 +127,99 @@ exports.createProductValidator = [
         }
       })
     ),
+  // body().custom((value) => {
+  //   const { colors, quantity, price, priceAfterDiscount } = value;
+    
+  //   const sizes = JSON.parse(value.sizes);
+  //   console.log(sizes);
+    
+  //   if (sizes) {
+  //     if (quantity) {
+  //       throw new Error("Cannot send quantity for product with sizes.");
+  //     }
+  //     if (price) {
+  //       throw new Error("Cannot send price for product with sizes.");
+  //     }
+  //     if (priceAfterDiscount) {
+  //       throw new Error(
+  //         "Cannot send priceAfterDiscount for product with sizes."
+  //       );
+  //     }
+
+  //     if (colors && colors.length > 0) {
+  //       throw new Error("Cannot send general colors with sizes.");
+  //     }
+
+  //     sizes.forEach((size, idx) => {
+  //       if (!size.size) {
+  //         throw new Error(`Size name is required for size index ${idx}`);
+  //       }
+  //       if (!size.price) {
+  //         throw new Error(`Price is required for size "${size.size}"`);
+  //       }
+
+  //       if (size.colors && size.colors.length > 0) {
+  //         let total = 0;
+
+  //         size.colors.forEach((colorObj, colorIdx) => {
+  //           if (!colorObj.color) {
+  //             throw new Error(
+  //               `Color name is required for color at size "${size.size}"`
+  //             );
+  //           }
+  //           if (colorObj.quantity == null) {
+  //             throw new Error(
+  //               `Color quantity is required for color "${colorObj.color}" at size "${size.size}"`
+  //             );
+  //           }
+  //           total += colorObj.quantity;
+  //         });
+
+  //         if (size.quantity) {
+  //           throw new Error(
+  //             `Do not send quantity directly for size "${size.size}" with colors`
+  //           );
+  //         }
+
+  //         size.quantity = total; // نحسب كمية المقاس تلقائيًا
+  //       } else if (size.quantity == null) {
+  //         throw new Error(
+  //           `Quantity is required for size "${size.size}" without colors`
+  //         );
+  //       }
+  //     });
+  //   } else {
+  //     if (colors && colors.length > 0) {
+  //       if (quantity) {
+  //         throw new Error("Cannot send general quantity with colors.");
+  //       }
+
+  //       let total = 0;
+
+  //       colors.forEach((colorObj, colorIdx) => {
+  //         if (!colorObj.color) {
+  //           throw new Error(
+  //             `Color name is required for color index ${colorIdx}`
+  //           );
+  //         }
+  //         if (colorObj.quantity == null) {
+  //           throw new Error(
+  //             `Color quantity is required for color "${colorObj.color}"`
+  //           );
+  //         }
+  //         total += colorObj.quantity;
+  //       });
+
+  //       value.quantity = total; // نحسب كمية المنتج تلقائيًا
+  //     }
+
+  //     if ((!colors || colors.length === 0) && quantity == null) {
+  //       throw new Error("Quantity is required when no sizes and no colors.");
+  //     }
+  //   }
+
+  //   return true;
+  // }),
   validatorMiddleware,
 ];
 

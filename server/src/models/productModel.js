@@ -49,17 +49,17 @@ const productSchema = new mongoose.Schema(
         "Product description in Arabic must not exceed 2000 characters.",
       ],
     },
-    quantity: {
-      type: Number,
-      required: [true, "product quantity is required"],
-    },
     sold: {
       type: Number,
       default: 0,
     },
+    quantity: {
+      type: Number,
+      // required: [true, "product quantity is required"],
+    },
     price: {
       type: Number,
-      required: [true, "product price is required"],
+      // required: [true, "product price is required"],
       trim: true,
       max: [200000, "Too long product price"],
     },

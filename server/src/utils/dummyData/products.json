@@ -1,124 +1,410 @@
 [
   {
-    "title": "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
-    "slug": "fjallraven-foldsack-no.-1-backpack-fits-15-laptops",
+    "_id": "680a4196e5ba39954c341d33",
+    "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+    "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+    "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+    "descriptionAr": "descriptionArdescriptionArdescriptionAr",
     "quantity": 10,
-    "sold": 25,
-    "price": 109.95,
-    "priceAfterDiscount": 100,
-    "description": "Your perfect pack for everyday use and walks in the forest. Stash your laptop (up to 15 inches) in the padded sleeve, your everyday",
-    "category": "61b2a9d869d54640ca3d7293",
-    "imageCover": "https://fakestoreapi.com/img/81fPKd-2AYL._AC_SL1500_.jpg",
-    "ratingsAverage": 4.3,
-    "ratingsQuantity": 20
+    "sold": 0,
+    "price": 20,
+    "sizes": [
+      {
+        "size": "s",
+        "quantity": 0,
+        "price": 20,
+        "_id": "680a4196e5ba39954c341d34",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d34"
+      },
+      {
+        "size": "m",
+        "quantity": 5,
+        "price": 20,
+        "colors": [
+          {
+            "color": "#ff5c34",
+            "quantity": 2,
+            "_id": "680a4196e5ba39954c341d36",
+            "id": "680a4196e5ba39954c341d36"
+          },
+          {
+            "color": "#ff5c34",
+            "quantity": 3,
+            "_id": "680a4196e5ba39954c341d37",
+            "id": "680a4196e5ba39954c341d37"
+          }
+        ],
+        "_id": "680a4196e5ba39954c341d35",
+        "id": "680a4196e5ba39954c341d35"
+      },
+      {
+        "size": "l",
+        "quantity": 10,
+        "price": 20,
+        "_id": "680a4196e5ba39954c341d38",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d38"
+      },
+      {
+        "size": "xl",
+        "quantity": 10,
+        "price": 20,
+        "priceAfterDiscount": 5,
+        "_id": "680a4196e5ba39954c341d39",
+        "colors": [],
+        "id": "680a4196e5ba39954c341d39"
+      }
+    ],
+    "coverImage": "http://localhost:8000/products/product-574c7885-c951-4eb8-a1ff-bd506f046bf9-1745502613318-cover.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/product-0c0e74b5-654c-485c-9e16-9f2d189e7de1-1745502613450-3.jpeg",
+        "_id": "680a4196e5ba39954c341d3a",
+        "id": "680a4196e5ba39954c341d3a"
+      },
+      {
+        "url": "http://localhost:8000/products/product-d47991f2-b907-4c05-accc-5d64304b40e3-1745502613451-5.jpeg",
+        "_id": "680a4196e5ba39954c341d3b",
+        "id": "680a4196e5ba39954c341d3b"
+      },
+      {
+        "url": "http://localhost:8000/products/product-871ca3c6-f428-4cb1-925e-d3c11f85ebdb-1745502613448-1.jpeg",
+        "_id": "680a4196e5ba39954c341d3c",
+        "id": "680a4196e5ba39954c341d3c"
+      },
+      {
+        "url": "http://localhost:8000/products/product-b686c7aa-a302-45ee-9dc9-189e6e965688-1745502613449-2.jpeg",
+        "_id": "680a4196e5ba39954c341d3d",
+        "id": "680a4196e5ba39954c341d3d"
+      },
+      {
+        "url": "http://localhost:8000/products/product-7e154098-a691-4a9d-a1cf-ee57e9afbe6b-1745502613450-4.jpeg",
+        "_id": "680a4196e5ba39954c341d3e",
+        "id": "680a4196e5ba39954c341d3e"
+      }
+    ],
+    "category": {
+      "_id": "680a2c23662d9661df208862",
+      "nameAr": "test cart(1)",
+      "nameEn": "test cart(1)",
+      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
+      "createdAt": "2025-04-24T12:18:43.654Z",
+      "updatedAt": "2025-04-24T12:18:43.654Z"
+    },
+    "ratingsQuantity": 0,
+    "colors": [],
+    "createdAt": "2025-04-24T13:50:14.105Z",
+    "updatedAt": "2025-04-24T13:50:14.105Z",
+    "reviews": [],
+    "id": "680a4196e5ba39954c341d33"
   },
   {
-    "title": "Mens Casual Premium Slim Fit T-Shirts",
-    "slug": "mens-casual-premium-slim-fit-t-shirts",
-    "quantity": 20,
-    "sold": 30,
-    "price": 22.3,
-    "priceAfterDiscount": 20,
-    "description": "Slim-fitting style, contrast raglan long sleeve, three-button henley placket, light weight & soft fabric for breathable and comfortable wearing. And Solid stitched shirts with round neck made for durability and a great fit for casual fashion wear and diehard baseball fans. The Henley style round neckline includes a three-button placket.",
-    "category": "61b2a9d869d54640ca3d7293",
-    "imageCover": "https://fakestoreapi.com/img/71-3HjGNDUL._AC_SY879._SX._UX._SY._UY_.jpg",
-    "ratingsAverage": 4.4,
-    "ratingsQuantity": 23
+    "_id": "680a3ead2e806910110d0e8e",
+    "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+    "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+    "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+    "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+    "quantity": 0,
+    "sold": 0,
+    "price": 20,
+    "sizes": [
+      {
+        "size": "s",
+        "quantity": 0,
+        "price": 20,
+        "_id": "680a3ead2e806910110d0e8f",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e8f"
+      },
+      {
+        "size": "m",
+        "quantity": 5,
+        "price": 20,
+        "colors": [
+          {
+            "color": "#ff5c34",
+            "quantity": 2,
+            "_id": "680a3ead2e806910110d0e91",
+            "id": "680a3ead2e806910110d0e91"
+          },
+          {
+            "color": "#ff5c34",
+            "quantity": 3,
+            "_id": "680a3ead2e806910110d0e92",
+            "id": "680a3ead2e806910110d0e92"
+          }
+        ],
+        "_id": "680a3ead2e806910110d0e90",
+        "id": "680a3ead2e806910110d0e90"
+      },
+      {
+        "size": "l",
+        "quantity": 10,
+        "price": 20,
+        "_id": "680a3ead2e806910110d0e93",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e93"
+      },
+      {
+        "size": "xl",
+        "quantity": 10,
+        "price": 20,
+        "priceAfterDiscount": 5,
+        "_id": "680a3ead2e806910110d0e94",
+        "colors": [],
+        "id": "680a3ead2e806910110d0e94"
+      }
+    ],
+    "coverImage": "http://localhost:8000/products/product-913c4c01-f352-42f8-a3f5-abe5422c143a-1745501868291-cover.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/product-816f5ba0-8431-4ab2-ba8b-690914640ed5-1745501868450-1.jpeg",
+        "_id": "680a3ead2e806910110d0e95",
+        "id": "680a3ead2e806910110d0e95"
+      },
+      {
+        "url": "http://localhost:8000/products/product-022ca90c-bc2d-4622-8cf9-4be6c5a8109e-1745501868452-3.jpeg",
+        "_id": "680a3ead2e806910110d0e96",
+        "id": "680a3ead2e806910110d0e96"
+      },
+      {
+        "url": "http://localhost:8000/products/product-6d2ff3a7-e72f-4389-9ea8-3826c187f662-1745501868451-2.jpeg",
+        "_id": "680a3ead2e806910110d0e97",
+        "id": "680a3ead2e806910110d0e97"
+      },
+      {
+        "url": "http://localhost:8000/products/product-7440356d-beef-4ab1-8ea5-aa4f2ff58141-1745501868452-5.jpeg",
+        "_id": "680a3ead2e806910110d0e98",
+        "id": "680a3ead2e806910110d0e98"
+      },
+      {
+        "url": "http://localhost:8000/products/product-df578845-a865-4dce-ae91-76c8cecec9fc-1745501868452-4.jpeg",
+        "_id": "680a3ead2e806910110d0e99",
+        "id": "680a3ead2e806910110d0e99"
+      }
+    ],
+    "category": {
+      "_id": "680a2c23662d9661df208862",
+      "nameAr": "test cart(1)",
+      "nameEn": "test cart(1)",
+      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
+      "createdAt": "2025-04-24T12:18:43.654Z",
+      "updatedAt": "2025-04-24T12:18:43.654Z"
+    },
+    "ratingsQuantity": 0,
+    "colors": [],
+    "createdAt": "2025-04-24T13:37:49.186Z",
+    "updatedAt": "2025-04-24T13:37:49.186Z",
+    "reviews": [],
+    "id": "680a3ead2e806910110d0e8e"
   },
   {
-    "title": "Mens Cotton Jacket",
-    "slug": "mens-cotton-jacket",
-    "quantity": 20,
-    "sold": 75,
-    "price": 55.99,
-    "description": "great outerwear jackets for Spring/Autumn/Winter, suitable for many occasions, such as working, hiking, camping, mountain/rock climbing, cycling, traveling or other outdoors. Good gift choice for you or your family member. A warm hearted love to Father, husband or son in this thanksgiving or Christmas Day.",
-    "category": "61b7a02868424f7846ce1d6f",
-    "imageCover": "https://fakestoreapi.com/img/71li-ujtlUL._AC_UX679_.jpg",
-    "ratingsAverage": 4.0,
-    "ratingsQuantity": 70
-  },
-  {
-    "title": "Mens Casual Slim Fit",
-    "slug": "mens-casual-slim-fit",
+    "_id": "680a39f0e4b05039ea2f27d1",
+    "titleEn": "Scenario 1 - Sizes with Colors(Cart Test)",
+    "titleAr": "السيناريو 1 - المقاسات مع الألوان (Cart Test)",
+    "descriptionEn": "Product with sizes and each size has its own colors.",
+    "descriptionAr": "منتج يحتوي على مقاسات، ولكل مقاس ألوانه الخاصة.",
     "quantity": 100,
-    "sold": 101,
-    "price": 15.99,
-    "description": "The color could be slightly different between on the screen and in practice. / Please note that body builds vary by person, therefore, detailed size information should be reviewed below on the product description.",
-    "category": "61b2a9d869d54640ca3d7293",
-    "imageCover": "https://fakestoreapi.com/img/71YXzeOuslL._AC_UY879_.jpg",
-    "ratingsAverage": 4.9,
-    "ratingsQuantity": 98
+    "sold": 0,
+    "price": 500,
+    "colors": [],
+    "sizes": [
+      {
+        "size": "M",
+        "quantity": 10,
+        "price": 500,
+        "priceAfterDiscount": 450,
+        "colors": [
+          {
+            "color": "red",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d3",
+            "id": "680a39f0e4b05039ea2f27d3"
+          },
+          {
+            "color": "blue",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d4",
+            "id": "680a39f0e4b05039ea2f27d4"
+          }
+        ],
+        "_id": "680a39f0e4b05039ea2f27d2",
+        "id": "680a39f0e4b05039ea2f27d2"
+      },
+      {
+        "size": "L",
+        "quantity": 10,
+        "price": 500,
+        "colors": [
+          {
+            "color": "green",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d6",
+            "id": "680a39f0e4b05039ea2f27d6"
+          },
+          {
+            "color": "yellow",
+            "quantity": 5,
+            "_id": "680a39f0e4b05039ea2f27d7",
+            "id": "680a39f0e4b05039ea2f27d7"
+          }
+        ],
+        "_id": "680a39f0e4b05039ea2f27d5",
+        "id": "680a39f0e4b05039ea2f27d5"
+      }
+    ],
+    "coverImage": "http://localhost:8000/products/http://localhost:8000/products/scene1.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/http://localhost:8000/products/scene1.jpeg",
+        "_id": "680a39f0e4b05039ea2f27d8",
+        "id": "680a39f0e4b05039ea2f27d8"
+      }
+    ],
+    "category": {
+      "_id": "680a2c23662d9661df208862",
+      "nameAr": "test cart(1)",
+      "nameEn": "test cart(1)",
+      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
+      "createdAt": "2025-04-24T12:18:43.654Z",
+      "updatedAt": "2025-04-24T12:18:43.654Z"
+    },
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27d1"
   },
   {
-    "title": "John Hardy Women's Legends Naga Gold & Silver Dragon Station Chain Bracelet",
-    "slug": "john-hardy-women's-legends-naga-gold-and-silver-dragon-station-chain-bracelet",
+    "_id": "680a39f0e4b05039ea2f27e1",
+    "titleEn": "Scenario 4 - No Sizes No Colors(Cart Test)",
+    "titleAr": "سيناريو 4 - بدون مقاسات وبدون ألوان(Cart Test)",
+    "descriptionEn": "Product without sizes and without any colors.",
+    "descriptionAr": "منتج بدون مقاسات وبدون أي ألوان.",
     "quantity": 100,
-    "sold": 14,
-    "price": 695,
-    "description": "From our Legends Collection, the Naga was inspired by the mythical water dragon that protects the ocean's pearl. Wear facing inward to be bestowed with love and abundance, or outward for protection.",
-    "category": "61b2a9d869d54640ca3d7293",
-    "imageCover": "https://fakestoreapi.com/img/71pWzhdJNwL._AC_UL640_QL65_ML3_.jpg",
-    "ratingsAverage": 4.4,
-    "ratingsQuantity": 12
+    "sold": 0,
+    "price": 150,
+    "colors": [],
+    "sizes": [],
+    "coverImage": "http://localhost:8000/products/http://localhost:8000/products/scene4.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/http://localhost:8000/products/scene4.jpeg",
+        "_id": "680a39f0e4b05039ea2f27e2",
+        "id": "680a39f0e4b05039ea2f27e2"
+      }
+    ],
+    "category": {
+      "_id": "680a2c33662d9661df208865",
+      "nameAr": "test cart(2)",
+      "nameEn": "test cart(2)",
+      "image": "http://localhost:8000/categories/category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg",
+      "createdAt": "2025-04-24T12:18:59.942Z",
+      "updatedAt": "2025-04-24T12:18:59.942Z"
+    },
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27e1"
   },
   {
-    "title": "Solid Gold Petite Micropave",
-    "slug": "solid-gold-petite-micropave",
-    "quantity": 75,
-    "sold": 69,
-    "price": 168,
-    "description": "Satisfaction Guaranteed. Return or exchange any order within 30 days.Designed and sold by Hafeez Center in the United States. Satisfaction Guaranteed. Return or exchange any order within 30 days.",
-    "category": "61b2a8dd4bad61f4cc4a98ea",
-    "imageCover": "https://fakestoreapi.com/img/61sbMiUnoGL._AC_UL640_QL65_ML3_.jpg",
-    "ratingsAverage": 3.1,
-    "ratingsQuantity": 66
+    "_id": "680a39f0e4b05039ea2f27d9",
+    "titleEn": "Scenario 2 - Sizes only(Cart Test)",
+    "titleAr": "سيناريو 2 - مقاسات فقط(Cart Test)",
+    "descriptionEn": "Product with sizes but no colors in sizes or globally.",
+    "descriptionAr": "منتج يحتوي على مقاسات فقط، بدون ألوان سواء داخل المقاسات أو بشكل عام.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 300,
+    "colors": [],
+    "sizes": [
+      {
+        "size": "S",
+        "quantity": 10,
+        "price": 300,
+        "priceAfterDiscount": 270,
+        "colors": [],
+        "_id": "680a39f0e4b05039ea2f27da",
+        "id": "680a39f0e4b05039ea2f27da"
+      },
+      {
+        "size": "XL",
+        "quantity": 10,
+        "price": 300,
+        "priceAfterDiscount": 270,
+        "colors": [],
+        "_id": "680a39f0e4b05039ea2f27db",
+        "id": "680a39f0e4b05039ea2f27db"
+      }
+    ],
+    "coverImage": "http://localhost:8000/products/http://localhost:8000/products/scene2.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/http://localhost:8000/products/scene2.jpeg",
+        "_id": "680a39f0e4b05039ea2f27dc",
+        "id": "680a39f0e4b05039ea2f27dc"
+      }
+    ],
+    "category": {
+      "_id": "680a2c33662d9661df208865",
+      "nameAr": "test cart(2)",
+      "nameEn": "test cart(2)",
+      "image": "http://localhost:8000/categories/category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg",
+      "createdAt": "2025-04-24T12:18:59.942Z",
+      "updatedAt": "2025-04-24T12:18:59.942Z"
+    },
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27d9"
   },
   {
-    "title": "White Gold Plated Princess",
-    "slug": "white-gold-plated-princess",
-    "quantity": 33,
-    "sold": 99,
-    "price": 9.99,
-    "description": "Classic Created Wedding Engagement Solitaire Diamond Promise Ring for Her. Gifts to spoil your love more for Engagement, Wedding, Anniversary, Valentine's Day...",
-    "category": "61b2a8dd4bad61f4cc4a98ea",
-    "imageCover": "https://fakestoreapi.com/img/61sbMiUnoGL._AC_UL640_QL65_ML3_.jpg",
-    "ratingsAverage": 2.8,
-    "ratingsQuantity": 76
-  },
-  {
-    "title": "Pierced Owl Rose Gold Plated Stainless Steel Double",
-    "slug": "pierced-owl-rose-gold-plated-stainless-steel-double",
-    "quantity": 90,
-    "sold": 32,
-    "price": 10.99,
-    "description": "Rose Gold Plated Double Flared Tunnel Plug Earrings. Made of 316L Stainless Steel",
-    "category": "61b2a8dd4bad61f4cc4a98ea",
-    "imageCover": "https://fakestoreapi.com/img/51UDEzMJVpL._AC_UL640_QL65_ML3_.jpg",
-    "ratingsAverage": 4.3,
-    "ratingsQuantity": 20
-  },
-  {
-    "title": "WD 2TB Elements Portable External Hard Drive - USB 3.0",
-    "slug": "wd-2tb-elements-portable-external-hard-drive-usb-3.0",
-    "quantity": 102,
-    "sold": 51,
-    "price": 64,
-    "description": "USB 3.0 and USB 2.0 Compatibility Fast data transfers Improve PC Performance High Capacity; Compatibility Formatted NTFS for Windows 10, Windows 8.1, Windows 7; Reformatting may be required for other operating systems; Compatibility may vary depending on user’s hardware configuration and operating system",
-    "category": "61b2a8dd4bad61f4cc4a98ea",
-    "imageCover": "https://fakestoreapi.com/img/61IBBVJvSDL._AC_SY879_.jpg",
-    "ratingsAverage": 4.8,
-    "ratingsQuantity": 42
-  },
-  {
-    "title": "SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s",
-    "slug": "sandisk-ssd-plus-1tb-internal-ssd-sata-iii-6-gbs",
-    "quantity": 104,
-    "sold": 9,
-    "price": 109,
-    "description": "Easy upgrade for faster boot up, shutdown, application load and response (As compared to 5400 RPM SATA 2.5” hard drive; Based on published specifications and internal benchmarking tests using PCMark vantage scores) Boosts burst write performance, making it ideal for typical PC workloads The perfect balance of performance and reliability Read/write speeds of up to 535MB/s/450MB/s (Based on internal testing; Performance may vary depending upon drive capacity, host device, OS and application.)",
-    "category": "61b2a8dd4bad61f4cc4a98ea",
-    "imageCover": "https://fakestoreapi.com/img/61U7T1koQqL._AC_SX679_.jpg",
-    "ratingsAverage": 1.6,
-    "ratingsQuantity": 5
+    "_id": "680a39f0e4b05039ea2f27dd",
+    "titleEn": "Scenario 3 - Colors only(Cart Test)",
+    "titleAr": "سيناريو 3 - ألوان فقط(Cart Test)",
+    "descriptionEn": "Product without sizes but has global colors.",
+    "descriptionAr": "منتج بدون مقاسات ولكنه يحتوي على ألوان عامة.",
+    "quantity": 100,
+    "sold": 0,
+    "price": 200,
+    "colors": [
+      {
+        "color": "black",
+        "quantity": 50,
+        "_id": "680a39f0e4b05039ea2f27de",
+        "id": "680a39f0e4b05039ea2f27de"
+      },
+      {
+        "color": "white",
+        "quantity": 50,
+        "_id": "680a39f0e4b05039ea2f27df",
+        "id": "680a39f0e4b05039ea2f27df"
+      }
+    ],
+    "sizes": [],
+    "coverImage": "http://localhost:8000/products/http://localhost:8000/products/scene3.jpeg",
+    "images": [
+      {
+        "url": "http://localhost:8000/products/http://localhost:8000/products/scene3.jpeg",
+        "_id": "680a39f0e4b05039ea2f27e0",
+        "id": "680a39f0e4b05039ea2f27e0"
+      }
+    ],
+    "category": {
+      "_id": "680a2c23662d9661df208862",
+      "nameAr": "test cart(1)",
+      "nameEn": "test cart(1)",
+      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
+      "createdAt": "2025-04-24T12:18:43.654Z",
+      "updatedAt": "2025-04-24T12:18:43.654Z"
+    },
+    "ratingsQuantity": 0,
+    "createdAt": "2025-04-24T13:17:36.145Z",
+    "updatedAt": "2025-04-24T13:17:36.145Z",
+    "reviews": [],
+    "id": "680a39f0e4b05039ea2f27dd"
   }
 ]

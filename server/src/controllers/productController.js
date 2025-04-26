@@ -8,6 +8,7 @@ const { uploadMixOfImages } = require("../middlewares/uploadImageMiddleware");
 const Category = require("../models/categoryModel");
 const Brand = require("../models/brandModel");
 const ApiFeatures = require("../utils/apiFeatures");
+const ApiError = require("../utils/apiError");
 
 exports.uploadProductImages = uploadMixOfImages([
   {
@@ -73,7 +74,138 @@ exports.getProduct = factory.getOne(Product, "reviews");
 // @desc    Create product
 // @route    POST /api/v1/products
 // @access    Private
-exports.createProduct = factory.createOne(Product, "product");
+exports.createProduct = asyncHandler(async (req, res, next) => {
+  let body = { ...req.body };
+  
+  try {
+    body.sizes = JSON.parse(body.sizes);
+  } catch (error) {
+    return next(new ApiError("Invalid sizes format.", 400));
+  }
+
+  let { sizes, colors, quantity, price, priceAfterDiscount } = body;
+  
+  if (sizes) {
+    if (quantity) {
+      return next(
+        new ApiError(`Cannot send quantity for product with sizes.`, 400)
+      );
+    }
+    if (price) {
+      return next(
+        new ApiError(`Cannot send price for product with sizes.`, 400)
+      );
+    }
+    if (priceAfterDiscount) {
+      return next(
+        new ApiError(
+          `Cannot send priceAfterDiscount for product with sizes.`,
+          400
+        )
+      );
+    }
+
+    if (colors && colors.length > 0) {
+      return next(new ApiError(`Cannot send general colors with sizes.`, 400));
+    }
+
+    sizes.forEach((size, idx) => {
+      if (!size.size) {
+        return next(
+          new ApiError(`Size name is required for size index ${idx}`, 400)
+        );
+      }
+      if (!size.price) {
+        return next(
+          new ApiError(`Price is required for size "${size.size}"`, 400)
+        );
+      }
+
+      if (size.colors && size.colors.length > 0) {
+        let total = 0;
+
+        size.colors.forEach((colorObj, colorIdx) => {
+          if (!colorObj.color) {
+            return next(
+              new ApiError(
+                `Color name is required for color at size "${size.size}"`,
+                400
+              )
+            );
+          }
+          if (colorObj.quantity == null) {
+            return next(
+              new ApiError(
+                `Color quantity is required for color "${colorObj.color}" at size "${size.size}"`,
+                400
+              )
+            );
+          }
+          total += colorObj.quantity;
+        });
+
+        if (size.quantity) {
+          return next(
+            new ApiError(
+              `Do not send quantity directly for size "${size.size}" with colors`,
+              400
+            )
+          );
+        }
+
+        body.sizes[idx] = { ...size, quantity: total };
+      } else if (size.quantity == null) {
+        return next(
+          new ApiError(
+            `Quantity is required for size "${size.size}" without colors`,
+            400
+          )
+        );
+      }
+    });
+  } else {
+    if (colors && colors.length > 0) {
+      if (quantity) {
+        return next(
+          new ApiError(`Cannot send general quantity with colors`, 400)
+        );
+      }
+
+      let total = 0;
+
+      colors.forEach((colorObj, colorIdx) => {
+        if (!colorObj.color) {
+          return next(
+            new ApiError(
+              `Color name is required for color index ${colorIdx}`,
+              400
+            )
+          );
+        }
+        if (colorObj.quantity == null) {
+          return next(
+            new ApiError(
+              `Color quantity is required for color "${colorObj.color}"`,
+              400
+            )
+          );
+        }
+        total += colorObj.quantity;
+      });
+
+      body.quantity = total;
+    }
+
+    if ((!colors || colors.length === 0) && quantity == null) {
+      return next(
+        new ApiError(`Quantity is required when no sizes and no colors.`, 400)
+      );
+    }
+  }
+
+  const product = await Product.create(body);
+  res.status(201).json({ data: product });
+});
 
 // @desc    Update specific product
 // @route    PUT /api/v1/products/:id
