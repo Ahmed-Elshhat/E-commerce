@@ -31,6 +31,7 @@
     "import/extensions": "off",
     "node/no-unsupported-features/node-builtins": "off",
     "import/no-extraneous-dependencies": "off",
+    "no-plusplus": "off",
     // "prefer-destructuring": ["warn", {"object": true, "array": false}],
     "prefer-destructuring": "off",
     "no-unused-vars": ["warn", {"argsIgnorePattern": "req|res|next|val"}]

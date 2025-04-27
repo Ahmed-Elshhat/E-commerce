@@ -84,14 +84,7 @@
         "id": "680a4196e5ba39954c341d3e"
       }
     ],
-    "category": {
-      "_id": "680a2c23662d9661df208862",
-      "nameAr": "test cart(1)",
-      "nameEn": "test cart(1)",
-      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
-      "createdAt": "2025-04-24T12:18:43.654Z",
-      "updatedAt": "2025-04-24T12:18:43.654Z"
-    },
+    "category": "680a2c23662d9661df208862",
     "ratingsQuantity": 0,
     "colors": [],
     "createdAt": "2025-04-24T13:50:14.105Z",
@@ -184,14 +177,7 @@
         "id": "680a3ead2e806910110d0e99"
       }
     ],
-    "category": {
-      "_id": "680a2c23662d9661df208862",
-      "nameAr": "test cart(1)",
-      "nameEn": "test cart(1)",
-      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
-      "createdAt": "2025-04-24T12:18:43.654Z",
-      "updatedAt": "2025-04-24T12:18:43.654Z"
-    },
+    "category": "680a2c23662d9661df208862",
     "ratingsQuantity": 0,
     "colors": [],
     "createdAt": "2025-04-24T13:37:49.186Z",
@@ -262,14 +248,7 @@
         "id": "680a39f0e4b05039ea2f27d8"
       }
     ],
-    "category": {
-      "_id": "680a2c23662d9661df208862",
-      "nameAr": "test cart(1)",
-      "nameEn": "test cart(1)",
-      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
-      "createdAt": "2025-04-24T12:18:43.654Z",
-      "updatedAt": "2025-04-24T12:18:43.654Z"
-    },
+    "category": "680a2c23662d9661df208862",
     "ratingsQuantity": 0,
     "createdAt": "2025-04-24T13:17:36.145Z",
     "updatedAt": "2025-04-24T13:17:36.145Z",
@@ -295,14 +274,7 @@
         "id": "680a39f0e4b05039ea2f27e2"
       }
     ],
-    "category": {
-      "_id": "680a2c33662d9661df208865",
-      "nameAr": "test cart(2)",
-      "nameEn": "test cart(2)",
-      "image": "http://localhost:8000/categories/category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg",
-      "createdAt": "2025-04-24T12:18:59.942Z",
-      "updatedAt": "2025-04-24T12:18:59.942Z"
-    },
+    "category": "680a2c33662d9661df208865",
     "ratingsQuantity": 0,
     "createdAt": "2025-04-24T13:17:36.145Z",
     "updatedAt": "2025-04-24T13:17:36.145Z",
@@ -347,14 +319,7 @@
         "id": "680a39f0e4b05039ea2f27dc"
       }
     ],
-    "category": {
-      "_id": "680a2c33662d9661df208865",
-      "nameAr": "test cart(2)",
-      "nameEn": "test cart(2)",
-      "image": "http://localhost:8000/categories/category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg",
-      "createdAt": "2025-04-24T12:18:59.942Z",
-      "updatedAt": "2025-04-24T12:18:59.942Z"
-    },
+    "category": "680a2c33662d9661df208865",
     "ratingsQuantity": 0,
     "createdAt": "2025-04-24T13:17:36.145Z",
     "updatedAt": "2025-04-24T13:17:36.145Z",
@@ -393,14 +358,7 @@
         "id": "680a39f0e4b05039ea2f27e0"
       }
     ],
-    "category": {
-      "_id": "680a2c23662d9661df208862",
-      "nameAr": "test cart(1)",
-      "nameEn": "test cart(1)",
-      "image": "http://localhost:8000/categories/category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
-      "createdAt": "2025-04-24T12:18:43.654Z",
-      "updatedAt": "2025-04-24T12:18:43.654Z"
-    },
+    "category": "680a2c23662d9661df208862",
     "ratingsQuantity": 0,
     "createdAt": "2025-04-24T13:17:36.145Z",
     "updatedAt": "2025-04-24T13:17:36.145Z",

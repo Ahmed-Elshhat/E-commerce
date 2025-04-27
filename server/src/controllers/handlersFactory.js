@@ -38,10 +38,6 @@ exports.createOne = (Model, modelName) =>
     const body = {
       ...req.body,
       ...(modelName === "users" && { role: "employee" }),
-      ...(modelName === "product" &&
-        req.body.sizes && {
-          sizes: JSON.parse(req.body.sizes),
-        }),
     };
 
     const newDoc = await Model.create(body);

@@ -38,9 +38,9 @@ const insertData = async () => {
 // Delete data from DB
 const destroyData = async () => {
   try {
-    await Category.deleteMany();
-    await SubCategory.deleteMany();
-    await Brand.deleteMany();
+    // await Category.deleteMany();
+    // await SubCategory.deleteMany();
+    // await Brand.deleteMany();
     await Product.deleteMany();
     console.log("Data Destroyed".red.inverse);
     process.exit();
