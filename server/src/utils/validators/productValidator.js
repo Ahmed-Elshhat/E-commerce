@@ -66,21 +66,27 @@ exports.createProductValidator = [
   check("quantity")
     .optional()
     .isNumeric()
-    .withMessage("Product quantity must be a number"),
+    .withMessage("Product quantity must be a number")
+    .isInt({ gt: 0 })
+    .withMessage("Product quantity must be a positive integer")
+    .toInt(),
   check("price")
     .optional()
     .isNumeric()
     .withMessage("Product price must be a number")
-    .isLength({ max: 32 })
-    .withMessage("To long price"),
+    .isFloat({ gt: 0 })
+    .withMessage("Product price must be a positive number")
+    .toFloat(),
   check("priceAfterDiscount")
     .optional()
     .isNumeric()
-    .withMessage("Product priceAfterDiscount must be a number")
+    .withMessage("Product price after discount must be a number")
+    .isFloat({ gt: 0 })
+    .withMessage("Product price after discount must be a positive number")
     .toFloat()
     .custom((value, { req }) => {
       if (req.body.price <= value) {
-        throw new Error("priceAfterDiscount must be lower than price");
+        throw new Error("price after discount must be lower than price");
       }
       return true;
     }),
@@ -119,6 +125,181 @@ exports.createProductValidator = [
         }
       })
     ),
+  body().custom((val) => {
+    let { sizes, colors, quantity, price, priceAfterDiscount } = val;
+    console.log(sizes);
+    console.log(colors);
+    console.log("Hello");
+
+    let setSizes = [];
+    if (sizes) {
+      // step 8: Ensure that quantity is not sent for products with sizes
+      if (quantity) {
+        throw new Error(`Cannot send quantity for product with sizes.`);
+      }
+
+      // step 9: Ensure that price is not sent for products with sizes
+      if (price) {
+        throw new Error(`Cannot send price for product with sizes.`);
+      }
+
+      // step 10: Ensure that priceAfterDiscount is not sent for products with sizes
+      if (priceAfterDiscount) {
+        throw new Error(
+          `Cannot send price after discount for product with sizes.`
+        );
+      }
+
+      // step 11: Ensure that general colors are not sent with sizes
+      if (colors && colors.length > 0) {
+        throw new Error(`Cannot send general colors with sizes.`);
+      }
+
+      sizes.forEach((size, i) => {
+        // Ensure a size name exists
+        if (!size.size) {
+          throw new Error(`Size name is required for size index ${i}`);
+        }
+
+        if (setSizes.includes(size.size)) {
+          throw new Error(
+            `You cannot add the same size more than once. index: ${i}`
+          );
+        }
+
+        setSizes.push(size.size);
+
+        // Ensure there is a price for each size
+        if (!size.price) {
+          throw new Error(`Price is required for size "${size.size}"`);
+        }
+
+        if (size.quantity && typeof size.quantity !== "number") {
+          throw new Error(
+            `The quantity for size "${size.size}" must be a number.`
+          );
+        }
+
+        if (typeof size.price !== "number") {
+          throw new Error(
+            `The price for size "${size.size}" must be a number.`
+          );
+        }
+
+        if (
+          size.priceAfterDiscount &&
+          typeof size.priceAfterDiscount !== "number"
+        ) {
+          throw new Error(
+            `The price after discount for size "${size.size}" must be a number.`
+          );
+        }
+
+        if (size.quantity && size.quantity < 0) {
+          throw new Error(
+            `The quantity for size "${size.size}" must not be negative.`
+          );
+        }
+
+        if (size.price && size.price < 0) {
+          throw new Error(
+            `The price for size "${size.size}" must not be negative.`
+          );
+        }
+
+        if (size.priceAfterDiscount && size.priceAfterDiscount < 0) {
+          throw new Error(
+            `The discounted price for size "${size.size}" must not be negative.`
+          );
+        }
+
+        if (size.priceAfterDiscount && size.priceAfterDiscount >= size.price) {
+          throw new Error(
+            `The discounted price for size "${size.size}" must be less than the original price.`
+          );
+        }
+
+        if (size.colors && size.colors.length > 0) {
+          if (size.quantity || size.quantity === 0) {
+            throw new Error(
+              `Do not send quantity directly for size "${size.size}" with colors`
+            );
+          }
+          const setColors = [];
+          size.colors.forEach((color) => {
+            if (!color.color) {
+              throw new Error(
+                `Color name is required for color index ${i} at size "${size.size}"`
+              );
+            }
+            if (!color.quantity && color.quantity !== 0) {
+              throw new Error(
+                `Color quantity is required for color "${color.color}" at size "${size.size}"`
+              );
+            }
+            if (color.quantity && typeof color.quantity !== "number") {
+              throw new Error(
+                `The quantity for color "${color.color}" at size "${size.size}" must be a number.`
+              );
+            }
+            if (color.quantity < 0) {
+              throw new Error(
+                `The quantity for color "${color.color}" in size "${size.size}" must not be negative.`
+              );
+            }
+            if (setColors.includes(color.color)) {
+              throw new Error(
+                `Duplicate color "${color.color}" found at size "${size.size}". Colors must be unique per size.`
+              );
+            }
+            setColors.push(color.color);
+          });
+        } else if (!size.quantity && size.quantity !== 0) {
+          throw new Error(
+            `Quantity is required for size "${size.size}" without colors`
+          );
+        }
+      });
+    } else if (colors && colors.length > 0) {
+      if (quantity || quantity === 0) {
+        throw new Error(`Cannot send general quantity with colors`);
+      }
+
+      let setColors = [];
+      colors.forEach((color, i) => {
+        if (!color.color) {
+          throw new Error(`Color name is required for color index ${i}`);
+        }
+        if (!color.quantity && color.quantity !== 0) {
+          throw new Error(
+            `Color quantity is required for color "${color.color}"`
+          );
+        }
+        if (color.quantity && typeof color.quantity !== "number") {
+          throw new Error(
+            `The quantity for color "${color.color}" must be a number.`
+          );
+        }
+        if (color.quantity < 0) {
+          throw new Error(
+            `The quantity for color "${color.color}" must not be negative.`
+          );
+        }
+        if (setColors.includes(color.color)) {
+          throw new Error(
+            `Color ${color.color} is already selected. Duplicates are not allowed.`
+          );
+        }
+        setColors.push(color.color);
+      });
+    } else if (!quantity && quantity !== 0) {
+      throw new Error(`Quantity is required when no sizes and no colors.`);
+    }else if (!price && price !== 0) {
+      throw new Error(`Product price is required when there are no sizes.`);
+    }
+
+    return true;
+  }),
   validatorMiddleware,
 ];
 
@@ -161,3 +342,5 @@ exports.productSearchValidator = [
     .withMessage("Search text is too long, Must be under 40 characters."),
   validatorMiddleware,
 ];
+
+

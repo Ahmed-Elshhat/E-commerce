@@ -18,6 +18,7 @@ const {
   deleteProduct,
   uploadProductImages,
   resizeProductImages,
+  parseJSON
 } = require("../controllers/productController");
 
 const AuthService = require("../controllers/authController");
@@ -37,6 +38,7 @@ router
     AuthService.allowedTo("admin", "manager"),
     uploadProductImages,
     resizeProductImages,
+    parseJSON,
     createProductValidator,
     createProduct
   );
