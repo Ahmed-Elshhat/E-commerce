@@ -294,7 +294,7 @@ exports.createProductValidator = [
       });
     } else if (!quantity && quantity !== 0) {
       throw new Error(`Quantity is required when no sizes and no colors.`);
-    }else if (!price && price !== 0) {
+    } else if (!price && price !== 0) {
       throw new Error(`Product price is required when there are no sizes.`);
     }
 
@@ -306,24 +306,134 @@ exports.createProductValidator = [
 exports.updateProductValidator = [
   validateExactFields(
     [
-      "title",
-      "description",
+      "titleEn",
+      "titleAr",
+      "descriptionEn",
+      "descriptionAr",
       "quantity",
       "price",
-      "imageCover",
+      "priceAfterDiscount",
+      "colors",
+      "sizes",
+      "coverImage",
       "images",
-      "ratingsQuantity",
       "category",
+      "brand",
+      "updateSizes",
     ],
     ["id"]
   ),
   check("id").isMongoId().withMessage("Invalid ID formate"),
-  body("title")
+  check("titleEn")
     .optional()
-    .custom((val, { req }) => {
-      req.body.slug = slugify(val);
+    .notEmpty()
+    .withMessage("Product title in English is required.")
+    .isLength({ min: 3 })
+    .withMessage("Product title in English must be at least 3 characters long.")
+    .isLength({ max: 100 })
+    .withMessage("The title in English must not exceed 100 characters."),
+  check("titleAr")
+    .optional()
+    .notEmpty()
+    .withMessage("Product title in Arabic is required.")
+    .isLength({ min: 3 })
+    .withMessage("Product title in Arabic must be at least 3 characters long.")
+    .isLength({ max: 100 })
+    .withMessage("The title in Arabic must not exceed 100 characters."),
+  check("descriptionEn")
+    .optional()
+    .notEmpty()
+    .withMessage("Product description in English is required.")
+    .isLength({ min: 20 })
+    .withMessage(
+      "Product description in English must be at least 20 characters long."
+    )
+    .isLength({ max: 2000 })
+    .withMessage(
+      "Product description in English must not exceed 2000 characters."
+    ),
+  check("descriptionAr")
+    .optional()
+    .notEmpty()
+    .withMessage("Product description in Arabic is required.")
+    .isLength({ min: 20 })
+    .withMessage(
+      "Product description in Arabic must be at least 20 characters long."
+    )
+    .isLength({ max: 2000 })
+    .withMessage(
+      "Product description in Arabic must not exceed 2000 characters."
+    ),
+  check("quantity")
+    .optional()
+    .optional()
+    .isNumeric()
+    .withMessage("Product quantity must be a number")
+    .isInt({ gt: 0 })
+    .withMessage("Product quantity must be a positive integer")
+    .toInt(),
+  check("price")
+    .optional()
+    .optional()
+    .isNumeric()
+    .withMessage("Product price must be a number")
+    .isFloat({ gt: 0 })
+    .withMessage("Product price must be a positive number")
+    .toFloat(),
+  check("priceAfterDiscount")
+    .optional()
+    .optional()
+    .isNumeric()
+    .withMessage("Product price after discount must be a number")
+    .isFloat({ gt: 0 })
+    .withMessage("Product price after discount must be a positive number")
+    .toFloat()
+    .custom((value, { req }) => {
+      if (req.body.price <= value) {
+        throw new Error("price after discount must be lower than price");
+      }
       return true;
     }),
+  check("colors")
+    .optional()
+    .optional()
+    .isArray()
+    .withMessage("availableColors should be array of string"),
+  check("sizes").optional(),
+  check("coverImage")
+    .notEmpty()
+    .withMessage("Product cover image is required")
+    .optional(),
+  check("images")
+    .optional()
+    .isArray()
+    .withMessage("images should be array of string"),
+  check("category")
+    .optional()
+    .notEmpty()
+    .withMessage("Product must be belong to a category")
+    .isMongoId()
+    .withMessage("Invalid ID formate")
+    .custom((categoryId) =>
+      Category.findById(categoryId).then((category) => {
+        if (!category) {
+          return Promise.reject(
+            new Error(`No category for this id: ${categoryId}`)
+          );
+        }
+      })
+    ),
+  check("brand")
+    .optional()
+    .isMongoId()
+    .withMessage("Invalid ID formate")
+    .custom((brandId) =>
+      Brand.findById(brandId).then((brand) => {
+        if (!brand) {
+          return Promise.reject(new Error(`No brand for this id: ${brandId}`));
+        }
+      })
+    ),
   validatorMiddleware,
 ];
 
@@ -342,5 +452,3 @@ exports.productSearchValidator = [
     .withMessage("Search text is too long, Must be under 40 characters."),
   validatorMiddleware,
 ];
-
-

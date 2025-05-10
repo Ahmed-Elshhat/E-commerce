@@ -51,6 +51,7 @@ router
     AuthService.allowedTo("admin", "manager"),
     uploadProductImages,
     resizeProductImages,
+    parseJSON,
     updateProductValidator,
     updateProduct
   )

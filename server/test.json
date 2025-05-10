@@ -1,0 +1,64 @@
+[
+  {
+    "sizeName": "l",
+    "newSizeName": "l",
+    "sizePrice": 100,
+    "sizePriceAfterDiscount": 90,
+    "sizeQuantity": 10,
+    "sizeColors": [
+      {
+        "type": "update OR new",
+        "colorName": "#fd34d4",
+        "newColorName": "#fd3534",
+        "colorQuantity": 5
+      }
+    ],
+    "deleteColors": ["#fd34d4"],
+    "deletePriceAfterDiscount": true
+  }
+]
+
+[
+  {
+    "sizeName": "l",
+    "newSizeName": "ll",
+  }
+]
+
+[
+  {
+    "sizeName": "l",
+    "sizePrice": 100,
+  }
+]
+
+[
+  {
+    "sizeName": "l",
+    "sizePriceAfterDiscount": 90,
+  }
+]
+
+[
+  {
+    "deletePriceAfterDiscount": true
+  }
+]
+
+[
+  {
+    "sizeName": "l",
+    "sizePrice": 100,
+    "sizePriceAfterDiscount": 90,
+  }
+]
+
+[
+  {
+    "sizeName": "l",
+    "newSizeName": "l",
+    "sizePrice": 100,
+    "sizePriceAfterDiscount": 90,
+    "deletePriceAfterDiscount": true
+  }
+]
