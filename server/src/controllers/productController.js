@@ -292,7 +292,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         const original = product.sizes.find(
           (s) => s.size.toLowerCase() === normalizedName
         );
-        
+      
         if (!original) {
           next(
             new ApiError(
@@ -302,8 +302,36 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           );
           return true;
         }
-        
-        // تحقق إذا تم إرسال السعر والخصم
+      
+        // ✅ تحقق من تكرار السعر الأصلي
+        if (
+          size.sizePrice != null &&
+          size.sizePrice === original.price
+        ) {
+          next(
+            new ApiError(
+              `The new price for size "${size.sizeName}" must be different from the old price.`,
+              400
+            )
+          );
+          return true;
+        }
+      
+        // ✅ تحقق من تكرار السعر بعد الخصم
+        if (
+          size.sizePriceAfterDiscount != null &&
+          size.sizePriceAfterDiscount === original.priceAfterDiscount
+        ) {
+          next(
+            new ApiError(
+              `The new discounted price for size "${size.sizeName}" must be different from the old discounted price.`,
+              400
+            )
+          );
+          return true;
+        }
+      
+        // ✅ تحقق إذا تم إرسال السعر والخصم وكان الخصم أكبر من السعر
         if (
           size.sizePrice != null &&
           size.sizePriceAfterDiscount != null &&
@@ -318,7 +346,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
       
-        // تحقق إذا فقط تم إرسال السعر بعد الخصم
+        // ✅ تحقق إذا فقط تم إرسال الخصم وكان أكبر من السعر القديم
         if (
           size.sizePrice == null &&
           size.sizePriceAfterDiscount != null &&
@@ -336,6 +364,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         return false;
       });
       if (priceIsInvalid) return;
+      
 
       const session = await mongoose.startSession();
       try {
