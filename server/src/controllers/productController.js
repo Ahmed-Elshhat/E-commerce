@@ -287,6 +287,56 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         );
       }
 
+      const priceIsInvalid = updateSizes.some((size) => {
+        const normalizedName = size.sizeName.toLowerCase();
+        const original = product.sizes.find(
+          (s) => s.size.toLowerCase() === normalizedName
+        );
+        
+        if (!original) {
+          next(
+            new ApiError(
+              `Size "${size.sizeName}" does not exist in the product.`,
+              400
+            )
+          );
+          return true;
+        }
+        
+        // تحقق إذا تم إرسال السعر والخصم
+        if (
+          size.sizePrice != null &&
+          size.sizePriceAfterDiscount != null &&
+          size.sizePriceAfterDiscount > size.sizePrice
+        ) {
+          next(
+            new ApiError(
+              `Discounted price for "${size.sizeName}" must be less than the original price.`,
+              400
+            )
+          );
+          return true;
+        }
+      
+        // تحقق إذا فقط تم إرسال السعر بعد الخصم
+        if (
+          size.sizePrice == null &&
+          size.sizePriceAfterDiscount != null &&
+          size.sizePriceAfterDiscount > original.price
+        ) {
+          next(
+            new ApiError(
+              `Discounted price for "${size.sizeName}" must be less than the original price (${original.price}).`,
+              400
+            )
+          );
+          return true;
+        }
+      
+        return false;
+      });
+      if (priceIsInvalid) return;
+
       const session = await mongoose.startSession();
       try {
         session.startTransaction();
@@ -352,7 +402,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             });
           }
 
-          const productSize = product.sizes.find((s) => {
+          let productSize = product.sizes.find((s) => {
             if (size.newSizeName) {
               return s.size.toLowerCase() === size.newSizeName.toLowerCase();
             }
@@ -384,7 +434,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               );
             }
 
-            delete productSize.priceAfterDiscount;
+            productSize.priceAfterDiscount = undefined;
+            await product.save({ session });
 
             const cartsToUpdate = await Cart.find({
               "cartItems.product": product._id,
@@ -418,7 +469,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   { session }
                 );
 
-                return result.modifiedCount; // 1 if modified, 0 otherwise
+                return result.modifiedCount;
               })
             );
 
@@ -546,8 +597,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               );
             }
           }
-
-          
         });
 
         await Promise.all(updatePromises);
@@ -557,7 +606,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       } catch (err) {
         await session.abortTransaction();
         session.endSession();
-        console.log(err)
         return next(
           new ApiError(
             err.message || "Error updating product or carts. Changes reverted.",
