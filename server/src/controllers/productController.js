@@ -212,6 +212,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
 
+        if (
+          !size.newSizeName &&
+          size.sizePrice == null &&
+          size.sizePriceAfterDiscount == null &&
+          !size.sizeColors?.length &&
+          !size.deleteColors?.length
+        ) {
+          next(
+            new ApiError(
+              `No actual update provided for size "${size.sizeName}". Please specify at least one change.`,
+              400
+            )
+          );
+          return true;
+        }
+
         const normalizedName = size.sizeName.toLowerCase();
         const original = product.sizes.find(
           (s) => s.size.toLowerCase() === normalizedName
@@ -281,6 +297,26 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         seenSizeNames.push(size.sizeName.toLowerCase());
         seenNewSizeNames.push(size.newSizeName.toLowerCase());
 
+        if (size.sizePrice != null && typeof size.sizePrice !== "number") {
+          next(
+            new ApiError(`Price for "${size.sizeName}" must be a number.`, 400)
+          );
+          return true;
+        }
+
+        if (
+          size.sizePriceAfterDiscount != null &&
+          typeof size.sizePriceAfterDiscount !== "number"
+        ) {
+          next(
+            new ApiError(
+              `Discounted price for "${size.sizeName}" must be a number.`,
+              400
+            )
+          );
+          return true;
+        }
+
         // ✅ تحقق من تكرار السعر الأصلي
         if (size.sizePrice != null && size.sizePrice === original.price) {
           next(
@@ -334,6 +370,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             )
           );
           return true;
+        }
+
+        if (size.deleteColors?.length) {
+          const seenDeleteColors = [];
+          const hasValidationDeleteColors = size.deleteColors.some((c) => {
+            if (seenDeleteColors.includes(c.toLowerCase())) {
+              next(new ApiError(`Duplicate color "${c}" found in delete colors list. Each color must be unique.`, 400));
+              return true;
+            }
+
+            seenDeleteColors.push(c.toLowerCase());
+
+            return false;
+          });
+
+          if(hasValidationDeleteColors) return true;
         }
 
         if (size.sizeColors && size.sizeColors.length > 0) {
@@ -542,7 +594,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               return true;
             }
 
-            if (color.newColorName && size.deleteColors.includes(color.newColorName)) {
+            if (
+              color.newColorName &&
+              size.deleteColors.includes(color.newColorName)
+            ) {
               next(
                 new ApiError(
                   `Cannot rename the color to (${color.newColorName}) because it is marked for deletion.`,
@@ -558,7 +613,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           });
         }
-
 
         return false;
       });
