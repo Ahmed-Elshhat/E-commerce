@@ -561,7 +561,9 @@ function AddProduct() {
       formData.append(`colors[]`, color);
     });
 
-    formData.append("sizes", JSON.stringify(form.sizes));
+    if(form.sizes.length > 0) {
+      formData.append("sizes", JSON.stringify(form.sizes));
+    }
 
     try {
       const res = await Axios.post(`${PRODUCTS}`, formData);

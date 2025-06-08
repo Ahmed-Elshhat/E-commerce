@@ -274,7 +274,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
 
-        if (seenNewSizeNames.includes(size.newSizeName.toLowerCase())) {
+        if (
+          size.newSizeName &&
+          seenNewSizeNames.includes(size.newSizeName.toLowerCase())
+        ) {
           next(
             new ApiError(
               "Duplicate new size name detected. Each size must have a unique name.",
@@ -284,7 +287,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
 
-        if (seenSizeNames.includes(size.newSizeName.toLowerCase())) {
+        if (
+          size.newSizeName &&
+          seenSizeNames.includes(size.newSizeName.toLowerCase())
+        ) {
           next(
             new ApiError(
               `The new size name "${size.newSizeName}" conflicts with an existing size name. Please choose a different name.`,
@@ -293,9 +299,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           );
           return true;
         }
-
-        seenSizeNames.push(size.sizeName.toLowerCase());
-        seenNewSizeNames.push(size.newSizeName.toLowerCase());
 
         if (size.sizePrice != null && typeof size.sizePrice !== "number") {
           next(
@@ -375,17 +378,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         if (size.deleteColors?.length) {
           const seenDeleteColors = [];
           const hasValidationDeleteColors = size.deleteColors.some((c) => {
-            if (seenDeleteColors.includes(c.toLowerCase())) {
-              next(new ApiError(`Duplicate color "${c}" found in delete colors list. Each color must be unique.`, 400));
-              return true;
+            const lowerC = c.toLowerCase();
+            if (seenDeleteColors.includes(lowerC)) {
+              next(
+                new ApiError(
+                  `Duplicate color "${c}" found in delete colors list. Each color must be unique.`,
+                  400
+                )
+              );
+              return true; // هذا يجعل some ترجع true وتتوقف
             }
 
-            seenDeleteColors.push(c.toLowerCase());
-
+            seenDeleteColors.push(lowerC);
             return false;
           });
 
-          if(hasValidationDeleteColors) return true;
+          if (hasValidationDeleteColors) return true; // وقف التنفيذ عند أول خطأ
         }
 
         if (size.sizeColors && size.sizeColors.length > 0) {
@@ -614,6 +622,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           });
         }
 
+        seenSizeNames.push(size.sizeName.toLowerCase());
+        if (size.newSizeName) {
+          seenNewSizeNames.push(size.newSizeName.toLowerCase());
+        }
         return false;
       });
       if (hasValidationErrors) return;
