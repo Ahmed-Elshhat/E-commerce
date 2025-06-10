@@ -400,7 +400,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           const seenOldColorNames = [];
           const seenNewColorNames = [];
 
-          size.sizeColors.forEach((color, colorIndex) => {
+          const colorValidator = size.sizeColors.some((color, colorIndex) => {
             if (!color.type) {
               next(
                 new ApiError(
@@ -619,7 +619,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (color.newColorName) {
               seenNewColorNames.push(color.newColorName.toLowerCase());
             }
+
+            return false;
           });
+
+          if(colorValidator) return true;
         }
 
         seenSizeNames.push(size.sizeName.toLowerCase());
