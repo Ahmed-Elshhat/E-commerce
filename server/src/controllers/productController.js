@@ -243,21 +243,21 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
 
-        const newNameIsExist = product.sizes.find(
-          (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
-        );
-
-        if (newNameIsExist) {
-          next(
-            new ApiError(
-              `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
-              400
-            )
-          );
-          return true;
-        }
-
         if (size.newSizeName) {
+          const newNameIsExist = product.sizes.find(
+            (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
+          );
+
+          if (newNameIsExist) {
+            next(
+              new ApiError(
+                `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
+                400
+              )
+            );
+            return true;
+          }
+
           if (size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()) {
             next(
               new ApiError(
@@ -377,23 +377,116 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
         if (size.deleteColors?.length) {
           const seenDeleteColors = [];
-          const hasValidationDeleteColors = size.deleteColors.some((c) => {
+
+          const hasValidationDeleteColors = size.deleteColors.some((c, i) => {
             const lowerC = c.toLowerCase();
-            if (seenDeleteColors.includes(lowerC)) {
+
+            // ❌ رجع Error فوري لو اللون غير موجود في الأصل
+            const existsInOriginal = original.colors.some(
+              (color) => color.toLowerCase() === lowerC
+            );
+
+            if (!existsInOriginal) {
               next(
                 new ApiError(
-                  `Duplicate color "${c}" found in delete colors list. Each color must be unique.`,
+                  `❌ Cannot delete color "${c}" in size "${size.sizeName}" because it does not exist in the original color list.`,
                   400
                 )
               );
-              return true; // هذا يجعل some ترجع true وتتوقف
+              return true;
+            }
+
+            // ❌ رجع Error لو فيه تكرار
+            if (seenDeleteColors.includes(lowerC)) {
+              next(
+                new ApiError(
+                  `❌ Duplicate color "${c}" found in deleteColors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
+                  400
+                )
+              );
+              return true;
             }
 
             seenDeleteColors.push(lowerC);
             return false;
           });
 
-          if (hasValidationDeleteColors) return true; // وقف التنفيذ عند أول خطأ
+          if (hasValidationDeleteColors) return true;
+        }
+
+        if (size.sizeQuantity != null) {
+          const hasOriginalColors = original.colors.length > 0;
+          const hasNewOrUpdatedColors =
+            Array.isArray(size.sizeColors) &&
+            size.sizeColors.some(
+              (c) => c.type === "new" || c.type === "update"
+            );
+
+          const allOriginalColorsDeleted =
+            Array.isArray(size.deleteColors) &&
+            size.deleteColors.length === original.colors.length &&
+            original.colors.every((oc) =>
+              size.deleteColors.some(
+                (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+              )
+            );
+
+          // الحالة 1: فيه ألوان أصلية
+          if (hasOriginalColors) {
+            if (
+              !Array.isArray(size.deleteColors) ||
+              size.deleteColors.length === 0
+            ) {
+              return next(
+                new ApiError(
+                  `❌ Cannot update size quantity for "${size.sizeName}" because it has original colors but no delete colors were provided.`,
+                  400
+                )
+              );
+            }
+
+            if (!allOriginalColorsDeleted) {
+              return next(
+                new ApiError(
+                  `❌ Cannot update size quantity for "${size.sizeName}" unless all original colors are marked for deletion.`,
+                  400
+                )
+              );
+            }
+
+            if (hasNewOrUpdatedColors) {
+              return next(
+                new ApiError(
+                  `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                  400
+                )
+              );
+            }
+          }
+
+          // الحالة 2: مفيش ألوان أصلية
+          if (!hasOriginalColors) {
+            if (
+              Array.isArray(size.deleteColors) &&
+              size.deleteColors.length > 0
+            ) {
+              return next(
+                new ApiError(
+                  `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
+                  400
+                )
+              );
+            }
+
+            if (hasNewOrUpdatedColors) {
+              return next(
+                new ApiError(
+                  `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                  400
+                )
+              );
+            }
+          }
         }
 
         if (size.sizeColors && size.sizeColors.length > 0) {
@@ -504,6 +597,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
 
             if (color.type === "new") {
+              if (size.deleteColors.includes(color.colorName)) {
+                next(
+                  new ApiError(
+                    `Color "${color.colorName}" cannot be added because it is scheduled for deletion.`,
+                    400
+                  )
+                );
+                return true;
+              }
+
               if (color.colorQuantity == null) {
                 next(
                   new ApiError(
@@ -540,6 +643,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
 
             if (color.type === "update") {
+              if (size.deleteColors.includes(color.colorName)) {
+                next(
+                  new ApiError(
+                    `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`,
+                    400
+                  )
+                );
+                return true;
+              }
+
               const existingColor = original.colors.find(
                 (c) => c.color.toLowerCase() === color.colorName.toLowerCase()
               );
@@ -592,16 +705,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
-            if (size.deleteColors.includes(color.colorName)) {
-              next(
-                new ApiError(
-                  `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`,
-                  400
-                )
-              );
-              return true;
-            }
-
             if (
               color.newColorName &&
               size.deleteColors.includes(color.newColorName)
@@ -623,7 +726,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             return false;
           });
 
-          if(colorValidator) return true;
+          if (colorValidator) return true;
         }
 
         seenSizeNames.push(size.sizeName.toLowerCase());
@@ -895,28 +998,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
 
           if (size.sizeQuantity !== undefined) {
-            if (size.sizeColors !== undefined) {
-              throw new ApiError(
-                `You cannot update the quantity while adding colors to size "${size.sizeName}".`,
-                400
-              );
-            }
-
-            if (
-              size.deleteColors &&
-              size.deleteColors.length !== productSize.colors.length
-            ) {
-              throw new ApiError(
-                `To update the quantity, you must delete all colors from size "${size.sizeName}".`,
-                400
-              );
-            } else if (productSize.colors && productSize.colors.length > 0) {
-              throw new ApiError(
-                `Cannot update quantity for size "${size.sizeName}" while it still has colors.`,
-                400
-              );
-            }
-
             productSize.quantity = size.sizeQuantity;
 
             const cartsToUpdate = await Cart.find({
@@ -969,6 +1050,90 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 400
               );
             }
+          }
+
+          if (size.sizeColors != null && size.sizeColors.length > 0) {
+            productSize.size = undefined;
+
+            size.sizeColors.forEach(async (color) => {
+              if (color.type === "new") {
+                const cartsToUpdate = await Cart.find({
+                  "cartItems.product": product._id,
+                  "cartItems.size": size.sizeName,
+                  "cartItems.color": color.colorName,
+                }).session(session);
+                productSize.colors.push({
+                  color: color.colorName,
+                  quantity: color.quantity,
+                });
+                if (cartsToUpdate.length !== 0) {
+                  let originalCartCount = 0;
+
+                  const updateResults = await Promise.all(
+                    cartsToUpdate.map(async (cart) => {
+                      const updatedItems = cart.cartItems.map((item) => {
+                        if (
+                          item.product._id.toString() ===
+                            product._id.toString() &&
+                          item.size.toLowerCase() ===
+                            size.sizeName.toLowerCase() &&
+                          item.color.toLowerCase() ===
+                            color.colorName.toLowerCase()
+                        ) {
+                          originalCartCount++;
+                          item.isAvailable = true;
+                        }
+                        return item;
+                      });
+
+                      const result = await Cart.updateOne(
+                        { _id: cart._id },
+                        {
+                          $set: {
+                            cartItems: updatedItems,
+                            totalCartPrice: calcTotalCartPrice({
+                              cartItems: updatedItems,
+                            }),
+                          },
+                        },
+                        { session }
+                      );
+
+                      return result.modifiedCount; // 1 if modified, 0 otherwise
+                    })
+                  );
+
+                  const updatedCartCount = updateResults.reduce(
+                    (sum, count) => sum + count,
+                    0
+                  );
+
+                  if (updatedCartCount < originalCartCount) {
+                    throw new ApiError(
+                      `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
+                      400
+                    );
+                  }
+                }
+              } else if (color.type === "update") {
+                const cartsToUpdate = await Cart.find({
+                  "cartItems.product": product._id,
+                  "cartItems.size": size.sizeName,
+                  "cartItems.color": color.colorName,
+                }).session(session);
+                productSize.colors.forEach((c) => {
+                  if (c.color.toLowerCase() === color.colorName.toLowerCase()) {
+                    if (color.newColorName !== null) {
+                      c.color = color.newColorName;
+                    }
+
+                    if (color.colorQuantity !== null) {
+                      c.quantity = color.colorQuantity;
+                    }
+                  }
+                });
+              }
+            });
           }
         });
 
