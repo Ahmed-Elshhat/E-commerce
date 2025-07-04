@@ -24,8 +24,12 @@ exports.uploadProductImages = uploadMixOfImages([
 ]);
 
 exports.resizeProductImages = asyncHandler(async (req, res, next) => {
+  if (!req.files) {
+    req.files = {};
+  }
+
   //1- Image processing for coverImage
-  if (req.files.coverImage) {
+  if (req.files.coverImage && req.files.coverImage[0]) {
     const coverImageFileName = `product-${uuidv4()}-${Date.now()}-cover.jpeg`;
 
     await sharp(req.files.coverImage[0].buffer)
@@ -37,8 +41,9 @@ exports.resizeProductImages = asyncHandler(async (req, res, next) => {
     // Save image into our db
     req.body.coverImage = coverImageFileName;
   }
+
   //2- Image processing for images
-  if (req.files.images) {
+  if (req.files.images && Array.isArray(req.files.images)) {
     req.body.images = [];
 
     const imagesArray = req.files.images.slice(0, 10); // الحد الأقصى 10 صور
@@ -216,6 +221,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           !size.newSizeName &&
           size.sizePrice == null &&
           size.sizePriceAfterDiscount == null &&
+          size.sizeQuantity == null &&
           !size.sizeColors?.length &&
           !size.deleteColors?.length
         ) {
@@ -244,6 +250,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         }
 
         if (size.newSizeName) {
+          if (size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()) {
+            next(
+              new ApiError(
+                `The new name for size "${size.sizeName}" matches the old name. It must be different.`,
+                400
+              )
+            );
+            return true;
+          }
+
           const newNameIsExist = product.sizes.find(
             (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
           );
@@ -252,16 +268,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             next(
               new ApiError(
                 `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
-                400
-              )
-            );
-            return true;
-          }
-
-          if (size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()) {
-            next(
-              new ApiError(
-                `The new name for size "${size.sizeName}" matches the old name. It must be different.`,
                 400
               )
             );
@@ -383,7 +389,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
             // ❌ رجع Error فوري لو اللون غير موجود في الأصل
             const existsInOriginal = original.colors.some(
-              (color) => color.toLowerCase() === lowerC
+              (color) => color.color.toLowerCase() === lowerC
             );
 
             if (!existsInOriginal) {
@@ -400,7 +406,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (seenDeleteColors.includes(lowerC)) {
               next(
                 new ApiError(
-                  `❌ Duplicate color "${c}" found in deleteColors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
+                  `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
                   400
                 )
               );
@@ -431,36 +437,39 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               )
             );
 
+          if (hasNewOrUpdatedColors) {
+            next(
+              new ApiError(
+                `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                400
+              )
+            );
+            return true;
+          }
+
           // الحالة 1: فيه ألوان أصلية
           if (hasOriginalColors) {
             if (
               !Array.isArray(size.deleteColors) ||
               size.deleteColors.length === 0
             ) {
-              return next(
+              next(
                 new ApiError(
-                  `❌ Cannot update size quantity for "${size.sizeName}" because it has original colors but no delete colors were provided.`,
+                  `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
                   400
                 )
               );
+              return true;
             }
 
             if (!allOriginalColorsDeleted) {
-              return next(
+              next(
                 new ApiError(
-                  `❌ Cannot update size quantity for "${size.sizeName}" unless all original colors are marked for deletion.`,
+                  `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
                   400
                 )
               );
-            }
-
-            if (hasNewOrUpdatedColors) {
-              return next(
-                new ApiError(
-                  `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
-                  400
-                )
-              );
+              return true;
             }
           }
 
@@ -470,21 +479,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               Array.isArray(size.deleteColors) &&
               size.deleteColors.length > 0
             ) {
-              return next(
+              next(
                 new ApiError(
                   `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
                   400
                 )
               );
-            }
-
-            if (hasNewOrUpdatedColors) {
-              return next(
-                new ApiError(
-                  `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
-                  400
-                )
-              );
+              return true;
             }
           }
         }
@@ -517,7 +518,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (!color.colorName) {
               next(
                 new ApiError(
-                  `Missing color name for size "${size.sizeName}" at color index ${colorIndex}. The "Color name" field is required.`,
+                  `Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}. The "Color name" field is required.`,
                   400
                 )
               );
@@ -597,7 +598,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
 
             if (color.type === "new") {
-              if (size.deleteColors.includes(color.colorName)) {
+              if (size.deleteColors && size.deleteColors.includes(color.colorName)) {
                 next(
                   new ApiError(
                     `Color "${color.colorName}" cannot be added because it is scheduled for deletion.`,
@@ -610,7 +611,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               if (color.colorQuantity == null) {
                 next(
                   new ApiError(
-                    `Please specify the quantity available for the new color in size "${size.sizeName}".`,
+                    `Please specify the quantity available for the new color "${color.colorName}" in size "${size.sizeName}".`,
                     400
                   )
                 );
@@ -620,7 +621,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               if (color.newColorName) {
                 next(
                   new ApiError(
-                    `❌ For new colors in size "${size.sizeName}", use "colorName" only. Do not include "newColorName".`,
+                    `❌ For new colors in size "${size.sizeName}", use "color Name" only. Do not include "new Color Name".`,
                     400
                   )
                 );
@@ -817,7 +818,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
 
           if (
-            size.sizePriceAfterDiscount !== undefined &&
+            size.sizePriceAfterDiscount != null &&
             size.deletePriceAfterDiscount
           ) {
             throw new ApiError(
@@ -885,7 +886,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           }
 
-          if (size.sizePrice !== undefined) {
+          if (size.sizePrice != null) {
             productSize.price = size.sizePrice;
 
             if (size.sizePriceAfterDiscount !== undefined) {
@@ -942,7 +943,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 400
               );
             }
-          } else if (size.sizePriceAfterDiscount !== undefined) {
+          } else if (size.sizePriceAfterDiscount != null) {
             productSize.priceAfterDiscount = size.sizePriceAfterDiscount;
 
             const cartsToUpdate = await Cart.find({
@@ -997,7 +998,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           }
 
-          if (size.sizeQuantity !== undefined) {
+          if (size.sizeQuantity != null) {
             productSize.quantity = size.sizeQuantity;
 
             const cartsToUpdate = await Cart.find({
