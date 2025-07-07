@@ -189,7 +189,11 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
         //  Error: User is trying to add more items than are available in stock for the selected color and size
         return next(
           new ApiError(
-            `Cannot add more than ${availableQuantity} items of this product with color '${color}'${size ? ` and size '${size}'` : ""}`,
+            size && color
+              ? `Cannot add more than ${availableQuantity} items of this product with color '${color}' and size '${size}'`
+              : size
+                ? `Cannot add more than ${availableQuantity} items of this product with size '${size}'`
+                : `Cannot add more than ${availableQuantity} items of this product`,
             400
           )
         );
