@@ -816,66 +816,64 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             productSize.quantity = size.sizeQuantity;
           }
 
-          if (size.deleteColors && size.deleteColors?.length > 0) {
-            size.deleteColors.forEach(async (c) => {
-              productSize.colors = productSize.colors.filter((color) => color.color.toLowerCase() !== c.toLowerCase());
-              const cartsToUpdate = await Cart.find({
-                "cartItems.product": product._id,
-                "cartItems.size": size.sizeName,
-                "cartItems.color": c,
-              }).session(session);
+          /* eslint-disable no-await-in-loop */
+          for (let i = 0; i < size.deleteColors.length; i++) {
+            const c = size.deleteColors[i];
 
-              let originalOldSizeCount = 0;
+            productSize.colors = productSize.colors.filter(
+              (color) => color.color.toLowerCase() !== c.toLowerCase()
+            );
 
-              // Loop through carts and update matching cart items
-              const updateResults = await Promise.all(
-                cartsToUpdate.map(async (cart) => {
-                  const updatedItems = cart.cartItems.map((item) => {
-                    // Match the specific product and size in the cart
-                    if (
-                      item.product._id.equals(product._id) &&
-                      item.size.toLowerCase() === size.sizeName.toLowerCase() &&
-                      item.color.toLowerCase() === c.toLowerCase()
-                    ) {
-                      item.isAvailable = false;
-                      originalOldSizeCount++;
-                    }
-                    return item;
-                  });
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.size": size.sizeName,
+              "cartItems.color": c,
+            }).session(session);
 
-                  // Save the updated cart items and recalculate total price
-                  const result = await Cart.updateOne(
-                    { _id: cart._id },
-                    {
-                      $set: {
+            let originalOldSizeCount = 0;
+
+            const updateResults = await Promise.all(
+              cartsToUpdate.map(async (cart) => {
+                const updatedItems = cart.cartItems.map((item) => {
+                  if (
+                    item.product._id.equals(product._id) &&
+                    item.size.toLowerCase() === size.sizeName.toLowerCase() &&
+                    item.color.toLowerCase() === c.toLowerCase()
+                  ) {
+                    item.isAvailable = false;
+                    originalOldSizeCount++;
+                  }
+                  return item;
+                });
+
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
+                      cartItems: updatedItems,
+                      totalCartPrice: calcTotalCartPrice({
                         cartItems: updatedItems,
-                        totalCartPrice: calcTotalCartPrice({
-                          cartItems: updatedItems,
-                        }),
-                      },
+                      }),
                     },
-                    { session }
-                  );
-
-                  // Return number of modified documents (1 or 0)
-                  return result.modifiedCount;
-                })
-              );
-
-              // Sum up all updated cart counts
-              const updatedCartCount = updateResults.reduce(
-                (sum, count) => sum + count,
-                0
-              );
-
-              // Rollback if not all matching carts were updated successfully
-              if (updatedCartCount < originalOldSizeCount) {
-                throw new ApiError(
-                  `Not all carts were updated for size "${size.sizeName}". Transaction rolled back.`,
-                  400
+                  },
+                  { session }
                 );
-              }
-            });
+
+                return result.modifiedCount;
+              })
+            );
+
+            const updatedCartCount = updateResults.reduce(
+              (sum, count) => sum + count,
+              0
+            );
+
+            if (updatedCartCount < originalOldSizeCount) {
+              throw new ApiError(
+                `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
+                400
+              );
+            }
           }
 
           if (size.sizeColors != null && size.sizeColors.length > 0) {
