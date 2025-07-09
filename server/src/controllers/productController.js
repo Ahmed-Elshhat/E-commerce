@@ -181,6 +181,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     // priceAfterDiscount,
     // quantity,
     // deleteGeneralColors,
+    sizesIsExist,
     updateSizes,
   } = body;
 
@@ -190,24 +191,25 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
     return next(new ApiError(`No product for this id ${req.params.id}`, 404));
   }
 
-  // 1 - update color quantity in size
-  // 2 - update color name in size
-  // 3 - update color name in size and update color quantity in size
+  if (sizesIsExist == null) {
+    return next(
+      new ApiError(
+        " The 'Sizes is exist' field is required. Please send true or false.",
+        400
+      )
+    );
+  }
 
-  // 4 - update size name
-  // 5 - update size price
-  // 6 - update size priceAfterDiscount
-  // 7 - update size quantity
-  // 8 - update size (name, price, priceAfterDiscount, quantity) Or all Or Some Or all and update color (quantity , price) OR all update color(all)
-  // 9 - update multiple sizes
-  // 10 - update multiple sizes and delete sizes
-  // 11 - delete all sizes
-  // 12 - delete all sizes and add general colors
+  if (typeof sizesIsExist !== "boolean") {
+    return next(
+      new ApiError(
+        "The value of the 'Sizes is exist' field must be either true or false.",
+        400
+      )
+    );
+  }
 
-  // 13 - update general colors quantity
-  // 14 - update general colors quantity and name
-
-  if (product.sizes && product.sizes.length > 0) {
+  if (sizesIsExist) {
     if (updateSizes && updateSizes.length > 0) {
       const seenSizeNames = [];
       const seenNewSizeNames = [];
@@ -306,19 +308,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           return true;
         }
 
-        if (
-          size.sizePriceAfterDiscount != null &&
-          size.deletePriceAfterDiscount === true
-        ) {
-          next(
-            new ApiError(
-              `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`,
-              400
-            )
-          );
-          return true;
-        }
-
         if (size.sizePrice != null && typeof size.sizePrice !== "number") {
           next(
             new ApiError(`Price for "${size.sizeName}" must be a number.`, 400)
@@ -333,6 +322,19 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           next(
             new ApiError(
               `Discounted price for "${size.sizeName}" must be a number.`,
+              400
+            )
+          );
+          return true;
+        }
+
+        if (
+          size.sizePriceAfterDiscount != null &&
+          size.deletePriceAfterDiscount === true
+        ) {
+          next(
+            new ApiError(
+              `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`,
               400
             )
           );
@@ -447,21 +449,21 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           if (hasValidationDeleteColors) return true;
         }
 
+        const allOriginalColorsDeleted =
+          Array.isArray(size.deleteColors) &&
+          size.deleteColors.length === original.colors.length &&
+          original.colors.every((oc) =>
+            size.deleteColors.some(
+              (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+            )
+          );
+
         if (size.sizeQuantity != null) {
           const hasOriginalColors = original.colors.length > 0;
           const hasNewOrUpdatedColors =
             Array.isArray(size.sizeColors) &&
             size.sizeColors.some(
               (c) => c.type === "new" || c.type === "update"
-            );
-
-          const allOriginalColorsDeleted =
-            Array.isArray(size.deleteColors) &&
-            size.deleteColors.length === original.colors.length &&
-            original.colors.every((oc) =>
-              size.deleteColors.some(
-                (dc) => dc.toLowerCase() === oc.color.toLowerCase()
-              )
             );
 
           if (hasNewOrUpdatedColors) {
@@ -515,6 +517,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               return true;
             }
           }
+        } else if (allOriginalColorsDeleted) {
+          next(
+            new ApiError(
+              `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
+              400
+            )
+          );
         }
 
         if (size.sizeColors && size.sizeColors.length > 0) {
@@ -817,62 +826,67 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
 
           /* eslint-disable no-await-in-loop */
-          for (let i = 0; i < size.deleteColors.length; i++) {
-            const c = size.deleteColors[i];
+          if (
+            Array.isArray(size.deleteColors) &&
+            size.deleteColors.length > 0
+          ) {
+            for (let i = 0; i < size.deleteColors.length; i++) {
+              const c = size.deleteColors[i];
 
-            productSize.colors = productSize.colors.filter(
-              (color) => color.color.toLowerCase() !== c.toLowerCase()
-            );
-
-            const cartsToUpdate = await Cart.find({
-              "cartItems.product": product._id,
-              "cartItems.size": size.sizeName,
-              "cartItems.color": c,
-            }).session(session);
-
-            let originalOldSizeCount = 0;
-
-            const updateResults = await Promise.all(
-              cartsToUpdate.map(async (cart) => {
-                const updatedItems = cart.cartItems.map((item) => {
-                  if (
-                    item.product._id.equals(product._id) &&
-                    item.size.toLowerCase() === size.sizeName.toLowerCase() &&
-                    item.color.toLowerCase() === c.toLowerCase()
-                  ) {
-                    item.isAvailable = false;
-                    originalOldSizeCount++;
-                  }
-                  return item;
-                });
-
-                const result = await Cart.updateOne(
-                  { _id: cart._id },
-                  {
-                    $set: {
-                      cartItems: updatedItems,
-                      totalCartPrice: calcTotalCartPrice({
-                        cartItems: updatedItems,
-                      }),
-                    },
-                  },
-                  { session }
-                );
-
-                return result.modifiedCount;
-              })
-            );
-
-            const updatedCartCount = updateResults.reduce(
-              (sum, count) => sum + count,
-              0
-            );
-
-            if (updatedCartCount < originalOldSizeCount) {
-              throw new ApiError(
-                `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
-                400
+              productSize.colors = productSize.colors.filter(
+                (color) => color.color.toLowerCase() !== c.toLowerCase()
               );
+
+              const cartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+                "cartItems.size": size.sizeName,
+                "cartItems.color": c,
+              }).session(session);
+
+              let originalOldSizeCount = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.sizeName.toLowerCase() &&
+                      item.color.toLowerCase() === c.toLowerCase()
+                    ) {
+                      item.isAvailable = false;
+                      originalOldSizeCount++;
+                    }
+                    return item;
+                  });
+
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
+                        cartItems: updatedItems,
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
+                    },
+                    { session }
+                  );
+
+                  return result.modifiedCount;
+                })
+              );
+
+              const updatedCartCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              if (updatedCartCount < originalOldSizeCount) {
+                throw new ApiError(
+                  `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
+                  400
+                );
+              }
             }
           }
 
@@ -1198,7 +1212,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       productSize?.priceAfterDiscount ?? productSize.price;
 
                     // If color exists and the size has colors, adjust availability and quantity
-                    if (item.color != null && productSize.colors.length > 0) {
+                    if (
+                      item.color != null &&
+                      Array.isArray(productSize.colors) &&
+                      productSize.colors.length > 0
+                    ) {
                       const matchedColor = productSize.colors.find(
                         (c) =>
                           c.color.toLowerCase() === item.color.toLowerCase()
@@ -1297,17 +1315,31 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           newColorName?: "#fd3534",
           colorQuantity?: 5,
         }
-      ](ok)
-      deleteColors?: ["#fd34d4", ...]
-      deletePriceAfterDiscount: true;(ok)(ok)
+      ],(ok)
+      deleteColors?: ["#fd34d4", ...],
+      deletePriceAfterDiscount: true,(ok)(ok)
     }
   ];
+
+  addSizes = [
+    {
+      name: "S",
+      price: 10,
+      priceAfterDiscount: 7,
+      quantity,
+      colors: [
+        color: "#f343df",
+        quantity: 5,
+      ]
+    }
+  ]
 
 
   deleteSizes = ["S", ...]
 
   updateGeneralColors = [
     {
+      type: "update OR new",
       colorName: "#f343df",
       newColorName: "#f343df",
       colorQuantity: 10,
@@ -1315,6 +1347,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   ]
 
   deleteGeneralColors = ["#f343df", ...]
+
+  deletePriceAfterDiscount: true;
 
   */
 
