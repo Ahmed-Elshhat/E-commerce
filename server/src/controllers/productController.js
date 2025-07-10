@@ -449,83 +449,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           if (hasValidationDeleteColors) return true;
         }
 
-        const allOriginalColorsDeleted =
-          Array.isArray(size.deleteColors) &&
-          size.deleteColors.length === original.colors.length &&
-          original.colors.every((oc) =>
-            size.deleteColors.some(
-              (dc) => dc.toLowerCase() === oc.color.toLowerCase()
-            )
-          );
-
-        if (size.sizeQuantity != null) {
-          const hasOriginalColors = original.colors.length > 0;
-          const hasNewOrUpdatedColors =
-            Array.isArray(size.sizeColors) &&
-            size.sizeColors.some(
-              (c) => c.type === "new" || c.type === "update"
-            );
-
-          if (hasNewOrUpdatedColors) {
-            next(
-              new ApiError(
-                `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
-                400
-              )
-            );
-            return true;
-          }
-
-          // الحالة 1: فيه ألوان أصلية
-          if (hasOriginalColors) {
-            if (
-              !Array.isArray(size.deleteColors) ||
-              size.deleteColors.length === 0
-            ) {
-              next(
-                new ApiError(
-                  `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (!allOriginalColorsDeleted) {
-              next(
-                new ApiError(
-                  `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
-                  400
-                )
-              );
-              return true;
-            }
-          }
-
-          // الحالة 2: مفيش ألوان أصلية
-          if (!hasOriginalColors) {
-            if (
-              Array.isArray(size.deleteColors) &&
-              size.deleteColors.length > 0
-            ) {
-              next(
-                new ApiError(
-                  `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
-                  400
-                )
-              );
-              return true;
-            }
-          }
-        } else if (allOriginalColorsDeleted) {
-          next(
-            new ApiError(
-              `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
-              400
-            )
-          );
-        }
-
         if (size.sizeColors && size.sizeColors.length > 0) {
           const seenOldColorNames = [];
           const seenNewColorNames = [];
@@ -771,6 +694,83 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           });
 
           if (colorValidator) return true;
+        }
+
+        const allOriginalColorsDeleted =
+          Array.isArray(size.deleteColors) &&
+          size.deleteColors.length === original.colors.length &&
+          original.colors.every((oc) =>
+            size.deleteColors.some(
+              (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+            )
+          );
+
+        const hasNewOrUpdatedColors =
+          Array.isArray(size.sizeColors) &&
+          size.sizeColors.some((c) => c.type === "new" || c.type === "update");
+
+        if (size.sizeQuantity != null) {
+          const hasOriginalColors = original.colors.length > 0;
+
+          if (hasNewOrUpdatedColors) {
+            next(
+              new ApiError(
+                `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          // الحالة 1: فيه ألوان أصلية
+          if (hasOriginalColors) {
+            if (
+              !Array.isArray(size.deleteColors) ||
+              size.deleteColors.length === 0
+            ) {
+              next(
+                new ApiError(
+                  `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
+                  400
+                )
+              );
+              return true;
+            }
+
+            if (!allOriginalColorsDeleted) {
+              next(
+                new ApiError(
+                  `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
+                  400
+                )
+              );
+              return true;
+            }
+          }
+
+          // الحالة 2: مفيش ألوان أصلية
+          if (!hasOriginalColors) {
+            if (
+              Array.isArray(size.deleteColors) &&
+              size.deleteColors.length > 0
+            ) {
+              next(
+                new ApiError(
+                  `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
+                  400
+                )
+              );
+              return true;
+            }
+          }
+        } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+          next(
+            new ApiError(
+              `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
+              400
+            )
+          );
+          return true;
         }
 
         seenSizeNames.push(size.sizeName.toLowerCase());
