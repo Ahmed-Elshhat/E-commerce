@@ -175,14 +175,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   ];
   let body = { ...req.body };
   const {
-    // sizes,
-    // colors,
-    // price,
-    // priceAfterDiscount,
-    // quantity,
-    // deleteGeneralColors,
     sizesIsExist,
+    price,
+    priceAfterDiscount,
+    quantity,
+    colors,
+    addGeneralColors,
+    updateGeneralColors,
+    deleteGeneralColors,
+    addSizes,
     updateSizes,
+    deleteSizes,
   } = body;
 
   const product = await Product.findById(id);
@@ -210,6 +213,67 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
   }
 
   if (sizesIsExist) {
+    if (price != null) {
+      return next(
+        new ApiError(
+          "The 'Price' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (priceAfterDiscount != null) {
+      return next(
+        new ApiError(
+          "The 'Price after discount' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (quantity != null) {
+      return next(
+        new ApiError(
+          "The 'Quantity' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (addGeneralColors != null) {
+      return next(
+        new ApiError(
+          "The 'Add general colors' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (updateGeneralColors != null) {
+      return next(
+        new ApiError(
+          "The 'Update general colors' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (deleteGeneralColors != null) {
+      return next(
+        new ApiError(
+          "The 'Delete general colors' field is not allowed when adding, updating, or deleting sizes.",
+          400
+        )
+      );
+    }
+
+    if (!product.sizesIsExist) {
+      product.price = undefined;
+      product.priceAfterDiscount = undefined;
+      product.quantity = undefined;
+      product.colors = undefined;
+    }
+
     if (updateSizes && updateSizes.length > 0) {
       const seenSizeNames = [];
       const seenNewSizeNames = [];
@@ -827,6 +891,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
           /* eslint-disable no-await-in-loop */
           if (
+            size.deleteColors != null &&
             Array.isArray(size.deleteColors) &&
             size.deleteColors.length > 0
           ) {
@@ -843,10 +908,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 "cartItems.color": c,
               }).session(session);
 
-              let originalOldSizeCount = 0;
+              let cartsNeedingUpdate = 0;
 
               const updateResults = await Promise.all(
                 cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
                   const updatedItems = cart.cartItems.map((item) => {
                     if (
                       item.product._id.equals(product._id) &&
@@ -854,10 +920,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.color.toLowerCase() === c.toLowerCase()
                     ) {
                       item.isAvailable = false;
-                      originalOldSizeCount++;
+                      shouldUpdateCart = true;
                     }
                     return item;
                   });
+
+                  if (shouldUpdateCart) cartsNeedingUpdate++;
 
                   const result = await Cart.updateOne(
                     { _id: cart._id },
@@ -876,12 +944,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 })
               );
 
-              const updatedCartCount = updateResults.reduce(
+              const modifiedCartsCount = updateResults.reduce(
                 (sum, count) => sum + count,
                 0
               );
 
-              if (updatedCartCount < originalOldSizeCount) {
+              if (modifiedCartsCount < cartsNeedingUpdate) {
                 throw new ApiError(
                   `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
                   400
@@ -890,10 +958,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           }
 
-          if (size.sizeColors != null && size.sizeColors.length > 0) {
+          if (
+            size.sizeColors != null &&
+            Array.isArray(size.sizeColors) &&
+            size.sizeColors.length > 0
+          ) {
             productSize.quantity = undefined;
 
-            size.sizeColors.forEach(async (color) => {
+            const updateColorPromises = size.sizeColors.map(async (color) => {
               if (color.type === "new") {
                 const cartsToUpdate = await Cart.find({
                   "cartItems.product": product._id,
@@ -902,13 +974,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }).session(session);
                 productSize.colors.push({
                   color: color.colorName,
-                  quantity: color.quantity,
+                  quantity: color.colorQuantity,
                 });
                 if (cartsToUpdate.length !== 0) {
-                  let originalCartCount = 0;
+                  let cartsNeedingUpdate = 0;
 
                   const updateResults = await Promise.all(
                     cartsToUpdate.map(async (cart) => {
+                      let shouldUpdateCart = false;
                       const updatedItems = cart.cartItems.map((item) => {
                         if (
                           item.product._id.equals(product._id) &&
@@ -917,7 +990,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           item.color.toLowerCase() ===
                             color.colorName.toLowerCase()
                         ) {
-                          originalCartCount++;
+                          shouldUpdateCart = true;
                           item.isAvailable = true;
                           item.quantity = Math.min(
                             item.quantity,
@@ -926,6 +999,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         }
                         return item;
                       });
+
+                      if (shouldUpdateCart) cartsNeedingUpdate++;
 
                       const result = await Cart.updateOne(
                         { _id: cart._id },
@@ -944,12 +1019,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     })
                   );
 
-                  const updatedCartCount = updateResults.reduce(
+                  const modifiedCartsCount = updateResults.reduce(
                     (sum, count) => sum + count,
                     0
                   );
 
-                  if (updatedCartCount < originalCartCount) {
+                  if (modifiedCartsCount < cartsNeedingUpdate) {
                     throw new ApiError(
                       `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
                       400
@@ -976,10 +1051,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }).session(session);
 
                 if (currentCartsToUpdate.length !== 0) {
-                  let currentOriginalCartCount = 0;
+                  let currentCartsNeedingUpdate = 0;
 
                   const currentUpdateResults = await Promise.all(
                     currentCartsToUpdate.map(async (cart) => {
+                      let shouldUpdateCart = false;
                       const updatedItems = cart.cartItems.map((item) => {
                         if (
                           item.product._id.toString() ===
@@ -1004,10 +1080,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                               color.colorQuantity
                             );
                           }
-                          currentOriginalCartCount++;
+                          shouldUpdateCart = true;
                         }
                         return item;
                       });
+
+                      if (shouldUpdateCart) currentCartsNeedingUpdate++;
 
                       const result = await Cart.updateOne(
                         { _id: cart._id },
@@ -1026,12 +1104,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     })
                   );
 
-                  const currentUpdatedCartCount = currentUpdateResults.reduce(
+                  const modifiedCurrentCartsCount = currentUpdateResults.reduce(
                     (sum, count) => sum + count,
                     0
                   );
 
-                  if (currentUpdatedCartCount < currentOriginalCartCount) {
+                  if (modifiedCurrentCartsCount < currentCartsNeedingUpdate) {
                     throw new ApiError(
                       `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
                       400
@@ -1047,10 +1125,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }).session(session);
 
                   if (oldCartsToUpdate.length !== 0) {
-                    let oldOriginalCartCount = 0;
+                    let oldCartsNeedingUpdate = 0;
 
                     const oldUpdateResults = await Promise.all(
                       oldCartsToUpdate.map(async (cart) => {
+                        let shouldUpdateCart = false;
                         const updatedItems = cart.cartItems.map((item) => {
                           if (
                             item.product._id.toString() ===
@@ -1070,10 +1149,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                                 color.colorQuantity
                               );
                             }
-                            oldOriginalCartCount++;
+                            shouldUpdateCart = true;
                           }
                           return item;
                         });
+
+                        if (shouldUpdateCart) oldCartsNeedingUpdate++;
 
                         const result = await Cart.updateOne(
                           { _id: cart._id },
@@ -1092,12 +1173,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       })
                     );
 
-                    const oldUpdatedCartCount = oldUpdateResults.reduce(
+                    const modifiedOldCartsCount = oldUpdateResults.reduce(
                       (sum, count) => sum + count,
                       0
                     );
 
-                    if (oldUpdatedCartCount < oldOriginalCartCount) {
+                    if (modifiedOldCartsCount < oldCartsNeedingUpdate) {
                       throw new ApiError(
                         `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
                         400
@@ -1107,6 +1188,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
               }
             });
+
+            await Promise.all(updateColorPromises);
           }
 
           // Find all carts that contain this product and size (before renaming)
@@ -1115,11 +1198,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             "cartItems.size": size.sizeName,
           }).session(session);
 
-          let originalOldSizeCount = 0;
+          let cartsNeedingUpdate = 0;
 
           // Loop through carts and update matching cart items
           const updateResults = await Promise.all(
             cartsToUpdate.map(async (cart) => {
+              let shouldUpdateCart = false;
               const updatedItems = cart.cartItems.map((item) => {
                 // Match the specific product and size in the cart
                 if (
@@ -1143,19 +1227,43 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     item.price = productSize.price;
                   }
 
-                  if (size.sizeQuantity != null) {
+                  if (size.sizeQuantity != null && item.color == null) {
                     item.quantity = Math.min(item.quantity, size.sizeQuantity);
                   }
+
+                  // test
+                  // if (
+                  //   item.color != null &&
+                  //   Array.isArray(productSize.colors) &&
+                  //   productSize.colors.length > 0
+                  // ) {
+                  //   const matchedColor = productSize.colors.find(
+                  //     (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                  //   );
+
+                  //   if (matchedColor) {
+                  //     item.isAvailable = true;
+                  //     // Limit quantity to available stock
+                  //     item.quantity = Math.min(
+                  //       item.quantity,
+                  //       matchedColor.quantity
+                  //     );
+                  //   } else {
+                  //     item.isAvailable = false;
+                  //   }
+                  // }
 
                   // If a new size name is provided, mark old size as unavailable in cart
                   if (size.newSizeName) {
                     item.isAvailable = false;
                   }
 
-                  originalOldSizeCount++;
+                  shouldUpdateCart = true;
                 }
                 return item;
               });
+
+              if (shouldUpdateCart) cartsNeedingUpdate++;
 
               // Save the updated cart items and recalculate total price
               const result = await Cart.updateOne(
@@ -1177,13 +1285,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           );
 
           // Sum up all updated cart counts
-          const updatedCartCount = updateResults.reduce(
+          const modifiedCartsCount = updateResults.reduce(
             (sum, count) => sum + count,
             0
           );
 
           // Rollback if not all matching carts were updated successfully
-          if (updatedCartCount < originalOldSizeCount) {
+          if (modifiedCartsCount < cartsNeedingUpdate) {
             throw new ApiError(
               `Not all carts were updated for size "${size.sizeName}". Transaction rolled back.`,
               400
@@ -1197,10 +1305,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               "cartItems.size": size.newSizeName,
             }).session(session);
 
-            let originalNewSizeCount = 0;
+            let newSizeNameCartsNeedingUpdate = 0;
 
             const updateNewResults = await Promise.all(
               newCartsToUpdate.map(async (cart) => {
+                let shouldUpdateCart = false;
                 const updatedItems = cart.cartItems.map((item) => {
                   // Match product and new size in cart
                   if (
@@ -1241,10 +1350,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = true;
                     }
 
-                    originalNewSizeCount++;
+                    shouldUpdateCart = true;
                   }
                   return item;
                 });
+
+                if (shouldUpdateCart) newSizeNameCartsNeedingUpdate++;
 
                 // Save updated cart with recalculated total price
                 const result = await Cart.updateOne(
@@ -1270,7 +1381,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             );
 
             // Rollback if not all carts were successfully updated with the new size name
-            if (updatedNewCartCount < originalNewSizeCount) {
+            if (updatedNewCartCount < newSizeNameCartsNeedingUpdate) {
               throw new ApiError(
                 `Not all carts were updated after renaming size "${size.sizeName}" to "${size.newSizeName}". Transaction rolled back.`,
                 400
@@ -1296,6 +1407,438 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           )
         );
       }
+    }
+  } else {
+    if (addSizes != null) {
+      return next(
+        new ApiError(
+          "Cannot add sizes when the product is not set to support sizes.",
+          400
+        )
+      );
+    }
+
+    if (updateSizes != null) {
+      return next(
+        new ApiError(
+          "Cannot update sizes when the product is not set to support sizes.",
+          400
+        )
+      );
+    }
+
+    if (deleteSizes != null) {
+      return next(
+        new ApiError(
+          "Cannot delete sizes when the product is not set to support sizes.",
+          400
+        )
+      );
+    }
+
+    if (product.sizesIsExist) {
+      product.sizes = [];
+    }
+
+    if (
+      product.sizesIsExist &&
+      deleteGeneralColors != null &&
+      deleteGeneralColors?.length > 0
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      !product.sizesIsExist &&
+      deleteGeneralColors != null &&
+      product.colors.length === 0
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      product.sizesIsExist &&
+      updateGeneralColors != null &&
+      updateGeneralColors?.length > 0
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      !product.sizesIsExist &&
+      updateGeneralColors != null &&
+      updateGeneralColors?.length > 0 &&
+      product.colors.length === 0
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (product.sizesIsExist && price == null) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      product.sizesIsExist &&
+      (addGeneralColors == null || addGeneralColors?.length === 0) &&
+      quantity == null
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (price != null && typeof price !== "number") {
+      return next(new ApiError("", 400));
+    }
+
+    if (price != null && price < 0) {
+      return next(new ApiError("", 400));
+    }
+
+    if (!product.sizesIsExist && price != null && price === product.price) {
+      return next(new ApiError("", 400));
+    }
+
+    if (priceAfterDiscount != null && typeof priceAfterDiscount !== "number") {
+      return next(new ApiError("", 400));
+    }
+
+    if (priceAfterDiscount != null && priceAfterDiscount < 0) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      priceAfterDiscount != null &&
+      price != null &&
+      priceAfterDiscount >= price
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      !product.sizesIsExist &&
+      priceAfterDiscount != null &&
+      price == null &&
+      priceAfterDiscount >= product.price
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    if (
+      !product.sizesIsExist &&
+      priceAfterDiscount != null &&
+      priceAfterDiscount === product.priceAfterDiscount
+    ) {
+      return next(new ApiError("", 400));
+    }
+
+    const session = await mongoose.startSession();
+    try {
+      session.startTransaction();
+
+      if (price != null) {
+        product.price = price;
+      }
+
+      if (priceAfterDiscount != null) {
+        product.priceAfterDiscount = priceAfterDiscount;
+      }
+
+      if (quantity != null) {
+        product.quantity = quantity;
+      }
+
+      let updateColorPromises;
+
+      if (colors != null && Array.isArray(colors) && colors?.length > 0) {
+        product.quantity = undefined;
+
+        updateColorPromises = colors.map(async (color) => {
+          if (color.type === "new") {
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.color": color.colorName,
+            }).session(session);
+
+            product.colors.push({
+              color: color.colorName,
+              quantity: color.colorQuantity,
+            });
+
+            if (cartsToUpdate.length !== 0) {
+              let cartsNeedingUpdate = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size == null &&
+                      item.color.toLowerCase() === color.colorName.toLowerCase()
+                    ) {
+                      shouldUpdateCart = true;
+                      item.isAvailable = true;
+                      item.quantity = Math.min(
+                        item.quantity,
+                        color.colorQuantity
+                      );
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) cartsNeedingUpdate++;
+
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
+                        cartItems: updatedItems,
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
+                    },
+                    { session }
+                  );
+
+                  return result.modifiedCount; // 1 if modified, 0 otherwise
+                })
+              );
+
+              const modifiedCartsCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              if (modifiedCartsCount < cartsNeedingUpdate) {
+                throw new ApiError(
+                  `Not all carts were updated after changing quantity". Transaction rolled back.`,
+                  400
+                );
+              }
+            }
+          } else if (color.type === "update") {
+            product.colors.forEach((c) => {
+              if (c.color.toLowerCase() === color.colorName.toLowerCase()) {
+                if (color.newColorName != null) {
+                  c.color = color.newColorName;
+                }
+
+                if (color.colorQuantity != null) {
+                  c.quantity = color.colorQuantity;
+                }
+              }
+            });
+
+            const currentCartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.color": color.colorName,
+            }).session(session);
+
+            if (currentCartsToUpdate.length !== 0) {
+              let currentCartsNeedingUpdate = 0;
+
+              const currentUpdateResults = await Promise.all(
+                currentCartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.toString() === product._id.toString() &&
+                      item.size == null &&
+                      item.color.toLowerCase() === color.colorName.toLowerCase()
+                    ) {
+                      if (color.newColorName && color.newColorName != null) {
+                        item.isAvailable = false;
+                      }
+                      if (color.colorQuantity && color.colorQuantity != null) {
+                        item.quantity = Math.min(
+                          item.quantity,
+                          color.colorQuantity
+                        );
+                      }
+                      shouldUpdateCart = true;
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) currentCartsNeedingUpdate++;
+
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
+                        cartItems: updatedItems,
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
+                    },
+                    { session }
+                  );
+
+                  return result.modifiedCount; // 1 if modified, 0 otherwise
+                })
+              );
+
+              const modifiedCurrentCartsCount = currentUpdateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              if (modifiedCurrentCartsCount < currentCartsNeedingUpdate) {
+                throw new ApiError(
+                  `Not all carts were updated after changing". Transaction rolled back.`,
+                  400
+                );
+              }
+            }
+
+            if (color.newColorName && color.newColorName != null) {
+              const oldCartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+                "cartItems.color": color.newColorName,
+              }).session(session);
+
+              if (oldCartsToUpdate.length !== 0) {
+                let oldCartsNeedingUpdate = 0;
+
+                const oldUpdateResults = await Promise.all(
+                  oldCartsToUpdate.map(async (cart) => {
+                    let shouldUpdateCart = false;
+                    const updatedItems = cart.cartItems.map((item) => {
+                      if (
+                        item.product._id.toString() ===
+                          product._id.toString() &&
+                        item.size == null &&
+                        item.color.toLowerCase() ===
+                          color.newColorName.toLowerCase()
+                      ) {
+                        item.isAvailable = true;
+                        if (
+                          color.colorQuantity &&
+                          color.colorQuantity != null
+                        ) {
+                          item.quantity = Math.min(
+                            item.quantity,
+                            color.colorQuantity
+                          );
+                        }
+                        shouldUpdateCart = true;
+                      }
+                      return item;
+                    });
+
+                    if (shouldUpdateCart) oldCartsNeedingUpdate++;
+
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
+                            cartItems: updatedItems,
+                          }),
+                        },
+                      },
+                      { session }
+                    );
+
+                    return result.modifiedCount; // 1 if modified, 0 otherwise
+                  })
+                );
+
+                const modifiedOldCartsCount = oldUpdateResults.reduce(
+                  (sum, count) => sum + count,
+                  0
+                );
+
+                if (modifiedOldCartsCount < oldCartsNeedingUpdate) {
+                  throw new ApiError(
+                    `Not all carts were updated after changing quantity". Transaction rolled back.`,
+                    400
+                  );
+                }
+              }
+            }
+          }
+        });
+
+        await Promise.all(updateColorPromises);
+      }
+
+      const cartsToUpdate = await Cart.find({
+        "cartItems.product": product._id,
+      }).session(session);
+
+      if (cartsToUpdate.length > 0) {
+        let cartsNeedingUpdate = 0;
+
+        const updateResults = await Promise.all(
+          cartsToUpdate.map(async (cart) => {
+            let shouldUpdateCart = false;
+            const updatedItems = cart.cartItems.map((item) => {
+              if (item.product._id.equals(product._id) && item.size == null) {
+                if (price != null || priceAfterDiscount != null) {
+                  item.price = priceAfterDiscount ?? price;
+                }
+
+                if (quantity != null && item.color == null) {
+                  item.quantity = Math.min(quantity, item.quantity);
+                }
+
+                shouldUpdateCart = true;
+              }
+              return item;
+            });
+
+            if (shouldUpdateCart) cartsNeedingUpdate++;
+
+            // Save the updated cart items and recalculate total price
+            const result = await Cart.updateOne(
+              { _id: cart._id },
+              {
+                $set: {
+                  cartItems: updatedItems,
+                  totalCartPrice: calcTotalCartPrice({
+                    cartItems: updatedItems,
+                  }),
+                },
+              },
+              { session }
+            );
+
+            // Return number of modified documents (1 or 0)
+            return result.modifiedCount;
+          })
+        );
+
+        // Sum up all updated cart counts
+        const modifiedCartsCount = updateResults.reduce(
+          (sum, count) => sum + count,
+          0
+        );
+
+        // Rollback if not all matching carts were updated successfully
+        if (modifiedCartsCount < cartsNeedingUpdate) {
+          throw new ApiError(
+            `Some carts failed to update. All changes have been rolled back.`,
+            400
+          );
+        }
+      }
+
+      await Promise.all(updateColorPromises);
+      await product.save({ session });
+      await session.commitTransaction();
+      session.endSession();
+    } catch (err) {
+      await session.abortTransaction();
+      session.endSession();
+      return next(
+        new ApiError(
+          err.message || "Error updating product or carts. Changes reverted.",
+          err.statusCode || 500
+        )
+      );
     }
   }
 

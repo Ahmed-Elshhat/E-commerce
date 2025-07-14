@@ -49,6 +49,10 @@ const productSchema = new mongoose.Schema(
         "Product description in Arabic must not exceed 2000 characters.",
       ],
     },
+    sizesIsExist: {
+      type: Boolean,
+      default: false,
+    },
     sold: {
       type: Number,
       default: 0,
