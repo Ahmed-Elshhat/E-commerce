@@ -1812,7 +1812,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               "cartItems.color": c,
             }).session(session);
 
-            
             let cartsNeedingUpdate = 0;
 
             const updateResults = await Promise.all(
@@ -1833,7 +1832,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 });
 
                 if (shouldUpdateCart) {
-                  cartsNeedingUpdate++
+                  cartsNeedingUpdate++;
                   const result = await Cart.updateOne(
                     { _id: cart._id },
                     {
@@ -1870,10 +1869,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           await Promise.all(deleteColorsPromises);
         }
 
-
-        
+        // Done
         if (colors != null && Array.isArray(colors) && colors?.length > 0) {
-          product.quantity = undefined;
+          const isMatchingCartItem = (item, productId, colorName) =>
+            item.product._id.equals(productId) &&
+            item.size == null &&
+            item.color.toLowerCase() === colorName.toLowerCase();
+
+          if (product.quantity != null) {
+            product.quantity = undefined;
+          }
 
           let updateColorsPromises = colors.map(async (color) => {
             if (color.type === "new") {
@@ -1894,38 +1899,44 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   cartsToUpdate.map(async (cart) => {
                     let shouldUpdateCart = false;
                     const updatedItems = cart.cartItems.map((item) => {
-                      if (
-                        item.product._id.equals(product._id) &&
-                        item.size == null &&
-                        item.color.toLowerCase() ===
-                          color.colorName.toLowerCase()
-                      ) {
-                        shouldUpdateCart = true;
+                      if (isMatchingCartItem(item, product._id, color.colorName)) {
                         item.isAvailable = true;
-                        item.quantity = Math.min(
-                          item.quantity,
-                          color.colorQuantity
-                        );
+                        if (item.quantity !== color.colorQuantity) {
+                          item.quantity = Math.min(
+                            item.quantity,
+                            color.colorQuantity
+                          );
+                        }
+
+                        if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                          item.price = product.priceAfterDiscount;
+                        } else if (product.price != null && item.price !== product.price) {
+                          item.price = product.price;
+                        }
+                        shouldUpdateCart = true;
                       }
                       return item;
                     });
 
-                    if (shouldUpdateCart) cartsNeedingUpdate++;
-
-                    const result = await Cart.updateOne(
-                      { _id: cart._id },
-                      {
-                        $set: {
-                          cartItems: updatedItems,
-                          totalCartPrice: calcTotalCartPrice({
+                    if (shouldUpdateCart) {
+                      cartsNeedingUpdate++;
+                      const result = await Cart.updateOne(
+                        { _id: cart._id },
+                        {
+                          $set: {
                             cartItems: updatedItems,
-                          }),
+                            totalCartPrice: calcTotalCartPrice({
+                              cartItems: updatedItems,
+                            }),
+                          },
                         },
-                      },
-                      { session }
-                    );
+                        { session }
+                      );
 
-                    return result.modifiedCount; // 1 if modified, 0 otherwise
+                      return result.modifiedCount; // 1 if modified, 0 otherwise
+                    }
+
+                    return 0;
                   })
                 );
 
@@ -1936,7 +1947,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
                 if (modifiedCartsCount < cartsNeedingUpdate) {
                   throw new ApiError(
-                    `Not all carts were updated after changing quantity". Transaction rolled back.`,
+                    `Not all carts were updated after changing quantity. Transaction rolled back.`,
                     400
                   );
                 }
@@ -1945,7 +1956,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               product.colors.forEach((c) => {
                 if (c.color.toLowerCase() === color.colorName.toLowerCase()) {
                   if (color.newColorName != null) {
-                    c.color = color.newColorName;
+                    c.color = color.newColorName.toLowerCase();
                   }
 
                   if (color.colorQuantity != null) {
@@ -1966,46 +1977,52 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   currentCartsToUpdate.map(async (cart) => {
                     let shouldUpdateCart = false;
                     const updatedItems = cart.cartItems.map((item) => {
-                      if (
-                        item.product._id.toString() ===
-                          product._id.toString() &&
-                        item.size == null &&
-                        item.color.toLowerCase() ===
-                          color.colorName.toLowerCase()
-                      ) {
-                        if (color.newColorName && color.newColorName != null) {
+                      if (isMatchingCartItem(item, product._id, color.colorName)) {
+                        if (color.newColorName != null) {
                           item.isAvailable = false;
+                          shouldUpdateCart = true;
                         }
                         if (
-                          color.colorQuantity &&
-                          color.colorQuantity != null
+                          color.colorQuantity != null &&
+                          item.quantity !== color.colorQuantity
                         ) {
                           item.quantity = Math.min(
                             item.quantity,
                             color.colorQuantity
                           );
+                          shouldUpdateCart = true;
                         }
-                        shouldUpdateCart = true;
+
+                        if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                          item.price = product.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (product.price != null && item.price !== product.price) {
+                          item.price = product.price;
+                          shouldUpdateCart = true;
+                        }
                       }
                       return item;
                     });
 
-                    if (shouldUpdateCart) currentCartsNeedingUpdate++;
-
-                    const result = await Cart.updateOne(
-                      { _id: cart._id },
-                      {
-                        $set: {
-                          cartItems: updatedItems,
-                          totalCartPrice: calcTotalCartPrice({
+                    if (shouldUpdateCart) {
+                      currentCartsNeedingUpdate++;
+                      const result = await Cart.updateOne(
+                        { _id: cart._id },
+                        {
+                          $set: {
                             cartItems: updatedItems,
-                          }),
+                            totalCartPrice: calcTotalCartPrice({
+                              cartItems: updatedItems,
+                            }),
+                          },
                         },
-                      },
-                      { session }
-                    );
+                        { session }
+                      );
 
-                    return result.modifiedCount; // 1 if modified, 0 otherwise
+                      return result.modifiedCount; // 1 if modified, 0 otherwise
+                    }
+
+                    return 0;
                   })
                 );
 
@@ -2022,7 +2039,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
               }
 
-              if (color.newColorName && color.newColorName != null) {
+              if (color.newColorName != null) {
                 const oldCartsToUpdate = await Cart.find({
                   "cartItems.product": product._id,
                   "cartItems.color": color.newColorName,
@@ -2035,44 +2052,47 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     oldCartsToUpdate.map(async (cart) => {
                       let shouldUpdateCart = false;
                       const updatedItems = cart.cartItems.map((item) => {
-                        if (
-                          item.product._id.toString() ===
-                            product._id.toString() &&
-                          item.size == null &&
-                          item.color.toLowerCase() ===
-                            color.newColorName.toLowerCase()
-                        ) {
+                        if (isMatchingCartItem(item, product._id, color.newColorName)) {
                           item.isAvailable = true;
                           if (
-                            color.colorQuantity &&
-                            color.colorQuantity != null
+                            color.colorQuantity != null &&
+                            item.quantity !== color.colorQuantity
                           ) {
                             item.quantity = Math.min(
                               item.quantity,
                               color.colorQuantity
                             );
                           }
+
+                          if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                            item.price = product.priceAfterDiscount;
+                          } else if (product.price != null && item.price !== product.price) {
+                            item.price = product.price;
+                          }
                           shouldUpdateCart = true;
                         }
                         return item;
                       });
 
-                      if (shouldUpdateCart) oldCartsNeedingUpdate++;
-
-                      const result = await Cart.updateOne(
-                        { _id: cart._id },
-                        {
-                          $set: {
-                            cartItems: updatedItems,
-                            totalCartPrice: calcTotalCartPrice({
+                      if (shouldUpdateCart) {
+                        oldCartsNeedingUpdate++;
+                        const result = await Cart.updateOne(
+                          { _id: cart._id },
+                          {
+                            $set: {
                               cartItems: updatedItems,
-                            }),
+                              totalCartPrice: calcTotalCartPrice({
+                                cartItems: updatedItems,
+                              }),
+                            },
                           },
-                        },
-                        { session }
-                      );
+                          { session }
+                        );
 
-                      return result.modifiedCount; // 1 if modified, 0 otherwise
+                        return result.modifiedCount; // 1 if modified, 0 otherwise
+                      }
+
+                      return 0;
                     })
                   );
 
@@ -2092,9 +2112,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           });
 
-          if (updateColorsPromises) {
-            await Promise.all(updateColorsPromises);
-          }
+          await Promise.all(updateColorsPromises);
         }
 
         const cartsToUpdate = await Cart.find({
