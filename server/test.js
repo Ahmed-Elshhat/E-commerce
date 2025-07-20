@@ -58,3 +58,46 @@
           //     }
           //   });
           // }
+
+                          if (item.color != null) {
+                            if (product.colors.length === 0) {
+                              shouldUpdateCart = false;
+                            } else if (product.colors.length > 0) {
+                              const colorIsExist = product.colors.find(
+                                (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                              );
+          
+                              if (colorIsExist) {
+                                item.isAvailable = true;
+                                item.color = colorIsExist.color;
+                                item.quantity = Math.min(
+                                  item.quantity,
+                                  colorIsExist.quantity
+                                );
+                                shouldUpdateCart = true;
+                              }
+                            }
+                          } else if (
+                            quantity !== item.quantity ||
+                            (priceAfterDiscount != null
+                              ? priceAfterDiscount
+                              : price) !== item.price
+                          ) {
+                            item.isAvailable = true;
+                            shouldUpdateCart = true;
+          
+                            if (quantity !== item.quantity) {
+                              item.quantity = quantity;
+                            }
+          
+                            if (
+                              (priceAfterDiscount != null
+                                ? priceAfterDiscount
+                                : price) !== item.price
+                            ) {
+                              item.price =
+                                priceAfterDiscount != null
+                                  ? priceAfterDiscount
+                                  : price;
+                            }
+                          }
