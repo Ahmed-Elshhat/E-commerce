@@ -1899,7 +1899,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   cartsToUpdate.map(async (cart) => {
                     let shouldUpdateCart = false;
                     const updatedItems = cart.cartItems.map((item) => {
-                      if (isMatchingCartItem(item, product._id, color.colorName)) {
+                      if (
+                        isMatchingCartItem(item, product._id, color.colorName)
+                      ) {
                         item.isAvailable = true;
                         if (item.quantity !== color.colorQuantity) {
                           item.quantity = Math.min(
@@ -1908,11 +1910,25 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           );
                         }
 
-                        if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                        if (
+                          priceAfterDiscount != null &&
+                          item.price !== priceAfterDiscount
+                        ) {
+                          item.price = priceAfterDiscount;
+                        } else if (
+                          product.priceAfterDiscount != null &&
+                          item.price !== product.priceAfterDiscount
+                        ) {
                           item.price = product.priceAfterDiscount;
-                        } else if (product.price != null && item.price !== product.price) {
+                        } else if (price != null && item.price !== price) {
+                          item.price = price;
+                        } else if (
+                          product.price != null &&
+                          item.price !== product.price
+                        ) {
                           item.price = product.price;
                         }
+
                         shouldUpdateCart = true;
                       }
                       return item;
@@ -1977,26 +1993,42 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   currentCartsToUpdate.map(async (cart) => {
                     let shouldUpdateCart = false;
                     const updatedItems = cart.cartItems.map((item) => {
-                      if (isMatchingCartItem(item, product._id, color.colorName)) {
+                      if (
+                        isMatchingCartItem(item, product._id, color.colorName)
+                      ) {
                         if (color.newColorName != null) {
                           item.isAvailable = false;
                           shouldUpdateCart = true;
                         }
+
                         if (
                           color.colorQuantity != null &&
-                          item.quantity !== color.colorQuantity
+                          item.quantity !== color.colorQuantity &&
+                          item.quantity > color.colorQuantity
                         ) {
-                          item.quantity = Math.min(
-                            item.quantity,
-                            color.colorQuantity
-                          );
+                          item.quantity = color.colorQuantity;
                           shouldUpdateCart = true;
                         }
 
-                        if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                        if (
+                          priceAfterDiscount != null &&
+                          item.price !== priceAfterDiscount
+                        ) {
+                          item.price = priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (
+                          product.priceAfterDiscount != null &&
+                          item.price !== product.priceAfterDiscount
+                        ) {
                           item.price = product.priceAfterDiscount;
                           shouldUpdateCart = true;
-                        } else if (product.price != null && item.price !== product.price) {
+                        } else if (price != null && item.price !== price) {
+                          item.price = price;
+                          shouldUpdateCart = true;
+                        } else if (
+                          product.price != null &&
+                          item.price !== product.price
+                        ) {
                           item.price = product.price;
                           shouldUpdateCart = true;
                         }
@@ -2052,7 +2084,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     oldCartsToUpdate.map(async (cart) => {
                       let shouldUpdateCart = false;
                       const updatedItems = cart.cartItems.map((item) => {
-                        if (isMatchingCartItem(item, product._id, color.newColorName)) {
+                        if (
+                          isMatchingCartItem(
+                            item,
+                            product._id,
+                            color.newColorName
+                          )
+                        ) {
                           item.isAvailable = true;
                           if (
                             color.colorQuantity != null &&
@@ -2064,9 +2102,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             );
                           }
 
-                          if (product.priceAfterDiscount != null && item.price !== product.priceAfterDiscount) {
+                          if (
+                            priceAfterDiscount != null &&
+                            item.price !== priceAfterDiscount
+                          ) {
+                            item.price = priceAfterDiscount;
+                          } else if (
+                            product.priceAfterDiscount != null &&
+                            item.price !== product.priceAfterDiscount
+                          ) {
                             item.price = product.priceAfterDiscount;
-                          } else if (product.price != null && item.price !== product.price) {
+                          } else if (price != null && item.price !== price) {
+                            item.price = price;
+                          } else if (
+                            product.price != null &&
+                            item.price !== product.price
+                          ) {
                             item.price = product.price;
                           }
                           shouldUpdateCart = true;
@@ -2115,6 +2166,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           await Promise.all(updateColorsPromises);
         }
 
+        // Done
         const cartsToUpdate = await Cart.find({
           "cartItems.product": product._id,
         }).session(session);
@@ -2138,13 +2190,39 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         shouldUpdateCart = true;
                       }
 
-                      if (item.quantity !== colorIsExist.quantity) {
-                        item.quantity = Math.min(
-                          item.quantity,
-                          colorIsExist.quantity
-                        );
+                      if (
+                        item.quantity !== colorIsExist.quantity &&
+                        item.quantity > colorIsExist.quantity
+                      ) {
+                        item.quantity = colorIsExist.quantity;
                         shouldUpdateCart = true;
                       }
+
+                      if (
+                        priceAfterDiscount != null &&
+                        item.price !== priceAfterDiscount
+                      ) {
+                        item.price = priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        product.priceAfterDiscount != null &&
+                        item.price !== product.priceAfterDiscount
+                      ) {
+                        item.price = product.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (price != null && item.price !== price) {
+                        item.price = price;
+                        shouldUpdateCart = true;
+                      } else if (
+                        product.price != null &&
+                        item.price !== product.price
+                      ) {
+                        item.price = product.price;
+                        shouldUpdateCart = true;
+                      }
+                    } else if (item.isAvailable) {
+                      item.isAvailable = false;
+                      shouldUpdateCart = true;
                     }
                   } else {
                     if (quantity != null && item.quantity !== quantity) {
@@ -2179,24 +2257,28 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 return item;
               });
 
-              if (shouldUpdateCart) cartsNeedingUpdate++;
+              if (shouldUpdateCart) {
+                cartsNeedingUpdate++;
 
-              // Save the updated cart items and recalculate total price
-              const result = await Cart.updateOne(
-                { _id: cart._id },
-                {
-                  $set: {
-                    cartItems: updatedItems,
-                    totalCartPrice: calcTotalCartPrice({
+                // Save the updated cart items and recalculate total price
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
                       cartItems: updatedItems,
-                    }),
+                      totalCartPrice: calcTotalCartPrice({
+                        cartItems: updatedItems,
+                      }),
+                    },
                   },
-                },
-                { session }
-              );
+                  { session }
+                );
 
-              // Return number of modified documents (1 or 0)
-              return result.modifiedCount;
+                // Return number of modified documents (1 or 0)
+                return result.modifiedCount;
+              }
+
+              return 0;
             })
           );
 
