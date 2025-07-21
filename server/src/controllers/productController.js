@@ -2334,13 +2334,39 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         shouldUpdateCart = true;
                       }
 
-                      if (item.quantity !== colorIsExist.quantity) {
-                        item.quantity = Math.min(
-                          item.quantity,
-                          colorIsExist.quantity
-                        );
+                      if (
+                        item.quantity !== colorIsExist.quantity &&
+                        item.quantity > colorIsExist.quantity
+                      ) {
+                        item.quantity = colorIsExist.quantity;
                         shouldUpdateCart = true;
                       }
+
+                      if (
+                        priceAfterDiscount != null &&
+                        item.price !== priceAfterDiscount
+                      ) {
+                        item.price = priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        product.priceAfterDiscount != null &&
+                        item.price !== product.priceAfterDiscount
+                      ) {
+                        item.price = product.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (price != null && item.price !== price) {
+                        item.price = price;
+                        shouldUpdateCart = true;
+                      } else if (
+                        product.price != null &&
+                        item.price !== product.price
+                      ) {
+                        item.price = product.price;
+                        shouldUpdateCart = true;
+                      }
+                    } else if (item.isAvailable) {
+                      item.isAvailable = false;
+                      shouldUpdateCart = true;
                     }
                   } else {
                     if (quantity != null && item.quantity !== quantity) {
