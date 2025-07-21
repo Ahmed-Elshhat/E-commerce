@@ -274,545 +274,475 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       product.colors = undefined;
     }
 
-    if (
-      deleteSizes != null &&
-      Array.isArray(deleteSizes) &&
-      deleteSizes.length > 0
-    ) {
-      /* eslint-disable no-await-in-loop */
-      const session = await mongoose.startSession();
-      try {
-        session.startTransaction();
-        for (let i = 0; i < deleteSizes.length; i++) {
-          const s = deleteSizes[i];
+    if (product.sizesIsExist) {
+      if (
+        deleteSizes != null &&
+        Array.isArray(deleteSizes) &&
+        deleteSizes.length > 0
+      ) {
+        /* eslint-disable no-await-in-loop */
+        const session = await mongoose.startSession();
+        try {
+          session.startTransaction();
+          const deleteSizesPromises = deleteSizes.map(async (s) => {
+            product.sizes = product.sizes.filter(
+              (size) => size.size.toLowerCase() !== s.toLowerCase()
+            );
 
-          product.sizes = product.sizes.filter(
-            (size) => size.size.toLowerCase() !== s.toLowerCase()
-          );
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.size": s,
+            }).session(session);
 
-          const cartsToUpdate = await Cart.find({
-            "cartItems.product": product._id,
-            "cartItems.size": s,
-          }).session(session);
+            let cartsNeedingUpdate = 0;
 
-          let cartsNeedingUpdate = 0;
+            const updateResults = await Promise.all(
+              cartsToUpdate.map(async (cart) => {
+                let shouldUpdateCart = false;
+                const updatedItems = cart.cartItems.map((item) => {
+                  if (
+                    item.product._id.equals(product._id) &&
+                    item.size.toLowerCase() === s.toLowerCase()
+                  ) {
+                    item.isAvailable = false;
+                    shouldUpdateCart = true;
+                  }
+                  return item;
+                });
 
-          const updateResults = await Promise.all(
-            cartsToUpdate.map(async (cart) => {
-              let shouldUpdateCart = false;
-              const updatedItems = cart.cartItems.map((item) => {
-                if (
-                  item.product._id.equals(product._id) &&
-                  item.size.toLowerCase() === s.toLowerCase()
-                ) {
-                  item.isAvailable = false;
-                  shouldUpdateCart = true;
-                }
-                return item;
-              });
+                if (shouldUpdateCart) cartsNeedingUpdate++;
 
-              if (shouldUpdateCart) cartsNeedingUpdate++;
-
-              const result = await Cart.updateOne(
-                { _id: cart._id },
-                {
-                  $set: {
-                    cartItems: updatedItems,
-                    totalCartPrice: calcTotalCartPrice({
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
                       cartItems: updatedItems,
-                    }),
+                      totalCartPrice: calcTotalCartPrice({
+                        cartItems: updatedItems,
+                      }),
+                    },
                   },
-                },
-                { session }
-              );
+                  { session }
+                );
 
-              return result.modifiedCount;
-            })
-          );
-
-          const modifiedCartsCount = updateResults.reduce(
-            (sum, count) => sum + count,
-            0
-          );
-
-          if (modifiedCartsCount < cartsNeedingUpdate) {
-            throw new ApiError(
-              `Not all carts were updated after deleting size "${s}"". Transaction rolled back.`,
-              400
+                return result.modifiedCount;
+              })
             );
-          }
-        }
-        await product.save({ session });
-        await session.commitTransaction();
-        session.endSession();
-      } catch (err) {
-        await session.abortTransaction();
-        session.endSession();
-        return next(
-          new ApiError(
-            err.message || "Error updating product or carts. Changes reverted.",
-            err.statusCode || 500
-          )
-        );
-      }
-    }
 
-    if (
-      updateSizes != null &&
-      Array.isArray(updateSizes) &&
-      updateSizes.length > 0
-    ) {
-      const seenSizeNames = [];
-      const seenNewSizeNames = [];
-      const hasValidationErrors = updateSizes.some((size) => {
-        if (!size.sizeName) {
-          next(new ApiError("Size name is required for update.", 400));
-          return true;
-        }
+            const modifiedCartsCount = updateResults.reduce(
+              (sum, count) => sum + count,
+              0
+            );
 
-        if (
-          !size.newSizeName &&
-          size.sizePrice == null &&
-          size.sizePriceAfterDiscount == null &&
-          size.sizeQuantity == null &&
-          !size.sizeColors?.length &&
-          !size.deleteColors?.length
-        ) {
-          next(
-            new ApiError(
-              `No actual update provided for size "${size.sizeName}". Please specify at least one change.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        const normalizedName = size.sizeName.toLowerCase();
-        const original = product.sizes.find(
-          (s) => s.size.toLowerCase() === normalizedName
-        );
-
-        if (!original) {
-          next(
-            new ApiError(
-              `Size "${size.sizeName}" does not exist in the product.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        if (size.newSizeName) {
-          if (size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()) {
-            next(
-              new ApiError(
-                `The new name for size "${size.sizeName}" matches the old name. It must be different.`,
+            if (modifiedCartsCount < cartsNeedingUpdate) {
+              throw new ApiError(
+                `Not all carts were updated after deleting size "${s}"". Transaction rolled back.`,
                 400
-              )
-            );
-            return true;
-          }
-
-          const newNameIsExist = product.sizes.find(
-            (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
-          );
-
-          if (newNameIsExist) {
-            next(
-              new ApiError(
-                `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
-                400
-              )
-            );
-            return true;
-          }
-        }
-
-        if (seenSizeNames.includes(size.sizeName.toLowerCase())) {
-          next(new ApiError("Only one update per size is allowed.", 400));
-          return true;
-        }
-
-        if (
-          size.newSizeName &&
-          seenNewSizeNames.includes(size.newSizeName.toLowerCase())
-        ) {
-          next(
-            new ApiError(
-              "Duplicate new size name detected. Each size must have a unique name.",
-              400
-            )
-          );
-          return true;
-        }
-
-        if (
-          size.newSizeName &&
-          seenSizeNames.includes(size.newSizeName.toLowerCase())
-        ) {
-          next(
-            new ApiError(
-              `The new size name "${size.newSizeName}" conflicts with an existing size name. Please choose a different name.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        if (size.sizePrice != null && typeof size.sizePrice !== "number") {
-          next(
-            new ApiError(`Price for "${size.sizeName}" must be a number.`, 400)
-          );
-          return true;
-        }
-
-        if (
-          size.sizePriceAfterDiscount != null &&
-          typeof size.sizePriceAfterDiscount !== "number"
-        ) {
-          next(
-            new ApiError(
-              `Discounted price for "${size.sizeName}" must be a number.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        if (
-          size.sizePriceAfterDiscount != null &&
-          size.deletePriceAfterDiscount === true
-        ) {
-          next(
-            new ApiError(
-              `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`,
-              400
-            )
-          );
-          return true;
-        }
-
-        // ✅ تحقق من تكرار السعر الأصلي
-        if (size.sizePrice != null && size.sizePrice === original.price) {
-          next(
-            new ApiError(
-              `The new price for size "${size.sizeName}" must be different from the old price.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        // ✅ تحقق من تكرار السعر بعد الخصم
-        if (
-          size.sizePriceAfterDiscount != null &&
-          size.sizePriceAfterDiscount === original.priceAfterDiscount
-        ) {
-          next(
-            new ApiError(
-              `The new discounted price for size "${size.sizeName}" must be different from the old discounted price.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        if (
-          size.sizePrice != null &&
-          size.sizePriceAfterDiscount == null &&
-          size.sizePrice <= original.priceAfterDiscount
-        ) {
-          next(
-            new ApiError(
-              `❌ The price for size "${size.sizeName}" must not be less than or equal to its existing discounted price.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        // ✅ تحقق إذا تم إرسال السعر والخصم وكان الخصم أكبر من السعر
-        if (
-          size.sizePrice != null &&
-          size.sizePriceAfterDiscount != null &&
-          size.sizePriceAfterDiscount > size.sizePrice
-        ) {
-          next(
-            new ApiError(
-              `Discounted price for "${size.sizeName}" must be less than the original price.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        // ✅ تحقق إذا فقط تم إرسال الخصم وكان أكبر من السعر القديم
-        if (
-          size.sizePrice == null &&
-          size.sizePriceAfterDiscount != null &&
-          size.sizePriceAfterDiscount > original.price
-        ) {
-          next(
-            new ApiError(
-              `Discounted price for "${size.sizeName}" must be less than the original price (${original.price}).`,
-              400
-            )
-          );
-          return true;
-        }
-
-        if (size.deleteColors?.length) {
-          const seenDeleteColors = [];
-
-          const hasValidationDeleteColors = size.deleteColors.some((c, i) => {
-            const lowerC = c.toLowerCase();
-
-            // ❌ رجع Error فوري لو اللون غير موجود في الأصل
-            const existsInOriginal = original.colors.some(
-              (color) => color.color.toLowerCase() === lowerC
-            );
-
-            if (!existsInOriginal) {
-              next(
-                new ApiError(
-                  `❌ Cannot delete color "${c}" in size "${size.sizeName}" because it does not exist in the original color list.`,
-                  400
-                )
               );
-              return true;
             }
-
-            // ❌ رجع Error لو فيه تكرار
-            if (seenDeleteColors.includes(lowerC)) {
-              next(
-                new ApiError(
-                  `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            seenDeleteColors.push(lowerC);
-            return false;
           });
 
-          if (hasValidationDeleteColors) return true;
+          await Promise.all(deleteSizesPromises);
+          await product.save({ session });
+          await session.commitTransaction();
+          session.endSession();
+        } catch (err) {
+          await session.abortTransaction();
+          session.endSession();
+          return next(
+            new ApiError(
+              err.message ||
+                "Error updating product or carts. Changes reverted.",
+              err.statusCode || 500
+            )
+          );
         }
+      }
 
-        if (size.sizeColors && size.sizeColors.length > 0) {
-          const seenOldColorNames = [];
-          const seenNewColorNames = [];
+      if (
+        updateSizes != null &&
+        Array.isArray(updateSizes) &&
+        updateSizes.length > 0
+      ) {
+        const seenSizeNames = [];
+        const seenNewSizeNames = [];
+        const hasValidationErrors = updateSizes.some((size) => {
+          if (!size.sizeName) {
+            next(new ApiError("Size name is required for update.", 400));
+            return true;
+          }
 
-          const colorValidator = size.sizeColors.some((color, colorIndex) => {
-            if (!color.type) {
-              next(
-                new ApiError(
-                  `Color update type is required for size "${size.sizeName}" at color index ${colorIndex}. Please specify either "update" or "new".`,
-                  400
-                )
-              );
-              return true;
-            }
+          if (
+            !size.newSizeName &&
+            size.sizePrice == null &&
+            size.sizePriceAfterDiscount == null &&
+            size.sizeQuantity == null &&
+            !size.sizeColors?.length &&
+            !size.deleteColors?.length
+          ) {
+            next(
+              new ApiError(
+                `No actual update provided for size "${size.sizeName}". Please specify at least one change.`,
+                400
+              )
+            );
+            return true;
+          }
 
-            if (color.type !== "new" && color.type !== "update") {
-              next(
-                new ApiError(
-                  `Invalid color update type "${color.type}" for size "${size.sizeName}" at color index ${colorIndex}. Expected "new" or "update".`,
-                  400
-                )
-              );
-              return true;
-            }
+          const normalizedName = size.sizeName.toLowerCase();
+          const original = product.sizes.find(
+            (s) => s.size.toLowerCase() === normalizedName
+          );
 
-            if (!color.colorName) {
-              next(
-                new ApiError(
-                  `Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}. The "Color name" field is required.`,
-                  400
-                )
-              );
-              return true;
-            }
+          if (!original) {
+            next(
+              new ApiError(
+                `Size "${size.sizeName}" does not exist in the product.`,
+                400
+              )
+            );
+            return true;
+          }
 
+          if (size.newSizeName) {
             if (
-              color.newColorName &&
-              color.colorName.toLowerCase() === color.newColorName.toLowerCase()
+              size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()
             ) {
               next(
                 new ApiError(
-                  `New color name must be different from the old color name for size "${size.sizeName}" at color index ${colorIndex}.`,
+                  `The new name for size "${size.sizeName}" matches the old name. It must be different.`,
                   400
                 )
               );
               return true;
             }
 
-            if (seenOldColorNames.includes(color.colorName.toLowerCase())) {
+            const newNameIsExist = product.sizes.find(
+              (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
+            );
+
+            if (newNameIsExist) {
               next(
                 new ApiError(
-                  `Duplicate color name "${color.colorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each color name must be unique.`,
+                  `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
                   400
                 )
               );
               return true;
             }
+          }
 
-            if (
-              color.newColorName &&
-              seenNewColorNames.includes(color.newColorName.toLowerCase())
-            ) {
-              next(
-                new ApiError(
-                  `Duplicate new color name "${color.newColorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each new color name must be unique.`,
-                  400
-                )
+          if (seenSizeNames.includes(size.sizeName.toLowerCase())) {
+            next(new ApiError("Only one update per size is allowed.", 400));
+            return true;
+          }
+
+          if (
+            size.newSizeName &&
+            seenNewSizeNames.includes(size.newSizeName.toLowerCase())
+          ) {
+            next(
+              new ApiError(
+                "Duplicate new size name detected. Each size must have a unique name.",
+                400
+              )
+            );
+            return true;
+          }
+
+          if (
+            size.newSizeName &&
+            seenSizeNames.includes(size.newSizeName.toLowerCase())
+          ) {
+            next(
+              new ApiError(
+                `The new size name "${size.newSizeName}" conflicts with an existing size name. Please choose a different name.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          if (size.sizePrice != null && typeof size.sizePrice !== "number") {
+            next(
+              new ApiError(
+                `Price for "${size.sizeName}" must be a number.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          if (
+            size.sizePriceAfterDiscount != null &&
+            typeof size.sizePriceAfterDiscount !== "number"
+          ) {
+            next(
+              new ApiError(
+                `Discounted price for "${size.sizeName}" must be a number.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          if (
+            size.sizePriceAfterDiscount != null &&
+            size.deletePriceAfterDiscount === true
+          ) {
+            next(
+              new ApiError(
+                `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`,
+                400
+              )
+            );
+            return true;
+          }
+
+          // ✅ تحقق من تكرار السعر الأصلي
+          if (size.sizePrice != null && size.sizePrice === original.price) {
+            next(
+              new ApiError(
+                `The new price for size "${size.sizeName}" must be different from the old price.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          // ✅ تحقق من تكرار السعر بعد الخصم
+          if (
+            size.sizePriceAfterDiscount != null &&
+            size.sizePriceAfterDiscount === original.priceAfterDiscount
+          ) {
+            next(
+              new ApiError(
+                `The new discounted price for size "${size.sizeName}" must be different from the old discounted price.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          if (
+            size.sizePrice != null &&
+            size.sizePriceAfterDiscount == null &&
+            size.sizePrice <= original.priceAfterDiscount
+          ) {
+            next(
+              new ApiError(
+                `❌ The price for size "${size.sizeName}" must not be less than or equal to its existing discounted price.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          // ✅ تحقق إذا تم إرسال السعر والخصم وكان الخصم أكبر من السعر
+          if (
+            size.sizePrice != null &&
+            size.sizePriceAfterDiscount != null &&
+            size.sizePriceAfterDiscount > size.sizePrice
+          ) {
+            next(
+              new ApiError(
+                `Discounted price for "${size.sizeName}" must be less than the original price.`,
+                400
+              )
+            );
+            return true;
+          }
+
+          // ✅ تحقق إذا فقط تم إرسال الخصم وكان أكبر من السعر القديم
+          if (
+            size.sizePrice == null &&
+            size.sizePriceAfterDiscount != null &&
+            size.sizePriceAfterDiscount > original.price
+          ) {
+            next(
+              new ApiError(
+                `Discounted price for "${size.sizeName}" must be less than the original price (${original.price}).`,
+                400
+              )
+            );
+            return true;
+          }
+
+          if (size.deleteColors?.length) {
+            const seenDeleteColors = [];
+
+            const hasValidationDeleteColors = size.deleteColors.some((c, i) => {
+              const lowerC = c.toLowerCase();
+
+              // ❌ رجع Error فوري لو اللون غير موجود في الأصل
+              const existsInOriginal = original.colors.some(
+                (color) => color.color.toLowerCase() === lowerC
               );
-              return true;
-            }
 
-            if (
-              color.newColorName &&
-              seenOldColorNames.includes(color.newColorName.toLowerCase())
-            ) {
-              next(
-                new ApiError(
-                  `The color name "${color.newColorName}" already exists. Please choose a unique name.`,
-                  400
-                )
-              );
-              return true;
-            }
+              if (!existsInOriginal) {
+                next(
+                  new ApiError(
+                    `❌ Cannot delete color "${c}" in size "${size.sizeName}" because it does not exist in the original color list.`,
+                    400
+                  )
+                );
+                return true;
+              }
 
-            if (color.colorQuantity != null && color.colorQuantity < 0) {
-              next(
-                new ApiError(
-                  `Color quantity for size "${size.sizeName}" at color index ${colorIndex} cannot be negative.`,
-                  400
-                )
-              );
-              return true;
-            }
+              // ❌ رجع Error لو فيه تكرار
+              if (seenDeleteColors.includes(lowerC)) {
+                next(
+                  new ApiError(
+                    `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
+                    400
+                  )
+                );
+                return true;
+              }
 
-            if (
-              color.colorQuantity != null &&
-              !Number.isInteger(color.colorQuantity)
-            ) {
-              next(
-                new ApiError(
-                  `Color quantity for size "${size.sizeName}" at color index ${colorIndex} must be a whole number (no decimals).`,
-                  400
-                )
-              );
-              return true;
-            }
+              seenDeleteColors.push(lowerC);
+              return false;
+            });
 
-            if (color.type === "new") {
+            if (hasValidationDeleteColors) return true;
+          }
+
+          if (size.sizeColors && size.sizeColors.length > 0) {
+            const seenOldColorNames = [];
+            const seenNewColorNames = [];
+
+            const colorValidator = size.sizeColors.some((color, colorIndex) => {
+              if (!color.type) {
+                next(
+                  new ApiError(
+                    `Color update type is required for size "${size.sizeName}" at color index ${colorIndex}. Please specify either "update" or "new".`,
+                    400
+                  )
+                );
+                return true;
+              }
+
+              if (color.type !== "new" && color.type !== "update") {
+                next(
+                  new ApiError(
+                    `Invalid color update type "${color.type}" for size "${size.sizeName}" at color index ${colorIndex}. Expected "new" or "update".`,
+                    400
+                  )
+                );
+                return true;
+              }
+
+              if (!color.colorName) {
+                next(
+                  new ApiError(
+                    `Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}. The "Color name" field is required.`,
+                    400
+                  )
+                );
+                return true;
+              }
+
               if (
-                size.deleteColors &&
-                size.deleteColors.includes(color.colorName)
+                color.newColorName &&
+                color.colorName.toLowerCase() ===
+                  color.newColorName.toLowerCase()
               ) {
                 next(
                   new ApiError(
-                    `Color "${color.colorName}" cannot be added because it is scheduled for deletion.`,
+                    `New color name must be different from the old color name for size "${size.sizeName}" at color index ${colorIndex}.`,
                     400
                   )
                 );
                 return true;
               }
 
-              if (color.colorQuantity == null) {
+              if (seenOldColorNames.includes(color.colorName.toLowerCase())) {
                 next(
                   new ApiError(
-                    `Please specify the quantity available for the new color "${color.colorName}" in size "${size.sizeName}".`,
+                    `Duplicate color name "${color.colorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each color name must be unique.`,
                     400
                   )
                 );
                 return true;
               }
 
-              if (color.newColorName) {
-                next(
-                  new ApiError(
-                    `❌ For new colors in size "${size.sizeName}", use "color Name" only. Do not include "new Color Name".`,
-                    400
-                  )
-                );
-                return true;
-              }
-
-              const newColorNameIsExist = original.colors.find(
-                (c) => c.color.toLowerCase() === color.colorName.toLowerCase()
-              );
-
-              if (newColorNameIsExist) {
-                next(
-                  new ApiError(
-                    `❌ The color name "${color.colorName}" already exists in the size "${original.size}". Please choose a different name.`,
-                    400
-                  )
-                );
-                return true;
-              }
-            }
-
-            if (color.type === "update") {
               if (
-                size.deleteColors &&
-                size.deleteColors.includes(color.colorName)
+                color.newColorName &&
+                seenNewColorNames.includes(color.newColorName.toLowerCase())
               ) {
                 next(
                   new ApiError(
-                    `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`,
+                    `Duplicate new color name "${color.newColorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each new color name must be unique.`,
                     400
                   )
                 );
                 return true;
               }
 
-              const existingColor = original.colors.find(
-                (c) => c.color.toLowerCase() === color.colorName.toLowerCase()
-              );
-
-              if (!existingColor) {
+              if (
+                color.newColorName &&
+                seenOldColorNames.includes(color.newColorName.toLowerCase())
+              ) {
                 next(
                   new ApiError(
-                    `❌ The original color "${color.colorName}" does not exist in size "${original.size}".`,
+                    `The color name "${color.newColorName}" already exists. Please choose a unique name.`,
                     400
                   )
                 );
                 return true;
               }
 
-              // ✅ تحقق أنه تم تقديم تغيير فعلي
-              const isSameQuantity =
-                color.colorQuantity == null ||
-                color.colorQuantity === existingColor.quantity;
-
-              const isSameName =
-                !color.newColorName ||
-                color.newColorName.toLowerCase() ===
-                  color.colorName.toLowerCase();
-
-              if (isSameQuantity && isSameName) {
+              if (color.colorQuantity != null && color.colorQuantity < 0) {
                 next(
                   new ApiError(
-                    `❌ No update provided for the color "${color.colorName}" in size "${original.size}". Please change the name or the quantity.`,
+                    `Color quantity for size "${size.sizeName}" at color index ${colorIndex} cannot be negative.`,
                     400
                   )
                 );
                 return true;
               }
 
-              if (color.newColorName) {
+              if (
+                color.colorQuantity != null &&
+                !Number.isInteger(color.colorQuantity)
+              ) {
+                next(
+                  new ApiError(
+                    `Color quantity for size "${size.sizeName}" at color index ${colorIndex} must be a whole number (no decimals).`,
+                    400
+                  )
+                );
+                return true;
+              }
+
+              if (color.type === "new") {
                 if (
-                  color.newColorName &&
                   size.deleteColors &&
-                  size.deleteColors.includes(color.newColorName)
+                  size.deleteColors.includes(color.colorName)
                 ) {
                   next(
                     new ApiError(
-                      `Cannot rename the color to (${color.newColorName}) because it is marked for deletion.`,
+                      `Color "${color.colorName}" cannot be added because it is scheduled for deletion.`,
+                      400
+                    )
+                  );
+                  return true;
+                }
+
+                if (color.colorQuantity == null) {
+                  next(
+                    new ApiError(
+                      `Please specify the quantity available for the new color "${color.colorName}" in size "${size.sizeName}".`,
+                      400
+                    )
+                  );
+                  return true;
+                }
+
+                if (color.newColorName) {
+                  next(
+                    new ApiError(
+                      `❌ For new colors in size "${size.sizeName}", use "color Name" only. Do not include "new Color Name".`,
                       400
                     )
                   );
@@ -820,428 +750,355 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
 
                 const newColorNameIsExist = original.colors.find(
-                  (c) =>
-                    c.color.toLowerCase() === color.newColorName.toLowerCase()
+                  (c) => c.color.toLowerCase() === color.colorName.toLowerCase()
                 );
 
                 if (newColorNameIsExist) {
                   next(
                     new ApiError(
-                      `❌ The new color name "${color.newColorName}" already exists in the size "${original.size}". Please choose a different name.`,
+                      `❌ The color name "${color.colorName}" already exists in the size "${original.size}". Please choose a different name.`,
                       400
                     )
                   );
                   return true;
                 }
               }
+
+              if (color.type === "update") {
+                if (
+                  size.deleteColors &&
+                  size.deleteColors.includes(color.colorName)
+                ) {
+                  next(
+                    new ApiError(
+                      `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`,
+                      400
+                    )
+                  );
+                  return true;
+                }
+
+                const existingColor = original.colors.find(
+                  (c) => c.color.toLowerCase() === color.colorName.toLowerCase()
+                );
+
+                if (!existingColor) {
+                  next(
+                    new ApiError(
+                      `❌ The original color "${color.colorName}" does not exist in size "${original.size}".`,
+                      400
+                    )
+                  );
+                  return true;
+                }
+
+                // ✅ تحقق أنه تم تقديم تغيير فعلي
+                const isSameQuantity =
+                  color.colorQuantity == null ||
+                  color.colorQuantity === existingColor.quantity;
+
+                const isSameName =
+                  !color.newColorName ||
+                  color.newColorName.toLowerCase() ===
+                    color.colorName.toLowerCase();
+
+                if (isSameQuantity && isSameName) {
+                  next(
+                    new ApiError(
+                      `❌ No update provided for the color "${color.colorName}" in size "${original.size}". Please change the name or the quantity.`,
+                      400
+                    )
+                  );
+                  return true;
+                }
+
+                if (color.newColorName) {
+                  if (
+                    color.newColorName &&
+                    size.deleteColors &&
+                    size.deleteColors.includes(color.newColorName)
+                  ) {
+                    next(
+                      new ApiError(
+                        `Cannot rename the color to (${color.newColorName}) because it is marked for deletion.`,
+                        400
+                      )
+                    );
+                    return true;
+                  }
+
+                  const newColorNameIsExist = original.colors.find(
+                    (c) =>
+                      c.color.toLowerCase() === color.newColorName.toLowerCase()
+                  );
+
+                  if (newColorNameIsExist) {
+                    next(
+                      new ApiError(
+                        `❌ The new color name "${color.newColorName}" already exists in the size "${original.size}". Please choose a different name.`,
+                        400
+                      )
+                    );
+                    return true;
+                  }
+                }
+              }
+
+              seenOldColorNames.push(color.colorName.toLowerCase());
+              if (color.newColorName) {
+                seenNewColorNames.push(color.newColorName.toLowerCase());
+              }
+
+              return false;
+            });
+
+            if (colorValidator) return true;
+          }
+
+          const allOriginalColorsDeleted =
+            Array.isArray(size.deleteColors) &&
+            size.deleteColors.length === original.colors.length &&
+            original.colors.every((oc) =>
+              size.deleteColors.some(
+                (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+              )
+            );
+
+          const hasNewOrUpdatedColors =
+            Array.isArray(size.sizeColors) &&
+            size.sizeColors.some(
+              (c) => c.type === "new" || c.type === "update"
+            );
+
+          if (size.sizeQuantity != null) {
+            const hasOriginalColors = original.colors.length > 0;
+
+            if (hasNewOrUpdatedColors) {
+              next(
+                new ApiError(
+                  `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                  400
+                )
+              );
+              return true;
             }
 
-            seenOldColorNames.push(color.colorName.toLowerCase());
-            if (color.newColorName) {
-              seenNewColorNames.push(color.newColorName.toLowerCase());
+            // الحالة 1: فيه ألوان أصلية
+            if (hasOriginalColors) {
+              if (
+                !Array.isArray(size.deleteColors) ||
+                size.deleteColors.length === 0
+              ) {
+                next(
+                  new ApiError(
+                    `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
+                    400
+                  )
+                );
+                return true;
+              }
+
+              if (!allOriginalColorsDeleted) {
+                next(
+                  new ApiError(
+                    `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
+                    400
+                  )
+                );
+                return true;
+              }
             }
 
-            return false;
-          });
-
-          if (colorValidator) return true;
-        }
-
-        const allOriginalColorsDeleted =
-          Array.isArray(size.deleteColors) &&
-          size.deleteColors.length === original.colors.length &&
-          original.colors.every((oc) =>
-            size.deleteColors.some(
-              (dc) => dc.toLowerCase() === oc.color.toLowerCase()
-            )
-          );
-
-        const hasNewOrUpdatedColors =
-          Array.isArray(size.sizeColors) &&
-          size.sizeColors.some((c) => c.type === "new" || c.type === "update");
-
-        if (size.sizeQuantity != null) {
-          const hasOriginalColors = original.colors.length > 0;
-
-          if (hasNewOrUpdatedColors) {
+            // الحالة 2: مفيش ألوان أصلية
+            if (!hasOriginalColors) {
+              if (
+                Array.isArray(size.deleteColors) &&
+                size.deleteColors.length > 0
+              ) {
+                next(
+                  new ApiError(
+                    `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
+                    400
+                  )
+                );
+                return true;
+              }
+            }
+          } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
             next(
               new ApiError(
-                `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
+                `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
                 400
               )
             );
             return true;
           }
 
-          // الحالة 1: فيه ألوان أصلية
-          if (hasOriginalColors) {
-            if (
-              !Array.isArray(size.deleteColors) ||
-              size.deleteColors.length === 0
-            ) {
-              next(
-                new ApiError(
-                  `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (!allOriginalColorsDeleted) {
-              next(
-                new ApiError(
-                  `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
-                  400
-                )
-              );
-              return true;
-            }
+          seenSizeNames.push(size.sizeName.toLowerCase());
+          if (size.newSizeName) {
+            seenNewSizeNames.push(size.newSizeName.toLowerCase());
           }
+          return false;
+        });
+        if (hasValidationErrors) return;
 
-          // الحالة 2: مفيش ألوان أصلية
-          if (!hasOriginalColors) {
-            if (
-              Array.isArray(size.deleteColors) &&
-              size.deleteColors.length > 0
-            ) {
-              next(
-                new ApiError(
-                  `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
-                  400
-                )
-              );
-              return true;
-            }
-          }
-        } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
-          next(
-            new ApiError(
-              `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
-              400
-            )
-          );
-          return true;
-        }
-
-        seenSizeNames.push(size.sizeName.toLowerCase());
-        if (size.newSizeName) {
-          seenNewSizeNames.push(size.newSizeName.toLowerCase());
-        }
-        return false;
-      });
-      if (hasValidationErrors) return;
-
-      const session = await mongoose.startSession();
-      try {
-        session.startTransaction();
-        const updatePromises = updateSizes.map(async (size) => {
-          // Find the target size in the product based on the provided size name (case insensitive)
-          let productSize = product.sizes.find(
-            (s) => s.size.toLowerCase() === size.sizeName.toLowerCase()
-          );
-
-          // If the size doesn't exist in the product, abort the operation
-          if (!productSize) {
-            throw new ApiError(
-              `Size "${size.sizeName}" not found in the product.`,
-              400
+        const session = await mongoose.startSession();
+        try {
+          session.startTransaction();
+          const updatePromises = updateSizes.map(async (size) => {
+            // Find the target size in the product based on the provided size name (case insensitive)
+            let productSize = product.sizes.find(
+              (s) => s.size.toLowerCase() === size.sizeName.toLowerCase()
             );
-          }
 
-          if (size.sizePrice != null) {
-            productSize.price = size.sizePrice;
-
-            if (size.sizePriceAfterDiscount != null) {
-              productSize.priceAfterDiscount = size.sizePriceAfterDiscount;
-            }
-          } else if (size.sizePriceAfterDiscount != null) {
-            productSize.priceAfterDiscount = size.sizePriceAfterDiscount;
-          }
-
-          if (size.deletePriceAfterDiscount) {
-            // Ensure there is a priceAfterDiscount to delete
-            if (productSize.priceAfterDiscount == null) {
+            // If the size doesn't exist in the product, abort the operation
+            if (!productSize) {
               throw new ApiError(
-                `Cannot delete the price after discount for size "${size.sizeName}" because it does not have a price after discount.`,
+                `Size "${size.sizeName}" not found in the product.`,
                 400
               );
             }
 
-            // Remove the priceAfterDiscount from the product size
-            productSize.priceAfterDiscount = undefined;
-          }
+            if (size.sizePrice != null) {
+              productSize.price = size.sizePrice;
 
-          if (size.sizeQuantity != null) {
-            productSize.quantity = size.sizeQuantity;
-          }
+              if (size.sizePriceAfterDiscount != null) {
+                productSize.priceAfterDiscount = size.sizePriceAfterDiscount;
+              }
+            } else if (size.sizePriceAfterDiscount != null) {
+              productSize.priceAfterDiscount = size.sizePriceAfterDiscount;
+            }
 
-          /* eslint-disable no-await-in-loop */
-          if (
-            size.deleteColors != null &&
-            Array.isArray(size.deleteColors) &&
-            size.deleteColors.length > 0
-          ) {
-            for (let i = 0; i < size.deleteColors.length; i++) {
-              const c = size.deleteColors[i];
-
-              productSize.colors = productSize.colors.filter(
-                (color) => color.color.toLowerCase() !== c.toLowerCase()
-              );
-
-              const cartsToUpdate = await Cart.find({
-                "cartItems.product": product._id,
-                "cartItems.size": size.sizeName,
-                "cartItems.color": c,
-              }).session(session);
-
-              let cartsNeedingUpdate = 0;
-
-              const updateResults = await Promise.all(
-                cartsToUpdate.map(async (cart) => {
-                  let shouldUpdateCart = false;
-                  const updatedItems = cart.cartItems.map((item) => {
-                    if (
-                      item.product._id.equals(product._id) &&
-                      item.size.toLowerCase() === size.sizeName.toLowerCase() &&
-                      item.color.toLowerCase() === c.toLowerCase()
-                    ) {
-                      item.isAvailable = false;
-                      shouldUpdateCart = true;
-                    }
-                    return item;
-                  });
-
-                  if (shouldUpdateCart) cartsNeedingUpdate++;
-
-                  const result = await Cart.updateOne(
-                    { _id: cart._id },
-                    {
-                      $set: {
-                        cartItems: updatedItems,
-                        totalCartPrice: calcTotalCartPrice({
-                          cartItems: updatedItems,
-                        }),
-                      },
-                    },
-                    { session }
-                  );
-
-                  return result.modifiedCount;
-                })
-              );
-
-              const modifiedCartsCount = updateResults.reduce(
-                (sum, count) => sum + count,
-                0
-              );
-
-              if (modifiedCartsCount < cartsNeedingUpdate) {
+            if (size.deletePriceAfterDiscount) {
+              // Ensure there is a priceAfterDiscount to delete
+              if (productSize.priceAfterDiscount == null) {
                 throw new ApiError(
-                  `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
+                  `Cannot delete the price after discount for size "${size.sizeName}" because it does not have a price after discount.`,
                   400
                 );
               }
+
+              // Remove the priceAfterDiscount from the product size
+              productSize.priceAfterDiscount = undefined;
             }
-          }
 
-          if (
-            size.sizeColors != null &&
-            Array.isArray(size.sizeColors) &&
-            size.sizeColors.length > 0
-          ) {
-            productSize.quantity = undefined;
+            if (size.sizeQuantity != null) {
+              productSize.quantity = size.sizeQuantity;
+            }
 
-            const updateColorPromises = size.sizeColors.map(async (color) => {
-              if (color.type === "new") {
+            /* eslint-disable no-await-in-loop */
+            if (
+              size.deleteColors != null &&
+              Array.isArray(size.deleteColors) &&
+              size.deleteColors.length > 0
+            ) {
+              for (let i = 0; i < size.deleteColors.length; i++) {
+                const c = size.deleteColors[i];
+
+                productSize.colors = productSize.colors.filter(
+                  (color) => color.color.toLowerCase() !== c.toLowerCase()
+                );
+
                 const cartsToUpdate = await Cart.find({
                   "cartItems.product": product._id,
                   "cartItems.size": size.sizeName,
-                  "cartItems.color": color.colorName,
+                  "cartItems.color": c,
                 }).session(session);
-                productSize.colors.push({
-                  color: color.colorName,
-                  quantity: color.colorQuantity,
-                });
-                if (cartsToUpdate.length !== 0) {
-                  let cartsNeedingUpdate = 0;
 
-                  const updateResults = await Promise.all(
-                    cartsToUpdate.map(async (cart) => {
-                      let shouldUpdateCart = false;
-                      const updatedItems = cart.cartItems.map((item) => {
-                        if (
-                          item.product._id.equals(product._id) &&
-                          item.size.toLowerCase() ===
-                            size.sizeName.toLowerCase() &&
-                          item.color.toLowerCase() ===
-                            color.colorName.toLowerCase()
-                        ) {
-                          shouldUpdateCart = true;
-                          item.isAvailable = true;
-                          item.quantity = Math.min(
-                            item.quantity,
-                            color.colorQuantity
-                          );
-                        }
-                        return item;
-                      });
+                let cartsNeedingUpdate = 0;
 
-                      if (shouldUpdateCart) cartsNeedingUpdate++;
+                const updateResults = await Promise.all(
+                  cartsToUpdate.map(async (cart) => {
+                    let shouldUpdateCart = false;
+                    const updatedItems = cart.cartItems.map((item) => {
+                      if (
+                        item.product._id.equals(product._id) &&
+                        item.size.toLowerCase() ===
+                          size.sizeName.toLowerCase() &&
+                        item.color.toLowerCase() === c.toLowerCase()
+                      ) {
+                        item.isAvailable = false;
+                        shouldUpdateCart = true;
+                      }
+                      return item;
+                    });
 
-                      const result = await Cart.updateOne(
-                        { _id: cart._id },
-                        {
-                          $set: {
+                    if (shouldUpdateCart) cartsNeedingUpdate++;
+
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
                             cartItems: updatedItems,
-                            totalCartPrice: calcTotalCartPrice({
-                              cartItems: updatedItems,
-                            }),
-                          },
+                          }),
                         },
-                        { session }
-                      );
-
-                      return result.modifiedCount; // 1 if modified, 0 otherwise
-                    })
-                  );
-
-                  const modifiedCartsCount = updateResults.reduce(
-                    (sum, count) => sum + count,
-                    0
-                  );
-
-                  if (modifiedCartsCount < cartsNeedingUpdate) {
-                    throw new ApiError(
-                      `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
-                      400
+                      },
+                      { session }
                     );
-                  }
+
+                    return result.modifiedCount;
+                  })
+                );
+
+                const modifiedCartsCount = updateResults.reduce(
+                  (sum, count) => sum + count,
+                  0
+                );
+
+                if (modifiedCartsCount < cartsNeedingUpdate) {
+                  throw new ApiError(
+                    `Not all carts were updated after deleting color "${c}" for size "${size.sizeName}". Transaction rolled back.`,
+                    400
+                  );
                 }
-              } else if (color.type === "update") {
-                productSize.colors.forEach((c) => {
-                  if (c.color.toLowerCase() === color.colorName.toLowerCase()) {
-                    if (color.newColorName != null) {
-                      c.color = color.newColorName;
-                    }
+              }
+            }
 
-                    if (color.colorQuantity != null) {
-                      c.quantity = color.colorQuantity;
-                    }
-                  }
-                });
+            if (
+              size.sizeColors != null &&
+              Array.isArray(size.sizeColors) &&
+              size.sizeColors.length > 0
+            ) {
+              productSize.quantity = undefined;
 
-                const currentCartsToUpdate = await Cart.find({
-                  "cartItems.product": product._id,
-                  "cartItems.size": size.sizeName,
-                  "cartItems.color": color.colorName,
-                }).session(session);
+              const updateColorPromises = size.sizeColors.map(async (color) => {
+                if (color.type === "new") {
+                  const cartsToUpdate = await Cart.find({
+                    "cartItems.product": product._id,
+                    "cartItems.size": size.sizeName,
+                    "cartItems.color": color.colorName,
+                  }).session(session);
+                  productSize.colors.push({
+                    color: color.colorName,
+                    quantity: color.colorQuantity,
+                  });
+                  if (cartsToUpdate.length !== 0) {
+                    let cartsNeedingUpdate = 0;
 
-                if (currentCartsToUpdate.length !== 0) {
-                  let currentCartsNeedingUpdate = 0;
-
-                  const currentUpdateResults = await Promise.all(
-                    currentCartsToUpdate.map(async (cart) => {
-                      let shouldUpdateCart = false;
-                      const updatedItems = cart.cartItems.map((item) => {
-                        if (
-                          item.product._id.toString() ===
-                            product._id.toString() &&
-                          item.size.toLowerCase() ===
-                            size.sizeName.toLowerCase() &&
-                          item.color.toLowerCase() ===
-                            color.colorName.toLowerCase()
-                        ) {
+                    const updateResults = await Promise.all(
+                      cartsToUpdate.map(async (cart) => {
+                        let shouldUpdateCart = false;
+                        const updatedItems = cart.cartItems.map((item) => {
                           if (
-                            color.newColorName &&
-                            color.newColorName != null
+                            item.product._id.equals(product._id) &&
+                            item.size.toLowerCase() ===
+                              size.sizeName.toLowerCase() &&
+                            item.color.toLowerCase() ===
+                              color.colorName.toLowerCase()
                           ) {
-                            item.isAvailable = false;
-                          }
-                          if (
-                            color.colorQuantity &&
-                            color.colorQuantity != null
-                          ) {
+                            shouldUpdateCart = true;
+                            item.isAvailable = true;
                             item.quantity = Math.min(
                               item.quantity,
                               color.colorQuantity
                             );
                           }
-                          shouldUpdateCart = true;
-                        }
-                        return item;
-                      });
-
-                      if (shouldUpdateCart) currentCartsNeedingUpdate++;
-
-                      const result = await Cart.updateOne(
-                        { _id: cart._id },
-                        {
-                          $set: {
-                            cartItems: updatedItems,
-                            totalCartPrice: calcTotalCartPrice({
-                              cartItems: updatedItems,
-                            }),
-                          },
-                        },
-                        { session }
-                      );
-
-                      return result.modifiedCount; // 1 if modified, 0 otherwise
-                    })
-                  );
-
-                  const modifiedCurrentCartsCount = currentUpdateResults.reduce(
-                    (sum, count) => sum + count,
-                    0
-                  );
-
-                  if (modifiedCurrentCartsCount < currentCartsNeedingUpdate) {
-                    throw new ApiError(
-                      `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
-                      400
-                    );
-                  }
-                }
-
-                if (color.newColorName && color.newColorName != null) {
-                  const oldCartsToUpdate = await Cart.find({
-                    "cartItems.product": product._id,
-                    "cartItems.size": size.sizeName,
-                    "cartItems.color": color.newColorName,
-                  }).session(session);
-
-                  if (oldCartsToUpdate.length !== 0) {
-                    let oldCartsNeedingUpdate = 0;
-
-                    const oldUpdateResults = await Promise.all(
-                      oldCartsToUpdate.map(async (cart) => {
-                        let shouldUpdateCart = false;
-                        const updatedItems = cart.cartItems.map((item) => {
-                          if (
-                            item.product._id.toString() ===
-                              product._id.toString() &&
-                            item.size.toLowerCase() ===
-                              size.sizeName.toLowerCase() &&
-                            item.color.toLowerCase() ===
-                              color.newColorName.toLowerCase()
-                          ) {
-                            item.isAvailable = true;
-                            if (
-                              color.colorQuantity &&
-                              color.colorQuantity != null
-                            ) {
-                              item.quantity = Math.min(
-                                item.quantity,
-                                color.colorQuantity
-                              );
-                            }
-                            shouldUpdateCart = true;
-                          }
                           return item;
                         });
 
-                        if (shouldUpdateCart) oldCartsNeedingUpdate++;
+                        if (shouldUpdateCart) cartsNeedingUpdate++;
 
                         const result = await Cart.updateOne(
                           { _id: cart._id },
@@ -1260,339 +1117,279 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       })
                     );
 
-                    const modifiedOldCartsCount = oldUpdateResults.reduce(
+                    const modifiedCartsCount = updateResults.reduce(
                       (sum, count) => sum + count,
                       0
                     );
 
-                    if (modifiedOldCartsCount < oldCartsNeedingUpdate) {
+                    if (modifiedCartsCount < cartsNeedingUpdate) {
                       throw new ApiError(
                         `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
                         400
                       );
                     }
                   }
+                } else if (color.type === "update") {
+                  productSize.colors.forEach((c) => {
+                    if (
+                      c.color.toLowerCase() === color.colorName.toLowerCase()
+                    ) {
+                      if (color.newColorName != null) {
+                        c.color = color.newColorName;
+                      }
+
+                      if (color.colorQuantity != null) {
+                        c.quantity = color.colorQuantity;
+                      }
+                    }
+                  });
+
+                  const currentCartsToUpdate = await Cart.find({
+                    "cartItems.product": product._id,
+                    "cartItems.size": size.sizeName,
+                    "cartItems.color": color.colorName,
+                  }).session(session);
+
+                  if (currentCartsToUpdate.length !== 0) {
+                    let currentCartsNeedingUpdate = 0;
+
+                    const currentUpdateResults = await Promise.all(
+                      currentCartsToUpdate.map(async (cart) => {
+                        let shouldUpdateCart = false;
+                        const updatedItems = cart.cartItems.map((item) => {
+                          if (
+                            item.product._id.toString() ===
+                              product._id.toString() &&
+                            item.size.toLowerCase() ===
+                              size.sizeName.toLowerCase() &&
+                            item.color.toLowerCase() ===
+                              color.colorName.toLowerCase()
+                          ) {
+                            if (
+                              color.newColorName &&
+                              color.newColorName != null
+                            ) {
+                              item.isAvailable = false;
+                            }
+                            if (
+                              color.colorQuantity &&
+                              color.colorQuantity != null
+                            ) {
+                              item.quantity = Math.min(
+                                item.quantity,
+                                color.colorQuantity
+                              );
+                            }
+                            shouldUpdateCart = true;
+                          }
+                          return item;
+                        });
+
+                        if (shouldUpdateCart) currentCartsNeedingUpdate++;
+
+                        const result = await Cart.updateOne(
+                          { _id: cart._id },
+                          {
+                            $set: {
+                              cartItems: updatedItems,
+                              totalCartPrice: calcTotalCartPrice({
+                                cartItems: updatedItems,
+                              }),
+                            },
+                          },
+                          { session }
+                        );
+
+                        return result.modifiedCount; // 1 if modified, 0 otherwise
+                      })
+                    );
+
+                    const modifiedCurrentCartsCount =
+                      currentUpdateResults.reduce(
+                        (sum, count) => sum + count,
+                        0
+                      );
+
+                    if (modifiedCurrentCartsCount < currentCartsNeedingUpdate) {
+                      throw new ApiError(
+                        `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
+                        400
+                      );
+                    }
+                  }
+
+                  if (color.newColorName && color.newColorName != null) {
+                    const oldCartsToUpdate = await Cart.find({
+                      "cartItems.product": product._id,
+                      "cartItems.size": size.sizeName,
+                      "cartItems.color": color.newColorName,
+                    }).session(session);
+
+                    if (oldCartsToUpdate.length !== 0) {
+                      let oldCartsNeedingUpdate = 0;
+
+                      const oldUpdateResults = await Promise.all(
+                        oldCartsToUpdate.map(async (cart) => {
+                          let shouldUpdateCart = false;
+                          const updatedItems = cart.cartItems.map((item) => {
+                            if (
+                              item.product._id.toString() ===
+                                product._id.toString() &&
+                              item.size.toLowerCase() ===
+                                size.sizeName.toLowerCase() &&
+                              item.color.toLowerCase() ===
+                                color.newColorName.toLowerCase()
+                            ) {
+                              item.isAvailable = true;
+                              if (
+                                color.colorQuantity &&
+                                color.colorQuantity != null
+                              ) {
+                                item.quantity = Math.min(
+                                  item.quantity,
+                                  color.colorQuantity
+                                );
+                              }
+                              shouldUpdateCart = true;
+                            }
+                            return item;
+                          });
+
+                          if (shouldUpdateCart) oldCartsNeedingUpdate++;
+
+                          const result = await Cart.updateOne(
+                            { _id: cart._id },
+                            {
+                              $set: {
+                                cartItems: updatedItems,
+                                totalCartPrice: calcTotalCartPrice({
+                                  cartItems: updatedItems,
+                                }),
+                              },
+                            },
+                            { session }
+                          );
+
+                          return result.modifiedCount; // 1 if modified, 0 otherwise
+                        })
+                      );
+
+                      const modifiedOldCartsCount = oldUpdateResults.reduce(
+                        (sum, count) => sum + count,
+                        0
+                      );
+
+                      if (modifiedOldCartsCount < oldCartsNeedingUpdate) {
+                        throw new ApiError(
+                          `Not all carts were updated after changing quantity for size "${size.sizeName}". Transaction rolled back.`,
+                          400
+                        );
+                      }
+                    }
+                  }
                 }
-              }
-            });
-
-            await Promise.all(updateColorPromises);
-          }
-
-          // Find all carts that contain this product and size (before renaming)
-          const cartsToUpdate = await Cart.find({
-            "cartItems.product": product._id,
-            "cartItems.size": size.sizeName,
-          }).session(session);
-
-          let cartsNeedingUpdate = 0;
-
-          // Loop through carts and update matching cart items
-          const updateResults = await Promise.all(
-            cartsToUpdate.map(async (cart) => {
-              let shouldUpdateCart = false;
-              const updatedItems = cart.cartItems.map((item) => {
-                // Match the specific product and size in the cart
-                if (
-                  item.product._id.equals(product._id) &&
-                  item.size.toLowerCase() === size.sizeName.toLowerCase()
-                ) {
-                  if (size.sizePrice != null) {
-                    item.price =
-                      size?.sizePriceAfterDiscount ??
-                      productSize?.priceAfterDiscount ??
-                      size.sizePrice;
-                  } else if (size.sizePriceAfterDiscount != null) {
-                    item.price =
-                      size?.sizePriceAfterDiscount ??
-                      productSize?.priceAfterDiscount ??
-                      productSize.price;
-                  }
-
-                  // If priceAfterDiscount was deleted, update cart item price to default product price
-                  if (size.deletePriceAfterDiscount) {
-                    item.price = productSize.price;
-                  }
-
-                  if (size.sizeQuantity != null && item.color == null) {
-                    item.quantity = Math.min(item.quantity, size.sizeQuantity);
-                  }
-
-                  // If a new size name is provided, mark old size as unavailable in cart
-                  if (size.newSizeName) {
-                    item.isAvailable = false;
-                  }
-
-                  shouldUpdateCart = true;
-
-                  // if (item.color != null && productSize.colors.length > 0) {
-                  //   const colorIsExist = productSize.colors.find(
-                  //     (c) => c.color.toLowerCase() === item.color.toLowerCase()
-                  //   );
-
-                  //   if (colorIsExist) {
-                  //     if (!item.isAvailable) {
-                  //       item.isAvailable = true;
-                  //       shouldUpdateCart = true;
-                  //     }
-
-                  //     if (item.quantity !== colorIsExist.quantity) {
-                  //       item.quantity = Math.min(
-                  //         item.quantity,
-                  //         colorIsExist.quantity
-                  //       );
-                  //       shouldUpdateCart = true;
-                  //     }
-                  //   }
-                  // } else {
-                  //   if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity) {
-                  //     item.quantity = size.sizeQuantity;
-                  //     shouldUpdateCart = true;
-                  //   }
-
-                  //   if (
-                  //     priceAfterDiscount != null &&
-                  //     item.price !== priceAfterDiscount
-                  //   ) {
-                  //     item.price = priceAfterDiscount;
-                  //     shouldUpdateCart = true;
-                  //   } else if (
-                  //     product.priceAfterDiscount != null &&
-                  //     item.price !== product.priceAfterDiscount
-                  //   ) {
-                  //     item.price = product.priceAfterDiscount;
-                  //     shouldUpdateCart = true;
-                  //   } else if (price != null && item.price !== price) {
-                  //     item.price = price;
-                  //     shouldUpdateCart = true;
-                  //   } else if (
-                  //     product.price != null &&
-                  //     item.price !== product.price
-                  //   ) {
-                  //     item.price = product.price;
-                  //     shouldUpdateCart = true;
-                  //   }
-                  // }
-                }
-                return item;
               });
 
-              if (shouldUpdateCart) cartsNeedingUpdate++;
-
-              // Save the updated cart items and recalculate total price
-              const result = await Cart.updateOne(
-                { _id: cart._id },
-                {
-                  $set: {
-                    cartItems: updatedItems,
-                    totalCartPrice: calcTotalCartPrice({
-                      cartItems: updatedItems,
-                    }),
-                  },
-                },
-                { session }
-              );
-
-              // Return number of modified documents (1 or 0)
-              return result.modifiedCount;
-            })
-          );
-
-          // Sum up all updated cart counts
-          const modifiedCartsCount = updateResults.reduce(
-            (sum, count) => sum + count,
-            0
-          );
-
-          // Rollback if not all matching carts were updated successfully
-          if (modifiedCartsCount < cartsNeedingUpdate) {
-            throw new ApiError(
-              `Not all carts were updated for size "${size.sizeName}". Transaction rolled back.`,
-              400
-            );
-          }
-
-          // If a new size name is specified, update all carts with the new size name
-          if (size.newSizeName) {
-            const newCartsToUpdate = await Cart.find({
-              "cartItems.product": product._id,
-              "cartItems.size": size.newSizeName,
-            }).session(session);
-
-            let newSizeNameCartsNeedingUpdate = 0;
-
-            const updateNewResults = await Promise.all(
-              newCartsToUpdate.map(async (cart) => {
-                let shouldUpdateCart = false;
-                const updatedItems = cart.cartItems.map((item) => {
-                  // Match product and new size in cart
-                  if (
-                    item.product._id.equals(product._id) &&
-                    item.size.toLowerCase() === size.newSizeName.toLowerCase()
-                  ) {
-                    // Use latest priceAfterDiscount if exists, otherwise fallback to regular price
-                    item.price =
-                      productSize?.priceAfterDiscount ?? productSize.price;
-
-                    // If color exists and the size has colors, adjust availability and quantity
-                    if (
-                      item.color != null &&
-                      Array.isArray(productSize.colors) &&
-                      productSize.colors.length > 0
-                    ) {
-                      const matchedColor = productSize.colors.find(
-                        (c) =>
-                          c.color.toLowerCase() === item.color.toLowerCase()
-                      );
-
-                      if (matchedColor) {
-                        item.isAvailable = true;
-                        // Limit quantity to available stock
-                        item.quantity = Math.min(
-                          item.quantity,
-                          matchedColor.quantity
-                        );
-                      } else {
-                        item.isAvailable = false;
-                      }
-                    } else {
-                      // No color variant: check general size quantity
-                      item.quantity = Math.min(
-                        item.quantity,
-                        productSize.quantity
-                      );
-                      item.isAvailable = true;
-                    }
-
-                    shouldUpdateCart = true;
-                  }
-                  return item;
-                });
-
-                if (shouldUpdateCart) newSizeNameCartsNeedingUpdate++;
-
-                // Save updated cart with recalculated total price
-                const result = await Cart.updateOne(
-                  { _id: cart._id },
-                  {
-                    $set: {
-                      cartItems: updatedItems,
-                      totalCartPrice: calcTotalCartPrice({
-                        cartItems: updatedItems,
-                      }),
-                    },
-                  },
-                  { session }
-                );
-
-                return result.modifiedCount;
-              })
-            );
-
-            const updatedNewCartCount = updateNewResults.reduce(
-              (sum, count) => sum + count,
-              0
-            );
-
-            // Rollback if not all carts were successfully updated with the new size name
-            if (updatedNewCartCount < newSizeNameCartsNeedingUpdate) {
-              throw new ApiError(
-                `Not all carts were updated after renaming size "${size.sizeName}" to "${size.newSizeName}". Transaction rolled back.`,
-                400
-              );
+              await Promise.all(updateColorPromises);
             }
 
-            // Finally, rename the size in the product itself
-            productSize.size = size.newSizeName;
-          }
-        });
+            // Find all carts that contain this product and size (before renaming)
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.size": size.sizeName,
+            }).session(session);
 
-        await Promise.all(updatePromises);
-        await product.save({ session });
-        await session.commitTransaction();
-        session.endSession();
-      } catch (err) {
-        await session.abortTransaction();
-        session.endSession();
-        return next(
-          new ApiError(
-            err.message || "Error updating product or carts. Changes reverted.",
-            err.statusCode || 500
-          )
-        );
-      }
-    }
-
-    if (addSizes != null && Array.isArray(addSizes) && addSizes.length > 0) {
-      const session = await mongoose.startSession();
-      try {
-        session.startTransaction();
-        const addSizesPromises = addSizes.map(async (size) => {
-          product.sizes.push(size);
-
-          const cartsToUpdate = await Cart.find({
-            "cartItems.product": product._id,
-            "cartItems.size": size.size,
-          }).session(session);
-
-          if (cartsToUpdate.length > 0) {
             let cartsNeedingUpdate = 0;
 
+            // Loop through carts and update matching cart items
             const updateResults = await Promise.all(
               cartsToUpdate.map(async (cart) => {
                 let shouldUpdateCart = false;
                 const updatedItems = cart.cartItems.map((item) => {
+                  // Match the specific product and size in the cart
                   if (
                     item.product._id.equals(product._id) &&
-                    item.size.toLowerCase() === size.size.toLowerCase()
+                    item.size.toLowerCase() === size.sizeName.toLowerCase()
                   ) {
-                    if (item.color != null && size.colors.length > 0) {
-                      const colorIsExist = size.colors.find(
-                        (c) =>
-                          c.color.toLowerCase() === item.color.toLowerCase()
-                      );
-
-                      if (colorIsExist) {
-                        if (!item.isAvailable) {
-                          item.isAvailable = true;
-                          shouldUpdateCart = true;
-                        }
-
-                        if (item.quantity !== colorIsExist.quantity) {
-                          item.quantity = Math.min(
-                            item.quantity,
-                            colorIsExist.quantity
-                          );
-                          shouldUpdateCart = true;
-                        }
-                      }
-                    } else {
-                      if (!item.isAvailable) {
-                        item.isAvailable = true;
-                        shouldUpdateCart = true;
-                      }
-                      if (
-                        size.quantity != null &&
-                        item.quantity !== size.quantity
-                      ) {
-                        item.quantity = size.quantity;
-                        shouldUpdateCart = true;
-                      }
-
-                      if (
-                        size.priceAfterDiscount != null &&
-                        item.price !== size.priceAfterDiscount
-                      ) {
-                        item.price = size.priceAfterDiscount;
-                        shouldUpdateCart = true;
-                      } else if (
-                        size.price != null &&
-                        item.price !== size.price
-                      ) {
-                        item.price = size.price;
-                        shouldUpdateCart = true;
-                      }
+                    if (size.sizePrice != null) {
+                      item.price =
+                        size?.sizePriceAfterDiscount ??
+                        productSize?.priceAfterDiscount ??
+                        size.sizePrice;
+                    } else if (size.sizePriceAfterDiscount != null) {
+                      item.price =
+                        size?.sizePriceAfterDiscount ??
+                        productSize?.priceAfterDiscount ??
+                        productSize.price;
                     }
+
+                    // If priceAfterDiscount was deleted, update cart item price to default product price
+                    if (size.deletePriceAfterDiscount) {
+                      item.price = productSize.price;
+                    }
+
+                    if (size.sizeQuantity != null && item.color == null) {
+                      item.quantity = Math.min(
+                        item.quantity,
+                        size.sizeQuantity
+                      );
+                    }
+
+                    // If a new size name is provided, mark old size as unavailable in cart
+                    if (size.newSizeName) {
+                      item.isAvailable = false;
+                    }
+
+                    shouldUpdateCart = true;
+
+                    // if (item.color != null && productSize.colors.length > 0) {
+                    //   const colorIsExist = productSize.colors.find(
+                    //     (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                    //   );
+
+                    //   if (colorIsExist) {
+                    //     if (!item.isAvailable) {
+                    //       item.isAvailable = true;
+                    //       shouldUpdateCart = true;
+                    //     }
+
+                    //     if (item.quantity !== colorIsExist.quantity) {
+                    //       item.quantity = Math.min(
+                    //         item.quantity,
+                    //         colorIsExist.quantity
+                    //       );
+                    //       shouldUpdateCart = true;
+                    //     }
+                    //   }
+                    // } else {
+                    //   if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity) {
+                    //     item.quantity = size.sizeQuantity;
+                    //     shouldUpdateCart = true;
+                    //   }
+
+                    //   if (
+                    //     priceAfterDiscount != null &&
+                    //     item.price !== priceAfterDiscount
+                    //   ) {
+                    //     item.price = priceAfterDiscount;
+                    //     shouldUpdateCart = true;
+                    //   } else if (
+                    //     product.priceAfterDiscount != null &&
+                    //     item.price !== product.priceAfterDiscount
+                    //   ) {
+                    //     item.price = product.priceAfterDiscount;
+                    //     shouldUpdateCart = true;
+                    //   } else if (price != null && item.price !== price) {
+                    //     item.price = price;
+                    //     shouldUpdateCart = true;
+                    //   } else if (
+                    //     product.price != null &&
+                    //     item.price !== product.price
+                    //   ) {
+                    //     item.price = product.price;
+                    //     shouldUpdateCart = true;
+                    //   }
+                    // }
                   }
                   return item;
                 });
@@ -1627,26 +1424,265 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             // Rollback if not all matching carts were updated successfully
             if (modifiedCartsCount < cartsNeedingUpdate) {
               throw new ApiError(
-                `Some carts failed to update. All changes have been rolled back.`,
+                `Not all carts were updated for size "${size.sizeName}". Transaction rolled back.`,
                 400
               );
             }
-          }
-        });
 
-        await Promise.all(addSizesPromises);
-        await product.save({ session });
-        await session.commitTransaction();
-        session.endSession();
-      } catch (err) {
-        await session.abortTransaction();
-        session.endSession();
-        return next(
-          new ApiError(
-            err.message || "Error updating product or carts. Changes reverted.",
-            err.statusCode || 500
-          )
-        );
+            // If a new size name is specified, update all carts with the new size name
+            if (size.newSizeName) {
+              const newCartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+                "cartItems.size": size.newSizeName,
+              }).session(session);
+
+              let newSizeNameCartsNeedingUpdate = 0;
+
+              const updateNewResults = await Promise.all(
+                newCartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    // Match product and new size in cart
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.newSizeName.toLowerCase()
+                    ) {
+                      // Use latest priceAfterDiscount if exists, otherwise fallback to regular price
+                      item.price =
+                        productSize?.priceAfterDiscount ?? productSize.price;
+
+                      // If color exists and the size has colors, adjust availability and quantity
+                      if (
+                        item.color != null &&
+                        Array.isArray(productSize.colors) &&
+                        productSize.colors.length > 0
+                      ) {
+                        const matchedColor = productSize.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() === item.color.toLowerCase()
+                        );
+
+                        if (matchedColor) {
+                          item.isAvailable = true;
+                          // Limit quantity to available stock
+                          item.quantity = Math.min(
+                            item.quantity,
+                            matchedColor.quantity
+                          );
+                        } else {
+                          item.isAvailable = false;
+                        }
+                      } else {
+                        // No color variant: check general size quantity
+                        item.quantity = Math.min(
+                          item.quantity,
+                          productSize.quantity
+                        );
+                        item.isAvailable = true;
+                      }
+
+                      shouldUpdateCart = true;
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) newSizeNameCartsNeedingUpdate++;
+
+                  // Save updated cart with recalculated total price
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
+                        cartItems: updatedItems,
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
+                    },
+                    { session }
+                  );
+
+                  return result.modifiedCount;
+                })
+              );
+
+              const updatedNewCartCount = updateNewResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              // Rollback if not all carts were successfully updated with the new size name
+              if (updatedNewCartCount < newSizeNameCartsNeedingUpdate) {
+                throw new ApiError(
+                  `Not all carts were updated after renaming size "${size.sizeName}" to "${size.newSizeName}". Transaction rolled back.`,
+                  400
+                );
+              }
+
+              // Finally, rename the size in the product itself
+              productSize.size = size.newSizeName;
+            }
+          });
+
+          await Promise.all(updatePromises);
+          await product.save({ session });
+          await session.commitTransaction();
+          session.endSession();
+        } catch (err) {
+          await session.abortTransaction();
+          session.endSession();
+          return next(
+            new ApiError(
+              err.message ||
+                "Error updating product or carts. Changes reverted.",
+              err.statusCode || 500
+            )
+          );
+        }
+      }
+
+      if (addSizes != null && Array.isArray(addSizes) && addSizes.length > 0) {
+        const session = await mongoose.startSession();
+        try {
+          session.startTransaction();
+          const addSizesPromises = addSizes.map(async (size) => {
+            product.sizes.push(size);
+
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id,
+              "cartItems.size": size.size,
+            }).session(session);
+
+            if (cartsToUpdate.length > 0) {
+              let cartsNeedingUpdate = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.size.toLowerCase()
+                    ) {
+                      if (item.color != null && Array.isArray(size.colors) && size.colors.length > 0) {
+                        const colorIsExist = size.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() === item.color.toLowerCase()
+                        );
+
+                        if (colorIsExist) {
+                          if (!item.isAvailable) {
+                            item.isAvailable = true;
+                            shouldUpdateCart = true;
+                          }
+
+                          if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
+                            item.quantity = colorIsExist.quantity
+                            shouldUpdateCart = true;
+                          }
+
+                          if (
+                          size.priceAfterDiscount != null &&
+                          item.price !== size.priceAfterDiscount
+                          ) {
+                            item.price = size.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (
+                            size.price != null &&
+                            item.price !== size.price
+                          ) {
+                            item.price = size.price;
+                            shouldUpdateCart = true;
+                          }
+                        }
+                      } else {
+                        if (!item.isAvailable) {
+                          item.isAvailable = true;
+                          shouldUpdateCart = true;
+                        }
+
+                        if (
+                          size.quantity != null &&
+                          item.quantity !== size.quantity
+                        ) {
+                          item.quantity = size.quantity;
+                          shouldUpdateCart = true;
+                        }
+
+                        if (
+                          size.priceAfterDiscount != null &&
+                          item.price !== size.priceAfterDiscount
+                        ) {
+                          item.price = size.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (
+                          size.price != null &&
+                          item.price !== size.price
+                        ) {
+                          item.price = size.price;
+                          shouldUpdateCart = true;
+                        }
+                      }
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) {
+                    cartsNeedingUpdate++;
+                    
+                    // Save the updated cart items and recalculate total price
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
+                            cartItems: updatedItems,
+                          }),
+                        },
+                      },
+                      { session }
+                    );
+  
+                    // Return number of modified documents (1 or 0)
+                    return result.modifiedCount;
+                  };
+
+                  return 0;
+                })
+              );
+
+              // Sum up all updated cart counts
+              const modifiedCartsCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              // Rollback if not all matching carts were updated successfully
+              if (modifiedCartsCount < cartsNeedingUpdate) {
+                throw new ApiError(
+                  `Some carts failed to update. All changes have been rolled back.`,
+                  400
+                );
+              }
+            }
+          });
+
+          await Promise.all(addSizesPromises);
+          await product.save({ session });
+          await session.commitTransaction();
+          session.endSession();
+        } catch (err) {
+          await session.abortTransaction();
+          session.endSession();
+          return next(
+            new ApiError(
+              err.message ||
+                "Error updating product or carts. Changes reverted.",
+              err.statusCode || 500
+            )
+          );
+        }
       }
     }
   } else {
@@ -2179,7 +2215,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               let shouldUpdateCart = false;
               const updatedItems = cart.cartItems.map((item) => {
                 if (item.product._id.equals(product._id) && item.size == null) {
-                  if (item.color != null && product.colors.length > 0) {
+                  if (item.color != null && Array.isArray(product.colors) && product.colors.length > 0) {
                     const colorIsExist = product.colors.find(
                       (c) => c.color.toLowerCase() === item.color.toLowerCase()
                     );
@@ -2323,7 +2359,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               let shouldUpdateCart = false;
               const updatedItems = cart.cartItems.map((item) => {
                 if (item.product._id.equals(product._id) && item.size == null) {
-                  if (item.color != null && product.colors.length > 0) {
+                  if (item.color != null && Array.isArray(product.colors) && product.colors.length > 0) {
                     const colorIsExist = product.colors.find(
                       (c) => c.color.toLowerCase() === item.color.toLowerCase()
                     );
