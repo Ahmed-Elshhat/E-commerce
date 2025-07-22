@@ -945,7 +945,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         const session = await mongoose.startSession();
         try {
           session.startTransaction();
-          const updatePromises = updateSizes.map(async (size) => {
+          const updateSizesPromises = updateSizes.map(async (size) => {
             // Find the target size in the product based on the provided size name (case insensitive)
             let productSize = product.sizes.find(
               (s) => s.size.toLowerCase() === size.sizeName.toLowerCase()
@@ -992,9 +992,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               Array.isArray(size.deleteColors) &&
               size.deleteColors.length > 0
             ) {
-              for (let i = 0; i < size.deleteColors.length; i++) {
-                const c = size.deleteColors[i];
-
+              const deleteColorsPromises = updateSizes.map(async (c) => {
                 productSize.colors = productSize.colors.filter(
                   (color) => color.color.toLowerCase() !== c.toLowerCase()
                 );
@@ -1053,7 +1051,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     400
                   );
                 }
-              }
+              });
+
+              await Promise.all(deleteColorsPromises);
             }
 
             if (
@@ -1524,7 +1524,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           });
 
-          await Promise.all(updatePromises);
+          await Promise.all(updateSizesPromises);
           await product.save({ session });
           await session.commitTransaction();
           session.endSession();
@@ -1564,7 +1564,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.product._id.equals(product._id) &&
                       item.size.toLowerCase() === size.size.toLowerCase()
                     ) {
-                      if (item.color != null && Array.isArray(size.colors) && size.colors.length > 0) {
+                      if (
+                        item.color != null &&
+                        Array.isArray(size.colors) &&
+                        size.colors.length > 0
+                      ) {
                         const colorIsExist = size.colors.find(
                           (c) =>
                             c.color.toLowerCase() === item.color.toLowerCase()
@@ -1576,14 +1580,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             shouldUpdateCart = true;
                           }
 
-                          if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
-                            item.quantity = colorIsExist.quantity
+                          if (
+                            item.quantity !== colorIsExist.quantity &&
+                            item.quantity > colorIsExist.quantity
+                          ) {
+                            item.quantity = colorIsExist.quantity;
                             shouldUpdateCart = true;
                           }
 
                           if (
-                          size.priceAfterDiscount != null &&
-                          item.price !== size.priceAfterDiscount
+                            size.priceAfterDiscount != null &&
+                            item.price !== size.priceAfterDiscount
                           ) {
                             item.price = size.priceAfterDiscount;
                             shouldUpdateCart = true;
@@ -1629,7 +1636,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
                   if (shouldUpdateCart) {
                     cartsNeedingUpdate++;
-                    
+
                     // Save the updated cart items and recalculate total price
                     const result = await Cart.updateOne(
                       { _id: cart._id },
@@ -1643,10 +1650,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       },
                       { session }
                     );
-  
+
                     // Return number of modified documents (1 or 0)
                     return result.modifiedCount;
-                  };
+                  }
 
                   return 0;
                 })
@@ -2215,7 +2222,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               let shouldUpdateCart = false;
               const updatedItems = cart.cartItems.map((item) => {
                 if (item.product._id.equals(product._id) && item.size == null) {
-                  if (item.color != null && Array.isArray(product.colors) && product.colors.length > 0) {
+                  if (
+                    item.color != null &&
+                    Array.isArray(product.colors) &&
+                    product.colors.length > 0
+                  ) {
                     const colorIsExist = product.colors.find(
                       (c) => c.color.toLowerCase() === item.color.toLowerCase()
                     );
@@ -2359,7 +2370,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               let shouldUpdateCart = false;
               const updatedItems = cart.cartItems.map((item) => {
                 if (item.product._id.equals(product._id) && item.size == null) {
-                  if (item.color != null && Array.isArray(product.colors) && product.colors.length > 0) {
+                  if (
+                    item.color != null &&
+                    Array.isArray(product.colors) &&
+                    product.colors.length > 0
+                  ) {
                     const colorIsExist = product.colors.find(
                       (c) => c.color.toLowerCase() === item.color.toLowerCase()
                     );
