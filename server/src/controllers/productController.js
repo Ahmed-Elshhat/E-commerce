@@ -1082,11 +1082,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         let shouldUpdateCart = false;
                         const updatedItems = cart.cartItems.map((item) => {
                           if (
-                            item.product._id.equals(product._id) &&
-                            item.size.toLowerCase() ===
-                              size.sizeName.toLowerCase() &&
-                            item.color.toLowerCase() ===
-                              color.colorName.toLowerCase()
+                            isMatchingCartItem(
+                              item,
+                              product._id,
+                              color.colorName
+                            )
                           ) {
                             shouldUpdateCart = true;
                             item.isAvailable = true;
