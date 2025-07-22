@@ -1061,7 +1061,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               Array.isArray(size.sizeColors) &&
               size.sizeColors.length > 0
             ) {
-              productSize.quantity = undefined;
+              const isMatchingCartItem = (item, productId, colorName) =>
+                item.product._id.equals(productId) &&
+                item.size.toLowerCase() === size.sizeName.toLowerCase() &&
+                item.color.toLowerCase() === colorName.toLowerCase();
+
+              if (productSize.quantity != null) {
+                productSize.quantity = undefined;
+              }
 
               const updateColorPromises = size.sizeColors.map(async (color) => {
                 if (color.type === "new") {
@@ -1070,10 +1077,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     "cartItems.size": size.sizeName,
                     "cartItems.color": color.colorName,
                   }).session(session);
+
                   productSize.colors.push({
                     color: color.colorName,
                     quantity: color.colorQuantity,
                   });
+
                   if (cartsToUpdate.length !== 0) {
                     let cartsNeedingUpdate = 0;
 
@@ -1090,30 +1099,61 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           ) {
                             shouldUpdateCart = true;
                             item.isAvailable = true;
-                            item.quantity = Math.min(
-                              item.quantity,
-                              color.colorQuantity
-                            );
+
+                            if (
+                              color.colorQuantity != null &&
+                              item.quantity !== color.colorQuantity
+                            ) {
+                              item.quantity = Math.min(
+                                item.quantity,
+                                color.colorQuantity
+                              );
+                            }
+
+                            if (
+                              size.priceAfterDiscount != null &&
+                              item.price !== size.priceAfterDiscount
+                            ) {
+                              item.price = size.priceAfterDiscount;
+                            } else if (
+                              productSize.priceAfterDiscount != null &&
+                              item.price !== productSize.priceAfterDiscount
+                            ) {
+                              item.price = productSize.priceAfterDiscount;
+                            } else if (
+                              size.price != null &&
+                              item.price !== size.price
+                            ) {
+                              item.price = size.price;
+                            } else if (
+                              productSize.price != null &&
+                              item.price !== productSize.price
+                            ) {
+                              item.price = productSize.price;
+                            }
                           }
                           return item;
                         });
 
-                        if (shouldUpdateCart) cartsNeedingUpdate++;
+                        if (shouldUpdateCart) {
+                          cartsNeedingUpdate++;
 
-                        const result = await Cart.updateOne(
-                          { _id: cart._id },
-                          {
-                            $set: {
-                              cartItems: updatedItems,
-                              totalCartPrice: calcTotalCartPrice({
+                          const result = await Cart.updateOne(
+                            { _id: cart._id },
+                            {
+                              $set: {
                                 cartItems: updatedItems,
-                              }),
+                                totalCartPrice: calcTotalCartPrice({
+                                  cartItems: updatedItems,
+                                }),
+                              },
                             },
-                          },
-                          { session }
-                        );
+                            { session }
+                          );
 
-                        return result.modifiedCount; // 1 if modified, 0 otherwise
+                          return result.modifiedCount; // 1 if modified, 0 otherwise
+                        }
+                        return 0; // 1 if modified, 0 otherwise
                       })
                     );
 
@@ -1158,49 +1198,75 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         let shouldUpdateCart = false;
                         const updatedItems = cart.cartItems.map((item) => {
                           if (
-                            item.product._id.toString() ===
-                              product._id.toString() &&
-                            item.size.toLowerCase() ===
-                              size.sizeName.toLowerCase() &&
-                            item.color.toLowerCase() ===
-                              color.colorName.toLowerCase()
+                            isMatchingCartItem(
+                              item,
+                              product._id,
+                              color.colorName
+                            )
                           ) {
-                            if (
-                              color.newColorName &&
-                              color.newColorName != null
-                            ) {
+                            if (color.newColorName != null) {
                               item.isAvailable = false;
+                              shouldUpdateCart = true;
                             }
+
                             if (
-                              color.colorQuantity &&
-                              color.colorQuantity != null
+                              color.colorQuantity != null &&
+                              item.quantity !== color.colorQuantity &&
+                              item.quantity > color.colorQuantity
                             ) {
-                              item.quantity = Math.min(
-                                item.quantity,
-                                color.colorQuantity
-                              );
+                              item.quantity = color.colorQuantity;
+                              shouldUpdateCart = true;
                             }
-                            shouldUpdateCart = true;
+
+                            if (
+                              size.priceAfterDiscount != null &&
+                              item.price !== size.priceAfterDiscount
+                            ) {
+                              item.price = size.priceAfterDiscount;
+                              shouldUpdateCart = true;
+                            } else if (
+                              productSize.priceAfterDiscount != null &&
+                              item.price !== productSize.priceAfterDiscount
+                            ) {
+                              item.price = productSize.priceAfterDiscount;
+                              shouldUpdateCart = true;
+                            } else if (
+                              size.price != null &&
+                              item.price !== size.price
+                            ) {
+                              item.price = size.price;
+                              shouldUpdateCart = true;
+                            } else if (
+                              productSize.price != null &&
+                              item.price !== productSize.price
+                            ) {
+                              item.price = productSize.price;
+                              shouldUpdateCart = true;
+                            }
                           }
                           return item;
                         });
 
-                        if (shouldUpdateCart) currentCartsNeedingUpdate++;
+                        if (shouldUpdateCart) {
+                          currentCartsNeedingUpdate++;
 
-                        const result = await Cart.updateOne(
-                          { _id: cart._id },
-                          {
-                            $set: {
-                              cartItems: updatedItems,
-                              totalCartPrice: calcTotalCartPrice({
+                          const result = await Cart.updateOne(
+                            { _id: cart._id },
+                            {
+                              $set: {
                                 cartItems: updatedItems,
-                              }),
+                                totalCartPrice: calcTotalCartPrice({
+                                  cartItems: updatedItems,
+                                }),
+                              },
                             },
-                          },
-                          { session }
-                        );
+                            { session }
+                          );
 
-                        return result.modifiedCount; // 1 if modified, 0 otherwise
+                          return result.modifiedCount; // 1 if modified, 0 otherwise
+                        }
+
+                        return 0; // 1 if modified, 0 otherwise
                       })
                     );
 
@@ -1218,7 +1284,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     }
                   }
 
-                  if (color.newColorName && color.newColorName != null) {
+                  if (color.newColorName != null) {
                     const oldCartsToUpdate = await Cart.find({
                       "cartItems.product": product._id,
                       "cartItems.size": size.sizeName,
@@ -1233,44 +1299,69 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           let shouldUpdateCart = false;
                           const updatedItems = cart.cartItems.map((item) => {
                             if (
-                              item.product._id.toString() ===
-                                product._id.toString() &&
-                              item.size.toLowerCase() ===
-                                size.sizeName.toLowerCase() &&
-                              item.color.toLowerCase() ===
-                                color.newColorName.toLowerCase()
+                              isMatchingCartItem(
+                                item,
+                                product._id,
+                                color.newColorName
+                              )
                             ) {
                               item.isAvailable = true;
                               if (
-                                color.colorQuantity &&
-                                color.colorQuantity != null
+                                color.colorQuantity != null &&
+                                item.quantity !== color.colorQuantity
                               ) {
                                 item.quantity = Math.min(
                                   item.quantity,
                                   color.colorQuantity
                                 );
                               }
+
+                              if (
+                                size.priceAfterDiscount != null &&
+                                item.price !== size.priceAfterDiscount
+                              ) {
+                                item.price = size.priceAfterDiscount;
+                              } else if (
+                                productSize.priceAfterDiscount != null &&
+                                item.price !== productSize.priceAfterDiscount
+                              ) {
+                                item.price = productSize.priceAfterDiscount;
+                              } else if (
+                                size.price != null &&
+                                item.price !== size.price
+                              ) {
+                                item.price = size.price;
+                              } else if (
+                                productSize.price != null &&
+                                item.price !== productSize.price
+                              ) {
+                                item.price = productSize.price;
+                              }
                               shouldUpdateCart = true;
                             }
                             return item;
                           });
 
-                          if (shouldUpdateCart) oldCartsNeedingUpdate++;
+                          if (shouldUpdateCart) {
+                            oldCartsNeedingUpdate++;
 
-                          const result = await Cart.updateOne(
-                            { _id: cart._id },
-                            {
-                              $set: {
-                                cartItems: updatedItems,
-                                totalCartPrice: calcTotalCartPrice({
+                            const result = await Cart.updateOne(
+                              { _id: cart._id },
+                              {
+                                $set: {
                                   cartItems: updatedItems,
-                                }),
+                                  totalCartPrice: calcTotalCartPrice({
+                                    cartItems: updatedItems,
+                                  }),
+                                },
                               },
-                            },
-                            { session }
-                          );
+                              { session }
+                            );
 
-                          return result.modifiedCount; // 1 if modified, 0 otherwise
+                            return result.modifiedCount; // 1 if modified, 0 otherwise
+                          }
+
+                          return 0;
                         })
                       );
 

@@ -18,7 +18,7 @@ const {
   createCategory,
   updateCategory,
   deleteCategory,
-  uploadBrandImage,
+  uploadCategoryImage,
   resizeImage,
 } = require("../controllers/categoryController");
 
@@ -33,7 +33,7 @@ router
   .post(
     AuthService.protect,
     AuthService.allowedTo("admin", "employee"),
-    uploadBrandImage,
+    uploadCategoryImage,
     resizeImage,
     createCategoryValidator,
     createCategory
@@ -45,7 +45,7 @@ router
   .put(
     AuthService.protect,
     AuthService.allowedTo("admin", "employee"),
-    uploadBrandImage,
+    uploadCategoryImage,
     resizeImage,
     updateCategoryValidator,
     updateCategory
