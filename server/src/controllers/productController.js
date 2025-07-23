@@ -304,28 +304,34 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     item.product._id.equals(product._id) &&
                     item.size.toLowerCase() === s.toLowerCase()
                   ) {
-                    item.isAvailable = false;
-                    shouldUpdateCart = true;
+                    if (item.isAvailable) {
+                      item.isAvailable = false;
+                      shouldUpdateCart = true;
+                    }
                   }
                   return item;
                 });
 
-                if (shouldUpdateCart) cartsNeedingUpdate++;
+                if (shouldUpdateCart) {
+                  cartsNeedingUpdate++;
 
-                const result = await Cart.updateOne(
-                  { _id: cart._id },
-                  {
-                    $set: {
-                      cartItems: updatedItems,
-                      totalCartPrice: calcTotalCartPrice({
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
                         cartItems: updatedItems,
-                      }),
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
                     },
-                  },
-                  { session }
-                );
+                    { session }
+                  );
 
-                return result.modifiedCount;
+                  return result.modifiedCount;
+                }
+                
+                return 0;
               })
             );
 
@@ -986,7 +992,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               productSize.quantity = size.sizeQuantity;
             }
 
-            /* eslint-disable no-await-in-loop */
+            // Done
             if (
               size.deleteColors != null &&
               Array.isArray(size.deleteColors) &&
@@ -1056,6 +1062,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               await Promise.all(deleteColorsPromises);
             }
 
+            // Done
             if (
               size.sizeColors != null &&
               Array.isArray(size.sizeColors) &&
@@ -1433,76 +1440,108 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
                     shouldUpdateCart = true;
 
-                    // if (item.color != null && productSize.colors.length > 0) {
-                    //   const colorIsExist = productSize.colors.find(
-                    //     (c) => c.color.toLowerCase() === item.color.toLowerCase()
-                    //   );
+                    if (item.color != null && Array.isArray(productSize.colors) && productSize.colors.length > 0) {
+                      const colorIsExist = productSize.colors.find(
+                        (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                      );
 
-                    //   if (colorIsExist) {
-                    //     if (!item.isAvailable) {
-                    //       item.isAvailable = true;
-                    //       shouldUpdateCart = true;
-                    //     }
+                      if (colorIsExist) {
+                        if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
+                          item.quantity = colorIsExist.quantity
+                          shouldUpdateCart = true;
+                        }
 
-                    //     if (item.quantity !== colorIsExist.quantity) {
-                    //       item.quantity = Math.min(
-                    //         item.quantity,
-                    //         colorIsExist.quantity
-                    //       );
-                    //       shouldUpdateCart = true;
-                    //     }
-                    //   }
-                    // } else {
-                    //   if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity) {
-                    //     item.quantity = size.sizeQuantity;
-                    //     shouldUpdateCart = true;
-                    //   }
+                        if (
+                          size.priceAfterDiscount != null &&
+                          item.price !== size.priceAfterDiscount
+                        ) {
+                          item.price = size.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (
+                          productSize.priceAfterDiscount != null &&
+                          item.price !== productSize.priceAfterDiscount
+                        ) {
+                          item.price = productSize.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (size.price != null && item.price !== size.price) {
+                          item.price = size.price;
+                          shouldUpdateCart = true;
+                        } else if (
+                          productSize.price != null &&
+                          item.price !== productSize.price
+                        ) {
+                          item.price = productSize.price;
+                          shouldUpdateCart = true;
+                        }
 
-                    //   if (
-                    //     priceAfterDiscount != null &&
-                    //     item.price !== priceAfterDiscount
-                    //   ) {
-                    //     item.price = priceAfterDiscount;
-                    //     shouldUpdateCart = true;
-                    //   } else if (
-                    //     product.priceAfterDiscount != null &&
-                    //     item.price !== product.priceAfterDiscount
-                    //   ) {
-                    //     item.price = product.priceAfterDiscount;
-                    //     shouldUpdateCart = true;
-                    //   } else if (price != null && item.price !== price) {
-                    //     item.price = price;
-                    //     shouldUpdateCart = true;
-                    //   } else if (
-                    //     product.price != null &&
-                    //     item.price !== product.price
-                    //   ) {
-                    //     item.price = product.price;
-                    //     shouldUpdateCart = true;
-                    //   }
-                    // }
+                        if (size.newSizeName) {
+                          if (item.isAvailable) {
+                            item.isAvailable = false;
+                            shouldUpdateCart = true;
+                          }
+                        } else if (!item.isAvailable) {
+                          item.isAvailable = true;
+                          shouldUpdateCart = true;
+                        }
+                      } else if (item.isAvailable) {
+                        item.isAvailable = false;
+                        shouldUpdateCart = true;
+                      }
+                    } else if (item.color == null) {
+                      if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
+                        item.quantity = size.sizeQuantity;
+                        shouldUpdateCart = true;
+                      }
+
+                      if (
+                        size.priceAfterDiscount != null &&
+                        item.price !== size.priceAfterDiscount
+                      ) {
+                        item.price = size.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.priceAfterDiscount != null &&
+                        item.price !== productSize.priceAfterDiscount
+                      ) {
+                        item.price = productSize.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (size.price != null && item.price !== size.price) {
+                        item.price = size.price;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.price != null &&
+                        item.price !== productSize.price
+                      ) {
+                        item.price = productSize.price;
+                        shouldUpdateCart = true;
+                      }
+                    }
                   }
                   return item;
                 });
 
-                if (shouldUpdateCart) cartsNeedingUpdate++;
+                if (shouldUpdateCart) {
+                  cartsNeedingUpdate++;
 
-                // Save the updated cart items and recalculate total price
-                const result = await Cart.updateOne(
-                  { _id: cart._id },
-                  {
-                    $set: {
-                      cartItems: updatedItems,
-                      totalCartPrice: calcTotalCartPrice({
+                  // Save the updated cart items and recalculate total price
+                  const result = await Cart.updateOne(
+                    { _id: cart._id },
+                    {
+                      $set: {
                         cartItems: updatedItems,
-                      }),
+                        totalCartPrice: calcTotalCartPrice({
+                          cartItems: updatedItems,
+                        }),
+                      },
                     },
-                  },
-                  { session }
-                );
+                    { session }
+                  );
+  
+                  // Return number of modified documents (1 or 0)
+                  return result.modifiedCount;
+                }
 
-                // Return number of modified documents (1 or 0)
-                return result.modifiedCount;
+                return 0;
               })
             );
 
@@ -1692,8 +1731,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             item.price = size.price;
                             shouldUpdateCart = true;
                           }
+                        } else if (item.isAvailable) {
+                          item.isAvailable = false;
+                          shouldUpdateCart = true;
                         }
-                      } else {
+                      } else if (item.color == null) {
                         if (!item.isAvailable) {
                           item.isAvailable = true;
                           shouldUpdateCart = true;
@@ -1701,7 +1743,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
                         if (
                           size.quantity != null &&
-                          item.quantity !== size.quantity
+                          item.quantity !== size.quantity &&
+                          item.quantity > size.quantity
                         ) {
                           item.quantity = size.quantity;
                           shouldUpdateCart = true;
@@ -2362,8 +2405,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else {
-                    if (quantity != null && item.quantity !== quantity) {
+                  } else if (item.color == null) {
+                    if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
                     }
@@ -2510,8 +2553,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else {
-                    if (quantity != null && item.quantity !== quantity) {
+                  } else if (item.color == null) {
+                    if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
                     }
@@ -2544,28 +2587,33 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   item.size != null
                 ) {
                   if (item.isAvailable) item.isAvailable = false;
+                  shouldUpdateCart = true;
                 }
                 return item;
               });
 
-              if (shouldUpdateCart) cartsNeedingUpdate++;
+              if (shouldUpdateCart) {
+                cartsNeedingUpdate++;
 
-              // Save the updated cart items and recalculate total price
-              const result = await Cart.updateOne(
-                { _id: cart._id },
-                {
-                  $set: {
-                    cartItems: updatedItems,
-                    totalCartPrice: calcTotalCartPrice({
+                // Save the updated cart items and recalculate total price
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
                       cartItems: updatedItems,
-                    }),
+                      totalCartPrice: calcTotalCartPrice({
+                        cartItems: updatedItems,
+                      }),
+                    },
                   },
-                },
-                { session }
-              );
-
-              // Return number of modified documents (1 or 0)
-              return result.modifiedCount;
+                  { session }
+                );
+  
+                // Return number of modified documents (1 or 0)
+                return result.modifiedCount;
+              }
+              
+              return 0;
             })
           );
 
