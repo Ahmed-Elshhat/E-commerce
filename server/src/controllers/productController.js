@@ -992,7 +992,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               productSize.quantity = size.sizeQuantity;
             }
 
+            // لو المقاس ماكنش لية الوان و عاوز يضيف الوان لاول مرة يروح يلغي تفعيل كل السلال اللي ملهاش الوان و يفعل اللي ليها الوان و بتحتوي علي تلوان موجودة فعلا في المقاس
+
             // Done
+            // لو هيحذف كل الالوان لازم يروح يفعل كل السلال اللي عندهوم نفس المقاس بس مش بيحتوو علي الوان
             if (
               size.deleteColors != null &&
               Array.isArray(size.deleteColors) &&
@@ -1409,48 +1412,68 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     item.product._id.equals(product._id) &&
                     item.size.toLowerCase() === size.sizeName.toLowerCase()
                   ) {
-                    if (size.sizePrice != null) {
-                      item.price =
-                        size?.sizePriceAfterDiscount ??
-                        productSize?.priceAfterDiscount ??
-                        size.sizePrice;
-                    } else if (size.sizePriceAfterDiscount != null) {
-                      item.price =
-                        size?.sizePriceAfterDiscount ??
-                        productSize?.priceAfterDiscount ??
-                        productSize.price;
-                    }
-
-                    // If priceAfterDiscount was deleted, update cart item price to default product price
-                    if (size.deletePriceAfterDiscount) {
-                      item.price = productSize.price;
-                    }
-
-                    if (size.sizeQuantity != null && item.color == null) {
-                      item.quantity = Math.min(
-                        item.quantity,
-                        size.sizeQuantity
-                      );
-                    }
-
-                    // If a new size name is provided, mark old size as unavailable in cart
-                    if (size.newSizeName) {
-                      item.isAvailable = false;
-                    }
-
-                    shouldUpdateCart = true;
-
                     if (item.color != null && Array.isArray(productSize.colors) && productSize.colors.length > 0) {
                       const colorIsExist = productSize.colors.find(
                         (c) => c.color.toLowerCase() === item.color.toLowerCase()
                       );
 
                       if (colorIsExist) {
-                        if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
-                          item.quantity = colorIsExist.quantity
+                        if (size.newSizeName) {
+                          if (item.isAvailable) {
+                            item.isAvailable = false;
+                            shouldUpdateCart = true;
+                          }
+                        } else {
+
+                          if (!item.isAvailable) {
+                            item.isAvailable = true;
+                            shouldUpdateCart = true;
+                          }
+  
+                          if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
+                            item.quantity = colorIsExist.quantity
+                            shouldUpdateCart = true;
+                          }
+  
+                          if (
+                            size.priceAfterDiscount != null &&
+                            item.price !== size.priceAfterDiscount
+                          ) {
+                            item.price = size.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (
+                            productSize.priceAfterDiscount != null &&
+                            item.price !== productSize.priceAfterDiscount
+                          ) {
+                            item.price = productSize.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (size.price != null && item.price !== size.price) {
+                            item.price = size.price;
+                            shouldUpdateCart = true;
+                          } else if (
+                            productSize.price != null &&
+                            item.price !== productSize.price
+                          ) {
+                            item.price = productSize.price;
+                            shouldUpdateCart = true;
+                          }
+                        }
+                      } else if (item.isAvailable) {
+                        item.isAvailable = false;
+                        shouldUpdateCart = true;
+                      }
+                    } else if (item.color == null && Array.isArray(productSize.colors) && productSize.colors.length === 0) {
+                      if (size.newSizeName != null) {
+                        if (item.isAvailable) {
+                          item.isAvailable = false;
                           shouldUpdateCart = true;
                         }
-
+                      } else {
+                        if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
+                          item.quantity = size.sizeQuantity;
+                          shouldUpdateCart = true;
+                        }
+  
                         if (
                           size.priceAfterDiscount != null &&
                           item.price !== size.priceAfterDiscount
@@ -1473,47 +1496,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           item.price = productSize.price;
                           shouldUpdateCart = true;
                         }
-
-                        if (size.newSizeName) {
-                          if (item.isAvailable) {
-                            item.isAvailable = false;
-                            shouldUpdateCart = true;
-                          }
-                        } else if (!item.isAvailable) {
-                          item.isAvailable = true;
-                          shouldUpdateCart = true;
-                        }
-                      } else if (item.isAvailable) {
-                        item.isAvailable = false;
-                        shouldUpdateCart = true;
-                      }
-                    } else if (item.color == null) {
-                      if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
-                        item.quantity = size.sizeQuantity;
-                        shouldUpdateCart = true;
-                      }
-
-                      if (
-                        size.priceAfterDiscount != null &&
-                        item.price !== size.priceAfterDiscount
-                      ) {
-                        item.price = size.priceAfterDiscount;
-                        shouldUpdateCart = true;
-                      } else if (
-                        productSize.priceAfterDiscount != null &&
-                        item.price !== productSize.priceAfterDiscount
-                      ) {
-                        item.price = productSize.priceAfterDiscount;
-                        shouldUpdateCart = true;
-                      } else if (size.price != null && item.price !== size.price) {
-                        item.price = size.price;
-                        shouldUpdateCart = true;
-                      } else if (
-                        productSize.price != null &&
-                        item.price !== productSize.price
-                      ) {
-                        item.price = productSize.price;
-                        shouldUpdateCart = true;
                       }
                     }
                   }
@@ -1577,41 +1559,85 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.product._id.equals(product._id) &&
                       item.size.toLowerCase() === size.newSizeName.toLowerCase()
                     ) {
-                      // Use latest priceAfterDiscount if exists, otherwise fallback to regular price
-                      item.price =
-                        productSize?.priceAfterDiscount ?? productSize.price;
+                    if (item.color != null && Array.isArray(productSize.colors) && productSize.colors.length > 0) {
+                      const colorIsExist = productSize.colors.find(
+                        (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                      );
 
-                      // If color exists and the size has colors, adjust availability and quantity
-                      if (
-                        item.color != null &&
-                        Array.isArray(productSize.colors) &&
-                        productSize.colors.length > 0
-                      ) {
-                        const matchedColor = productSize.colors.find(
-                          (c) =>
-                            c.color.toLowerCase() === item.color.toLowerCase()
-                        );
-
-                        if (matchedColor) {
+                      if (colorIsExist) {
+                        if (!item.isAvailable) {
                           item.isAvailable = true;
-                          // Limit quantity to available stock
-                          item.quantity = Math.min(
-                            item.quantity,
-                            matchedColor.quantity
-                          );
-                        } else {
-                          item.isAvailable = false;
+                          shouldUpdateCart = true;
                         }
-                      } else {
-                        // No color variant: check general size quantity
-                        item.quantity = Math.min(
-                          item.quantity,
-                          productSize.quantity
-                        );
+
+                        if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
+                          item.quantity = colorIsExist.quantity
+                          shouldUpdateCart = true;
+                        }
+
+                        if (
+                          size.priceAfterDiscount != null &&
+                          item.price !== size.priceAfterDiscount
+                        ) {
+                          item.price = size.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (
+                          productSize.priceAfterDiscount != null &&
+                          item.price !== productSize.priceAfterDiscount
+                        ) {
+                          item.price = productSize.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (size.price != null && item.price !== size.price) {
+                          item.price = size.price;
+                          shouldUpdateCart = true;
+                        } else if (
+                          productSize.price != null &&
+                          item.price !== productSize.price
+                        ) {
+                          item.price = productSize.price;
+                          shouldUpdateCart = true;
+                        }
+                      } else if (item.isAvailable) {
+                        item.isAvailable = false;
+                        shouldUpdateCart = true;
+                      }
+                    } else if (item.color == null && Array.isArray(productSize.colors) && productSize.colors.length === 0) {
+                      if (!item.isAvailable) {
                         item.isAvailable = true;
+                        shouldUpdateCart = true;
                       }
 
-                      shouldUpdateCart = true;
+                      if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
+                        item.quantity = size.sizeQuantity;
+                        shouldUpdateCart = true;
+                      } else if (productSize.quantity != null && item.quantity !== productSize.quantity && item.quantity > productSize.quantity) {
+                        item.quantity = productSize.quantity;
+                        shouldUpdateCart = true;
+                      }
+
+                      if (
+                        size.priceAfterDiscount != null &&
+                        item.price !== size.priceAfterDiscount
+                      ) {
+                        item.price = size.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.priceAfterDiscount != null &&
+                        item.price !== productSize.priceAfterDiscount
+                      ) {
+                        item.price = productSize.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (size.price != null && item.price !== size.price) {
+                        item.price = size.price;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.price != null &&
+                        item.price !== productSize.price
+                      ) {
+                        item.price = productSize.price;
+                        shouldUpdateCart = true;
+                      }
+                    }
                     }
                     return item;
                   });
@@ -1965,7 +1991,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           product.quantity = quantity;
         }
 
+        // لو المقاس ماكنش لية الوان و عاوز يضيف الوان لاول مرة يروح يلغي تفعيل كل السلال اللي ملهاش الوان و يفعل اللي ليها الوان و بتحتوي علي تلوان موجودة فعلا في المقاس
         // Done
+        // لو هيحذف كل الالوان لازم يروح يفعل كل السلال اللي عندهوم نفس المقاس بس مش بيحتوو علي الوان
         /* eslint-disable no-await-in-loop */
         if (
           deleteGeneralColors != null &&
@@ -2405,7 +2433,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else if (item.color == null) {
+                  } else if (item.color == null && Array.isArray(product.colors) &&
+                    product.colors.length === 0) {
                     if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
@@ -2553,7 +2582,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else if (item.color == null) {
+                  } else if (item.color == null && Array.isArray(product.colors) &&
+                    product.colors.length === 0) {
+                    if (!item.isAvailable) {
+                      item.isAvailable = true;
+                      shouldUpdateCart = true;
+                    }
+
                     if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
