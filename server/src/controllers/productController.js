@@ -267,13 +267,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
       );
     }
 
-    if (!product.sizesIsExist) {
-      product.price = undefined;
-      product.priceAfterDiscount = undefined;
-      product.quantity = undefined;
-      product.colors = undefined;
-    }
-
     if (product.sizesIsExist) {
       if (
         deleteSizes != null &&
@@ -330,7 +323,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
                   return result.modifiedCount;
                 }
-                
+
                 return 0;
               })
             );
@@ -862,6 +855,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
 
           const allOriginalColorsDeleted =
+            Array.isArray(original.colors) &&
+            original.colors.length > 0 && // ✅ شرط وجود ألوان
             Array.isArray(size.deleteColors) &&
             size.deleteColors.length === original.colors.length &&
             original.colors.every((oc) =>
@@ -992,10 +987,123 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               productSize.quantity = size.sizeQuantity;
             }
 
-            // لو المقاس ماكنش لية الوان و عاوز يضيف الوان لاول مرة يروح يلغي تفعيل كل السلال اللي ملهاش الوان و يفعل اللي ليها الوان و بتحتوي علي تلوان موجودة فعلا في المقاس
+            const allOriginalColorsDeleted =
+              Array.isArray(productSize.colors) &&
+              productSize.colors.length > 0 && // ✅ شرط وجود ألوان
+              Array.isArray(size.deleteColors) &&
+              size.deleteColors.length === productSize.colors.length &&
+              productSize.colors.every((oc) =>
+                size.deleteColors.some(
+                  (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+                )
+              );
 
-            // Done
-            // لو هيحذف كل الالوان لازم يروح يفعل كل السلال اللي عندهوم نفس المقاس بس مش بيحتوو علي الوان
+            const hasNewOrUpdatedColors =
+              Array.isArray(size.sizeColors) &&
+              size.sizeColors.some(
+                (c) => c.type === "new" || c.type === "update"
+              );
+
+            if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+              const cartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+                "cartItems.size": size.sizeName,
+              }).session(session);
+
+              let cartsNeedingUpdate = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.sizeName.toLowerCase() &&
+                      item.color == null
+                    ) {
+                      item.isAvailable = true;
+                      shouldUpdateCart = true;
+
+                      if (
+                        size.sizeQuantity != null &&
+                        item.quantity !== size.sizeQuantity &&
+                        item.quantity > size.sizeQuantity
+                      ) {
+                        item.quantity = size.sizeQuantity;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.quantity != null &&
+                        item.quantity !== productSize.quantity &&
+                        item.quantity > productSize.quantity
+                      ) {
+                        item.quantity = productSize.quantity;
+                        shouldUpdateCart = true;
+                      }
+
+                      if (
+                        size.priceAfterDiscount != null &&
+                        item.price !== size.priceAfterDiscount
+                      ) {
+                        item.price = size.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.priceAfterDiscount != null &&
+                        item.price !== productSize.priceAfterDiscount
+                      ) {
+                        item.price = productSize.priceAfterDiscount;
+                        shouldUpdateCart = true;
+                      } else if (
+                        size.price != null &&
+                        item.price !== size.price
+                      ) {
+                        item.price = size.price;
+                        shouldUpdateCart = true;
+                      } else if (
+                        productSize.price != null &&
+                        item.price !== productSize.price
+                      ) {
+                        item.price = productSize.price;
+                        shouldUpdateCart = true;
+                      }
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) {
+                    cartsNeedingUpdate++;
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
+                            cartItems: updatedItems,
+                          }),
+                        },
+                      },
+                      { session }
+                    );
+
+                    return result.modifiedCount;
+                  }
+
+                  return 0;
+                })
+              );
+
+              const modifiedCartsCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              if (modifiedCartsCount < cartsNeedingUpdate) {
+                throw new ApiError(
+                  `Not all carts were updated after deleting all colors for size "${size.sizeName}". Transaction rolled back.`,
+                  400
+                );
+              }
+            }
+
             if (
               size.deleteColors != null &&
               Array.isArray(size.deleteColors) &&
@@ -1065,7 +1173,70 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               await Promise.all(deleteColorsPromises);
             }
 
-            // Done
+            const isFirstTimeAddingColors =
+              (!Array.isArray(productSize.colors) ||
+                productSize.colors.length === 0) &&
+              Array.isArray(size.sizeColors) &&
+              size.sizeColors.some((c) => c.type === "new");
+
+            if (isFirstTimeAddingColors) {
+              const cartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+                "cartItems.size": size.sizeName,
+              }).session(session);
+
+              let cartsNeedingUpdate = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.sizeName.toLowerCase() &&
+                      item.color == null
+                    ) {
+                      item.isAvailable = false;
+                      shouldUpdateCart = true;
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) {
+                    cartsNeedingUpdate++;
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
+                            cartItems: updatedItems,
+                          }),
+                        },
+                      },
+                      { session }
+                    );
+
+                    return result.modifiedCount;
+                  }
+
+                  return 0;
+                })
+              );
+
+              const modifiedCartsCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              if (modifiedCartsCount < cartsNeedingUpdate) {
+                throw new ApiError(
+                  `Not all carts were updated after disabling items with no color for size "${size.sizeName}" during first-time color addition. Transaction rolled back.`,
+                  400
+                );
+              }
+            }
+
             if (
               size.sizeColors != null &&
               Array.isArray(size.sizeColors) &&
@@ -1412,9 +1583,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     item.product._id.equals(product._id) &&
                     item.size.toLowerCase() === size.sizeName.toLowerCase()
                   ) {
-                    if (item.color != null && Array.isArray(productSize.colors) && productSize.colors.length > 0) {
+                    if (
+                      item.color != null &&
+                      Array.isArray(productSize.colors) &&
+                      productSize.colors.length > 0
+                    ) {
                       const colorIsExist = productSize.colors.find(
-                        (c) => c.color.toLowerCase() === item.color.toLowerCase()
+                        (c) =>
+                          c.color.toLowerCase() === item.color.toLowerCase()
                       );
 
                       if (colorIsExist) {
@@ -1424,17 +1600,19 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             shouldUpdateCart = true;
                           }
                         } else {
-
                           if (!item.isAvailable) {
                             item.isAvailable = true;
                             shouldUpdateCart = true;
                           }
-  
-                          if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
-                            item.quantity = colorIsExist.quantity
+
+                          if (
+                            item.quantity !== colorIsExist.quantity &&
+                            item.quantity > colorIsExist.quantity
+                          ) {
+                            item.quantity = colorIsExist.quantity;
                             shouldUpdateCart = true;
                           }
-  
+
                           if (
                             size.priceAfterDiscount != null &&
                             item.price !== size.priceAfterDiscount
@@ -1447,7 +1625,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           ) {
                             item.price = productSize.priceAfterDiscount;
                             shouldUpdateCart = true;
-                          } else if (size.price != null && item.price !== size.price) {
+                          } else if (
+                            size.price != null &&
+                            item.price !== size.price
+                          ) {
                             item.price = size.price;
                             shouldUpdateCart = true;
                           } else if (
@@ -1462,18 +1643,26 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         item.isAvailable = false;
                         shouldUpdateCart = true;
                       }
-                    } else if (item.color == null && Array.isArray(productSize.colors) && productSize.colors.length === 0) {
+                    } else if (
+                      item.color == null &&
+                      Array.isArray(productSize.colors) &&
+                      productSize.colors.length === 0
+                    ) {
                       if (size.newSizeName != null) {
                         if (item.isAvailable) {
                           item.isAvailable = false;
                           shouldUpdateCart = true;
                         }
                       } else {
-                        if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
+                        if (
+                          size.sizeQuantity != null &&
+                          item.quantity !== size.sizeQuantity &&
+                          item.quantity > size.sizeQuantity
+                        ) {
                           item.quantity = size.sizeQuantity;
                           shouldUpdateCart = true;
                         }
-  
+
                         if (
                           size.priceAfterDiscount != null &&
                           item.price !== size.priceAfterDiscount
@@ -1486,7 +1675,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         ) {
                           item.price = productSize.priceAfterDiscount;
                           shouldUpdateCart = true;
-                        } else if (size.price != null && item.price !== size.price) {
+                        } else if (
+                          size.price != null &&
+                          item.price !== size.price
+                        ) {
                           item.price = size.price;
                           shouldUpdateCart = true;
                         } else if (
@@ -1518,7 +1710,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     },
                     { session }
                   );
-  
+
                   // Return number of modified documents (1 or 0)
                   return result.modifiedCount;
                 }
@@ -1559,19 +1751,82 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.product._id.equals(product._id) &&
                       item.size.toLowerCase() === size.newSizeName.toLowerCase()
                     ) {
-                    if (item.color != null && Array.isArray(productSize.colors) && productSize.colors.length > 0) {
-                      const colorIsExist = productSize.colors.find(
-                        (c) => c.color.toLowerCase() === item.color.toLowerCase()
-                      );
+                      if (
+                        item.color != null &&
+                        Array.isArray(productSize.colors) &&
+                        productSize.colors.length > 0
+                      ) {
+                        const colorIsExist = productSize.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() === item.color.toLowerCase()
+                        );
 
-                      if (colorIsExist) {
+                        if (colorIsExist) {
+                          if (!item.isAvailable) {
+                            item.isAvailable = true;
+                            shouldUpdateCart = true;
+                          }
+
+                          if (
+                            item.quantity !== colorIsExist.quantity &&
+                            item.quantity > colorIsExist.quantity
+                          ) {
+                            item.quantity = colorIsExist.quantity;
+                            shouldUpdateCart = true;
+                          }
+
+                          if (
+                            size.priceAfterDiscount != null &&
+                            item.price !== size.priceAfterDiscount
+                          ) {
+                            item.price = size.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (
+                            productSize.priceAfterDiscount != null &&
+                            item.price !== productSize.priceAfterDiscount
+                          ) {
+                            item.price = productSize.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (
+                            size.price != null &&
+                            item.price !== size.price
+                          ) {
+                            item.price = size.price;
+                            shouldUpdateCart = true;
+                          } else if (
+                            productSize.price != null &&
+                            item.price !== productSize.price
+                          ) {
+                            item.price = productSize.price;
+                            shouldUpdateCart = true;
+                          }
+                        } else if (item.isAvailable) {
+                          item.isAvailable = false;
+                          shouldUpdateCart = true;
+                        }
+                      } else if (
+                        item.color == null &&
+                        Array.isArray(productSize.colors) &&
+                        productSize.colors.length === 0
+                      ) {
                         if (!item.isAvailable) {
                           item.isAvailable = true;
                           shouldUpdateCart = true;
                         }
 
-                        if (item.quantity !== colorIsExist.quantity && item.quantity > colorIsExist.quantity) {
-                          item.quantity = colorIsExist.quantity
+                        if (
+                          size.sizeQuantity != null &&
+                          item.quantity !== size.sizeQuantity &&
+                          item.quantity > size.sizeQuantity
+                        ) {
+                          item.quantity = size.sizeQuantity;
+                          shouldUpdateCart = true;
+                        } else if (
+                          productSize.quantity != null &&
+                          item.quantity !== productSize.quantity &&
+                          item.quantity > productSize.quantity
+                        ) {
+                          item.quantity = productSize.quantity;
                           shouldUpdateCart = true;
                         }
 
@@ -1587,7 +1842,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         ) {
                           item.price = productSize.priceAfterDiscount;
                           shouldUpdateCart = true;
-                        } else if (size.price != null && item.price !== size.price) {
+                        } else if (
+                          size.price != null &&
+                          item.price !== size.price
+                        ) {
                           item.price = size.price;
                           shouldUpdateCart = true;
                         } else if (
@@ -1597,47 +1855,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           item.price = productSize.price;
                           shouldUpdateCart = true;
                         }
-                      } else if (item.isAvailable) {
-                        item.isAvailable = false;
-                        shouldUpdateCart = true;
                       }
-                    } else if (item.color == null && Array.isArray(productSize.colors) && productSize.colors.length === 0) {
-                      if (!item.isAvailable) {
-                        item.isAvailable = true;
-                        shouldUpdateCart = true;
-                      }
-
-                      if (size.sizeQuantity != null && item.quantity !== size.sizeQuantity && item.quantity > size.sizeQuantity) {
-                        item.quantity = size.sizeQuantity;
-                        shouldUpdateCart = true;
-                      } else if (productSize.quantity != null && item.quantity !== productSize.quantity && item.quantity > productSize.quantity) {
-                        item.quantity = productSize.quantity;
-                        shouldUpdateCart = true;
-                      }
-
-                      if (
-                        size.priceAfterDiscount != null &&
-                        item.price !== size.priceAfterDiscount
-                      ) {
-                        item.price = size.priceAfterDiscount;
-                        shouldUpdateCart = true;
-                      } else if (
-                        productSize.priceAfterDiscount != null &&
-                        item.price !== productSize.priceAfterDiscount
-                      ) {
-                        item.price = productSize.priceAfterDiscount;
-                        shouldUpdateCart = true;
-                      } else if (size.price != null && item.price !== size.price) {
-                        item.price = size.price;
-                        shouldUpdateCart = true;
-                      } else if (
-                        productSize.price != null &&
-                        item.price !== productSize.price
-                      ) {
-                        item.price = productSize.price;
-                        shouldUpdateCart = true;
-                      }
-                    }
                     }
                     return item;
                   });
@@ -1761,7 +1979,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                           item.isAvailable = false;
                           shouldUpdateCart = true;
                         }
-                      } else if (item.color == null) {
+                      } else if (
+                        item.color == null &&
+                        Array.isArray(size.colors) &&
+                        size.colors.length === 0
+                      ) {
                         if (!item.isAvailable) {
                           item.isAvailable = true;
                           shouldUpdateCart = true;
@@ -1851,6 +2073,177 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           );
         }
       }
+    } else {
+      product.price = undefined;
+      product.priceAfterDiscount = undefined;
+      product.quantity = undefined;
+      product.colors = undefined;
+
+      if (addSizes != null && Array.isArray(addSizes) && addSizes.length > 0) {
+        const session = await mongoose.startSession();
+        try {
+          session.startTransaction();
+          const addSizesPromises = addSizes.map(async (size) => {
+            product.sizes.push(size);
+
+            const cartsToUpdate = await Cart.find({
+              "cartItems.product": product._id
+            }).session(session);
+
+            if (cartsToUpdate.length > 0) {
+              let cartsNeedingUpdate = 0;
+
+              const updateResults = await Promise.all(
+                cartsToUpdate.map(async (cart) => {
+                  let shouldUpdateCart = false;
+                  const updatedItems = cart.cartItems.map((item) => {
+                    if (
+                      item.product._id.equals(product._id) &&
+                      item.size.toLowerCase() === size.size.toLowerCase()
+                    ) {
+                      if (
+                        item.color != null &&
+                        Array.isArray(size.colors) &&
+                        size.colors.length > 0
+                      ) {
+                        const colorIsExist = size.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() === item.color.toLowerCase()
+                        );
+
+                        if (colorIsExist) {
+                          if (!item.isAvailable) {
+                            item.isAvailable = true;
+                            shouldUpdateCart = true;
+                          }
+
+                          if (
+                            item.quantity !== colorIsExist.quantity &&
+                            item.quantity > colorIsExist.quantity
+                          ) {
+                            item.quantity = colorIsExist.quantity;
+                            shouldUpdateCart = true;
+                          }
+
+                          if (
+                            size.priceAfterDiscount != null &&
+                            item.price !== size.priceAfterDiscount
+                          ) {
+                            item.price = size.priceAfterDiscount;
+                            shouldUpdateCart = true;
+                          } else if (
+                            size.price != null &&
+                            item.price !== size.price
+                          ) {
+                            item.price = size.price;
+                            shouldUpdateCart = true;
+                          }
+                        } else if (item.isAvailable) {
+                          item.isAvailable = false;
+                          shouldUpdateCart = true;
+                        }
+                      } else if (
+                        item.color == null &&
+                        Array.isArray(size.colors) &&
+                        size.colors.length === 0
+                      ) {
+                        if (!item.isAvailable) {
+                          item.isAvailable = true;
+                          shouldUpdateCart = true;
+                        }
+
+                        if (
+                          size.quantity != null &&
+                          item.quantity !== size.quantity &&
+                          item.quantity > size.quantity
+                        ) {
+                          item.quantity = size.quantity;
+                          shouldUpdateCart = true;
+                        }
+
+                        if (
+                          size.priceAfterDiscount != null &&
+                          item.price !== size.priceAfterDiscount
+                        ) {
+                          item.price = size.priceAfterDiscount;
+                          shouldUpdateCart = true;
+                        } else if (
+                          size.price != null &&
+                          item.price !== size.price
+                        ) {
+                          item.price = size.price;
+                          shouldUpdateCart = true;
+                        }
+                      }
+                    } else if (item.product._id.equals(product._id) && item.size == null) {
+                      if (item.isAvailable) {
+                        item.isAvailable = false;
+                        shouldUpdateCart = true;
+                      }
+                    }
+                    return item;
+                  });
+
+                  if (shouldUpdateCart) {
+                    cartsNeedingUpdate++;
+
+                    // Save the updated cart items and recalculate total price
+                    const result = await Cart.updateOne(
+                      { _id: cart._id },
+                      {
+                        $set: {
+                          cartItems: updatedItems,
+                          totalCartPrice: calcTotalCartPrice({
+                            cartItems: updatedItems,
+                          }),
+                        },
+                      },
+                      { session }
+                    );
+
+                    // Return number of modified documents (1 or 0)
+                    return result.modifiedCount;
+                  }
+
+                  return 0;
+                })
+              );
+
+              // Sum up all updated cart counts
+              const modifiedCartsCount = updateResults.reduce(
+                (sum, count) => sum + count,
+                0
+              );
+
+              // Rollback if not all matching carts were updated successfully
+              if (modifiedCartsCount < cartsNeedingUpdate) {
+                throw new ApiError(
+                  `Some carts failed to update. All changes have been rolled back.`,
+                  400
+                );
+              }
+            }
+          });
+
+          await Promise.all(addSizesPromises);
+          await product.save({ session });
+          await session.commitTransaction();
+          session.endSession();
+        } catch (err) {
+          await session.abortTransaction();
+          session.endSession();
+          return next(
+            new ApiError(
+              err.message ||
+                "Error updating product or carts. Changes reverted.",
+              err.statusCode || 500
+            )
+          );
+        }
+      }
+
+
+      product.sizesIsExist = true;
     }
   } else {
     if (addSizes != null) {
@@ -1991,10 +2384,117 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           product.quantity = quantity;
         }
 
-        // لو المقاس ماكنش لية الوان و عاوز يضيف الوان لاول مرة يروح يلغي تفعيل كل السلال اللي ملهاش الوان و يفعل اللي ليها الوان و بتحتوي علي تلوان موجودة فعلا في المقاس
-        // Done
-        // لو هيحذف كل الالوان لازم يروح يفعل كل السلال اللي عندهوم نفس المقاس بس مش بيحتوو علي الوان
-        /* eslint-disable no-await-in-loop */
+        const allOriginalColorsDeleted =
+          Array.isArray(product.colors) &&
+          product.colors.length > 0 && // ✅ شرط وجود ألوان
+          Array.isArray(deleteGeneralColors) &&
+          deleteGeneralColors.length === product.colors.length &&
+          product.colors.every((oc) =>
+            deleteGeneralColors.some(
+              (dc) => dc.toLowerCase() === oc.color.toLowerCase()
+            )
+          );
+
+        const hasNewOrUpdatedColors =
+          Array.isArray(colors) &&
+          colors.some((c) => c.type === "new" || c.type === "update");
+
+        if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+          const cartsToUpdate = await Cart.find({
+            "cartItems.product": product._id,
+          }).session(session);
+
+          let cartsNeedingUpdate = 0;
+
+          const updateResults = await Promise.all(
+            cartsToUpdate.map(async (cart) => {
+              let shouldUpdateCart = false;
+              const updatedItems = cart.cartItems.map((item) => {
+                if (
+                  item.product._id.equals(product._id) &&
+                  item.size == null &&
+                  item.color == null
+                ) {
+                  item.isAvailable = true;
+                  shouldUpdateCart = true;
+
+                  if (
+                    quantity != null &&
+                    item.quantity !== quantity &&
+                    item.quantity > quantity
+                  ) {
+                    item.quantity = quantity;
+                    shouldUpdateCart = true;
+                  } else if (
+                    product.quantity != null &&
+                    item.quantity !== product.quantity &&
+                    item.quantity > product.quantity
+                  ) {
+                    item.quantity = product.quantity;
+                    shouldUpdateCart = true;
+                  }
+
+                  if (
+                    priceAfterDiscount != null &&
+                    item.price !== priceAfterDiscount
+                  ) {
+                    item.price = priceAfterDiscount;
+                    shouldUpdateCart = true;
+                  } else if (
+                    product.priceAfterDiscount != null &&
+                    item.price !== product.priceAfterDiscount
+                  ) {
+                    item.price = product.priceAfterDiscount;
+                    shouldUpdateCart = true;
+                  } else if (price != null && item.price !== price) {
+                    item.price = price;
+                    shouldUpdateCart = true;
+                  } else if (
+                    product.price != null &&
+                    item.price !== product.price
+                  ) {
+                    item.price = product.price;
+                    shouldUpdateCart = true;
+                  }
+                }
+                return item;
+              });
+
+              if (shouldUpdateCart) {
+                cartsNeedingUpdate++;
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
+                      cartItems: updatedItems,
+                      totalCartPrice: calcTotalCartPrice({
+                        cartItems: updatedItems,
+                      }),
+                    },
+                  },
+                  { session }
+                );
+
+                return result.modifiedCount;
+              }
+
+              return 0;
+            })
+          );
+
+          const modifiedCartsCount = updateResults.reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
+          if (modifiedCartsCount < cartsNeedingUpdate) {
+            throw new ApiError(
+              `Not all carts were updated after deleting all colors". Transaction rolled back.`,
+              400
+            );
+          }
+        }
+
         if (
           deleteGeneralColors != null &&
           Array.isArray(deleteGeneralColors) &&
@@ -2074,7 +2574,69 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           await Promise.all(deleteColorsPromises);
         }
 
-        // Done
+        const isFirstTimeAddingColors =
+          (!Array.isArray(product.colors) ||
+          product.colors.length === 0) &&
+          Array.isArray(colors) &&
+          colors.some((c) => c.type === "new");
+
+        if (isFirstTimeAddingColors) {
+          const cartsToUpdate = await Cart.find({
+            "cartItems.product": product._id,
+          }).session(session);
+
+          let cartsNeedingUpdate = 0;
+          
+          const updateResults = await Promise.all(
+            cartsToUpdate.map(async (cart) => {
+              let shouldUpdateCart = false;
+              const updatedItems = cart.cartItems.map((item) => {
+                if (
+                  item.product._id.equals(product._id) &&
+                  item.size == null &&
+                  item.color == null
+                ) {
+                  item.isAvailable = false;
+                  shouldUpdateCart = true;
+                }
+                return item;
+              });
+
+              if (shouldUpdateCart) {
+                cartsNeedingUpdate++;
+                const result = await Cart.updateOne(
+                  { _id: cart._id },
+                  {
+                    $set: {
+                      cartItems: updatedItems,
+                      totalCartPrice: calcTotalCartPrice({
+                        cartItems: updatedItems,
+                      }),
+                    },
+                  },
+                  { session }
+                );
+                
+                return result.modifiedCount;
+              }
+
+              return 0;
+            })
+          );
+
+          const modifiedCartsCount = updateResults.reduce(
+            (sum, count) => sum + count,
+            0
+          );
+
+          if (modifiedCartsCount < cartsNeedingUpdate) {
+            throw new ApiError(
+              `Not all carts were updated after disabling items with no color" during first-time color addition. Transaction rolled back.`,
+              400
+            );
+          }
+        }
+
         if (colors != null && Array.isArray(colors) && colors?.length > 0) {
           const isMatchingCartItem = (item, productId, colorName) =>
             item.product._id.equals(productId) &&
@@ -2371,7 +2933,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           await Promise.all(updateColorsPromises);
         }
 
-        // Done
         const cartsToUpdate = await Cart.find({
           "cartItems.product": product._id,
         }).session(session);
@@ -2433,9 +2994,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else if (item.color == null && Array.isArray(product.colors) &&
-                    product.colors.length === 0) {
-                    if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
+                  } else if (
+                    item.color == null &&
+                    Array.isArray(product.colors) &&
+                    product.colors.length === 0
+                  ) {
+                    if (
+                      quantity != null &&
+                      item.quantity !== quantity &&
+                      item.quantity > quantity
+                    ) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
                     }
@@ -2582,14 +3150,21 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       item.isAvailable = false;
                       shouldUpdateCart = true;
                     }
-                  } else if (item.color == null && Array.isArray(product.colors) &&
-                    product.colors.length === 0) {
+                  } else if (
+                    item.color == null &&
+                    Array.isArray(product.colors) &&
+                    product.colors.length === 0
+                  ) {
                     if (!item.isAvailable) {
                       item.isAvailable = true;
                       shouldUpdateCart = true;
                     }
 
-                    if (quantity != null && item.quantity !== quantity && item.quantity > quantity) {
+                    if (
+                      quantity != null &&
+                      item.quantity !== quantity &&
+                      item.quantity > quantity
+                    ) {
                       item.quantity = quantity;
                       shouldUpdateCart = true;
                     }
@@ -2643,11 +3218,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   },
                   { session }
                 );
-  
+
                 // Return number of modified documents (1 or 0)
                 return result.modifiedCount;
               }
-              
+
               return 0;
             })
           );
