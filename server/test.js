@@ -1,103 +1,46 @@
-          // if (size.newSizeName) {
-          //   const originalCartCount = await Cart.countDocuments({
-          //     "cartItems.product": product._id,
-          //     "cartItems.size": size.sizeName,
-          //   });
+let updateStatus = true;
+const validationErrors = {};
 
-          //   let updatedCartCount = 0;
+if (
+  deleteSizes != null &&
+  Array.isArray(deleteSizes) &&
+  deleteSizes.length > 0
+) {
+  const seenDeleteSizes = [];
+  const deleteSizesErrors = [];
 
-          //   const result = await Cart.updateMany(
-          //     {
-          //       "cartItems.product": product._id,
-          //       "cartItems.size": size.sizeName,
-          //     },
-          //     {
-          //       $set: {
-          //         "cartItems.$[elem].isAvailable": false,
-          //       },
-          //     },
-          //     {
-          //       arrayFilters: [
-          //         {
-          //           "elem.product": product._id,
-          //           "elem.size": size.sizeName,
-          //         },
-          //       ],
-          //       session,
-          //     }
-          //   );
+  deleteSizes.forEach((s, i) => {
+    const lowerS = s.toLowerCase();
+    const errors = [];
 
-          //   if (result.modifiedCount > 0) {
-          //     updatedCartCount += result.modifiedCount;
-          //   }
+    const existsInOriginal = product.sizes.some(
+      (size) => size.size.toLowerCase() === lowerS
+    );
 
-          //   if (updatedCartCount < originalCartCount) {
-          //     throw new ApiError(
-          //       "Not all carts were updated. Transaction rolled back.",
-          //       400
-          //     );
-          //   }
+    if (!existsInOriginal) {
+      errors.push(
+        `❌ Cannot delete size "${s}" because it does not exist in the original sizes list.`
+      );
+    }
 
-          //   const affectedCarts = await Cart.find({
-          //     "cartItems.product": product._id,
-          //     "cartItems.size": size.sizeName,
-          //   }).session(session);
+    if (seenDeleteSizes.includes(lowerS)) {
+      errors.push(
+        `❌ Duplicate size "${s}" found in delete sizes list at index ${i}. Each size must be unique.`
+      );
+    }
 
-          //   await Promise.all(
-          //     affectedCarts.map(async (cart) => {
-          //       calcTotalCartPrice(cart);
-          //       await cart.save({ session });
-          //     })
-          //   );
+    if (errors.length > 0) {
+      deleteSizesErrors.push({
+        index: i,
+        message: errors
+      });
+    }
 
-          //   product.sizes.forEach((productSize) => {
-          //     if (
-          //       productSize.size.toLowerCase() === size.sizeName.toLowerCase()
-          //     ) {
-          //       productSize.size = size.newSizeName;
-          //     }
-          //   });
-          // }
+    seenDeleteSizes.push(lowerS);
+  });
 
-                          if (item.color != null) {
-                            if (product.colors.length === 0) {
-                              shouldUpdateCart = false;
-                            } else if (product.colors.length > 0) {
-                              const colorIsExist = product.colors.find(
-                                (c) => c.color.toLowerCase() === item.color.toLowerCase()
-                              );
-          
-                              if (colorIsExist) {
-                                item.isAvailable = true;
-                                item.color = colorIsExist.color;
-                                item.quantity = Math.min(
-                                  item.quantity,
-                                  colorIsExist.quantity
-                                );
-                                shouldUpdateCart = true;
-                              }
-                            }
-                          } else if (
-                            quantity !== item.quantity ||
-                            (priceAfterDiscount != null
-                              ? priceAfterDiscount
-                              : price) !== item.price
-                          ) {
-                            item.isAvailable = true;
-                            shouldUpdateCart = true;
-          
-                            if (quantity !== item.quantity) {
-                              item.quantity = quantity;
-                            }
-          
-                            if (
-                              (priceAfterDiscount != null
-                                ? priceAfterDiscount
-                                : price) !== item.price
-                            ) {
-                              item.price =
-                                priceAfterDiscount != null
-                                  ? priceAfterDiscount
-                                  : price;
-                            }
-                          }
+  if (deleteSizesErrors.length > 0) {
+    validationErrors.deleteSizes = deleteSizesErrors;
+    updateStatus = false;
+  }
+}
