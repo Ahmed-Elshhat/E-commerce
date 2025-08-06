@@ -313,7 +313,6 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
         }
 
-
         const seenNewSizeNames = [];
         if (
           updateSizes != null &&
@@ -944,6 +943,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           addSizes.length > 0
         ) {
           const addSizesErrors = [];
+          const addSizeColorsErrors = [];
 
           addSizes.forEach((size, i) => {
             const errors = [];
@@ -987,6 +987,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (size.quantity != null) {
               if (typeof size.quantity !== "number") {
                 errors.push(`❌ quantity must be a number.`);
+              } else if (!Number.isInteger(size.quantity)) {
+                errors.push(`❌ quantity must be an integer.`);
               } else if (size.quantity <= 0) {
                 errors.push(`❌ quantity must be greater than 0.`);
               }
@@ -1000,6 +1002,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               errors.push(`❌ You must define either quantity or colors.`);
             }
 
+            // الألوان فقط
             if (size.quantity == null && size.colors != null) {
               if (!Array.isArray(size.colors)) {
                 errors.push(`❌ colors must be an array.`);
@@ -1007,28 +1010,45 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 errors.push(`❌ colors array must not be empty.`);
               } else {
                 const seenColorNames = [];
+                const colorErrors = [];
+
                 size.colors.forEach((c, colorIndex) => {
+                  const colorValidationErrors = [];
+
                   if (c.color == null) {
-                    errors.push(`❌ Color name is required in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ Color name is required in colors[${colorIndex}].`);
                   } else if (typeof c.color !== "string") {
-                    errors.push(`❌ Color must be a string in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ Color must be a string in colors[${colorIndex}].`);
                   } else if (seenColorNames.includes(c.color.toLowerCase())) {
-                    errors.push(`❌ Duplicate color "${c.color}" in colors[${colorIndex}].`);
-                    seenColorNames.push(c.color.toLowerCase());
+                    colorValidationErrors.push(`❌ Duplicate color "${c.color}" in colors[${colorIndex}].`);
                   } else {
                     seenColorNames.push(c.color.toLowerCase());
                   }
 
                   if (c.quantity == null) {
-                    errors.push(`❌ quantity is required in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ quantity is required in colors[${colorIndex}].`);
                   } else if (typeof c.quantity !== "number") {
-                    errors.push(`❌ quantity must be a number in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ quantity must be a number in colors[${colorIndex}].`);
                   } else if (!Number.isInteger(c.quantity)) {
-                    errors.push(`❌ quantity must be an integer in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ quantity must be an integer in colors[${colorIndex}].`);
                   } else if (c.quantity <= 0) {
-                    errors.push(`❌ quantity must be greater than 0 in colors[${colorIndex}].`);
+                    colorValidationErrors.push(`❌ quantity must be greater than 0 in colors[${colorIndex}].`);
+                  }
+
+                  if (colorValidationErrors.length > 0) {
+                    colorErrors.push({
+                      colorIndex,
+                      message: colorValidationErrors
+                    });
                   }
                 });
+
+                if (colorErrors.length > 0) {
+                  addSizeColorsErrors.push({
+                    index: i,
+                    colors: colorErrors
+                  });
+                }
               }
             }
 
@@ -1044,8 +1064,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             validationErrors.addSizes = addSizesErrors;
             updateStatus = false;
           }
-        }
 
+          if (addSizeColorsErrors.length > 0) {
+            validationErrors.addSizeColors = addSizeColorsErrors;
+            updateStatus = false;
+          }
+        }
 
         // update product and update carts
         if (updateStatus) {

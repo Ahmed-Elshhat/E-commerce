@@ -1,207 +1,117 @@
 if (addSizes != null && Array.isArray(addSizes) && addSizes.length > 0) {
-  const addSizesValidation = addSizes.some((size) => {
-    // size: String,
-    // quantity: Number,
-    // price: Number,
-    // priceAfterDiscount: Number,
-    // colors: [
-    //   {
-    //     color: String,
-    //     quantity: Number,
-    //   },
-    // ],
+  const addSizesErrors = [];
+
+  addSizes.forEach((size, i) => {
+    const errors = [];
 
     if (size.size == null) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (size.size != null && typeof size.size !== "string") {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (size.size != null && typeof size.size === "string") {
+      errors.push(`❌ Size name is required.`);
+    } else if (typeof size.size !== "string") {
+      errors.push(`❌ Size name must be a string.`);
+    } else {
       const sizeIsExist = product.sizes.find(
         (s) => s.size.toLowerCase() === size.size.toLowerCase()
       );
 
       if (sizeIsExist) {
-        next(new ApiError(``, 400));
-
-        return true;
+        errors.push(`❌ Size "${size.size}" already exists in the product.`);
       }
 
       if (seenNewSizeNames.includes(size.size.toLowerCase())) {
-        next(new ApiError(``, 400));
-
-        return true;
+        errors.push(
+          `❌ Duplicate size "${size.size}" in addSizes at index ${i}.`
+        );
       }
     }
 
     if (size.price == null) {
-      next(new ApiError(``, 400));
-
-      return true;
+      errors.push(`❌ Price is required.`);
+    } else if (typeof size.price !== "number") {
+      errors.push(`❌ Price must be a number.`);
+    } else if (size.price <= 0) {
+      errors.push(`❌ Price must be greater than 0.`);
     }
 
-    if (size.price != null && typeof size.price !== "number") {
-      next(new ApiError(``, 400));
-
-      return true;
+    if (size.priceAfterDiscount != null) {
+      if (typeof size.priceAfterDiscount !== "number") {
+        errors.push(`❌ priceAfterDiscount must be a number.`);
+      } else if (size.priceAfterDiscount <= 0) {
+        errors.push(`❌ priceAfterDiscount must be greater than 0.`);
+      } else if (size.priceAfterDiscount > size.price) {
+        errors.push(
+          `❌ priceAfterDiscount must be less than or equal to price.`
+        );
+      }
     }
 
-    if (
-      size.price != null &&
-      typeof size.price === "number" &&
-      size.price <= 0
-    ) {
-      next(new ApiError(``, 400));
+    if (size.quantity != null) {
+      if (typeof size.quantity !== "number") {
+        errors.push(`❌ quantity must be a number.`);
+      } else if (size.quantity <= 0) {
+        errors.push(`❌ quantity must be greater than 0.`);
+      }
 
-      return true;
-    }
-
-    if (
-      size.priceAfterDiscount != null &&
-      typeof size.priceAfterDiscount !== "number"
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (
-      size.priceAfterDiscount != null &&
-      typeof size.priceAfterDiscount === "number" &&
-      size.priceAfterDiscount <= 0
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (
-      size.priceAfterDiscount != null &&
-      typeof size.priceAfterDiscount === "number" &&
-      size.priceAfterDiscount > size.price
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (size.quantity != null && typeof size.quantity !== "number") {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (
-      size.quantity != null &&
-      typeof size.quantity === "number" &&
-      size.quantity <= 0
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (
-      size.quantity != null &&
-      typeof size.quantity === "number" &&
-      size.colors != null
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
+      if (size.colors != null) {
+        errors.push(
+          `❌ You can't define both quantity and colors at the same time.`
+        );
+      }
     }
 
     if (size.quantity == null && size.colors == null) {
-      next(new ApiError(``, 400));
-
-      return true;
+      errors.push(`❌ You must define either quantity or colors.`);
     }
 
-    if (
-      size.quantity == null &&
-      size.colors != null &&
-      !Array.isArray(size.colors)
-    ) {
-      next(new ApiError(``, 400));
+    if (size.quantity == null && size.colors != null) {
+      if (!Array.isArray(size.colors)) {
+        errors.push(`❌ colors must be an array.`);
+      } else if (size.colors.length === 0) {
+        errors.push(`❌ colors array must not be empty.`);
+      } else {
+        const seenColorNames = [];
+        size.colors.forEach((c, colorIndex) => {
+          if (c.color == null) {
+            errors.push(`❌ Color name is required in colors[${colorIndex}].`);
+          } else if (typeof c.color !== "string") {
+            errors.push(`❌ Color must be a string in colors[${colorIndex}].`);
+          } else if (seenColorNames.includes(c.color.toLowerCase())) {
+            errors.push(
+              `❌ Duplicate color "${c.color}" in colors[${colorIndex}].`
+            );
+            seenColorNames.push(c.color.toLowerCase());
+          } else {
+            seenColorNames.push(c.color.toLowerCase());
+          }
 
-      return true;
+          if (c.quantity == null) {
+            errors.push(`❌ quantity is required in colors[${colorIndex}].`);
+          } else if (typeof c.quantity !== "number") {
+            errors.push(
+              `❌ quantity must be a number in colors[${colorIndex}].`
+            );
+          } else if (!Number.isInteger(c.quantity)) {
+            errors.push(
+              `❌ quantity must be an integer in colors[${colorIndex}].`
+            );
+          } else if (c.quantity <= 0) {
+            errors.push(
+              `❌ quantity must be greater than 0 in colors[${colorIndex}].`
+            );
+          }
+        });
+      }
     }
 
-    if (
-      size.quantity == null &&
-      size.colors != null &&
-      Array.isArray(size.colors) &&
-      size.colors.length === 0
-    ) {
-      next(new ApiError(``, 400));
-
-      return true;
-    }
-
-    if (
-      size.quantity == null &&
-      size.colors != null &&
-      Array.isArray(size.colors) &&
-      size.colors.length > 0
-    ) {
-      const seenColorNames = [];
-      const colorsValidation = size.colors.some((c) => {
-        if (c.color == null) {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        if (c.color != null && typeof c.color !== "string") {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        if (seenColorNames.includes(c.color.toLowerCase())) {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        if (c.quantity == null) {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        if (c.quantity != null && typeof c.quantity !== "number") {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        if (
-          c.quantity != null &&
-          typeof c.quantity === "number" &&
-          c.quantity <= 0
-        ) {
-          next(new ApiError(``, 400));
-
-          return true;
-        }
-
-        seenColorNames.push(c.color.toLowerCase());
-        return false;
+    if (errors.length > 0) {
+      addSizesErrors.push({
+        index: i,
+        message: errors,
       });
-
-      if (colorsValidation) return true;
     }
-
-    return false;
   });
 
-  if (addSizesValidation) updateStatus = false;
+  if (addSizesErrors.length > 0) {
+    validationErrors.addSizes = addSizesErrors;
+    updateStatus = false;
+  }
 }
