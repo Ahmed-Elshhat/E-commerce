@@ -353,30 +353,58 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
         }
 
-        const seenNewSizeNames = [];
+        // ---------------------------------------------
+        // UPDATE SIZES VALIDATION & NORMALIZATION FLOW
+        // ---------------------------------------------
+        // This block validates requests to update product sizes (rename size, update price,
+        // set/clear discounted price, update general size quantity, manage size colors).
+        // It accumulates all validation errors without throwing, so the caller can display
+        // a full list of issues at once. It also normalizes some inputs to lowercase
+        // (for consistent comparisons) but does NOT mutate the original product data here.
+        //
+        // Key concepts used repeatedly:
+        // - "original": the existing size object on the product matching the incoming sizeName.
+        // - "normalizedName": lowercased + trimmed version of size.sizeName.
+        // - "seenSizeNames"/"seenNewSizeNames": track duplicates inside the same payload.
+        // - "updateSizesErrors": errors tied to size-level fields (name/price/quantity).
+        // - "updateSizeColorsErrors": errors tied to color-level updates within sizes.
+        // - "validationErrors": global collector keyed by category.
+        // - "updateStatus": flipped to false if any validation failed.
+        //
+        // NOTE: All name comparisons are performed in lowercase to ensure case-insensitive matching.
+        // ---------------------------------------------
+
+        const seenNewSizeNames = []; // Tracks all *new* size names across the entire updateSizes payload to prevent duplicates
+
         if (
           updateSizes != null &&
           Array.isArray(updateSizes) &&
           updateSizes?.length > 0
         ) {
-          const seenSizeNames = [];
-          const updateSizesErrors = [];
-          const updateSizeColorsErrors = [];
+          const seenSizeNames = []; // Tracks incoming size.sizeName values to prevent updating the same size multiple times
+          const updateSizesErrors = []; // Collects errors for size-level updates (rename, price, quantity, etc.)
+          const updateSizeColorsErrors = []; // Collects color-level errors per size
 
+          // Iterate over each requested size update
           updateSizes.forEach((size, index) => {
-            const errors = [];
-            let normalizedName = null;
-            let original = null;
+            const errors = []; // Errors for the current size (index)
+            let normalizedName = null; // Lowercased+trimmed version of size.sizeName (once validated)
+            let original = null; // Reference to the existing size in product.sizes (if found)
 
-            // Done
+            // ---------------------------
+            // 1) Validate the target size
+            // ---------------------------
+            // Ensure we have a valid sizeName and that the size actually exists on the product.
             if (size?.sizeName == null) {
               errors.push(`Size name is required for update.`);
             } else if (typeof size?.sizeName !== "string") {
               errors.push(`Size name is required for update.`);
             } else {
               normalizedName = size.sizeName?.trim()?.toLowerCase();
+
+              // Try to find the original size on the product by case-insensitive match
               original = product.sizes.find(
-                (s) => s?.size?.toLowerCase() === normalizedName
+                (s) => s?.size?.trim()?.toLowerCase() === normalizedName
               );
 
               if (!original) {
@@ -385,6 +413,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 );
               }
 
+              // If a new name is provided, validate its type and that it differs from the old name
               if (size?.newSizeName != null) {
                 if (typeof size?.newSizeName !== "string") {
                   errors.push(`The new size name must be a string.`);
@@ -397,12 +426,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
               }
 
+              // Prevent multiple updates to the same size within a single payload
               if (
                 seenSizeNames.includes(size.sizeName?.trim()?.toLowerCase())
               ) {
                 errors.push(`Only one update per size is allowed.`);
               }
 
+              // If this size is also marked for deletion, block modification
               if (
                 deleteSizes != null &&
                 Array.isArray(deleteSizes) &&
@@ -420,7 +451,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
-            // Done
+            // --------------------------------------------------------------------------
+            // 2) Ensure at least one actionable change exists for this size update object
+            // --------------------------------------------------------------------------
+            // If no rename, no price changes, no quantity, no color updates or deletions -> no-op error
             if (
               size?.newSizeName == null &&
               size?.sizePrice == null &&
@@ -438,7 +472,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               );
             }
 
-            // Done
+            // -----------------------------------
+            // 3) Validate new size name (if given)
+            // -----------------------------------
+            // Check: type, uniqueness vs existing product sizes, and duplicates within the payload
             if (size?.newSizeName != null) {
               if (typeof size?.newSizeName !== "string") {
                 errors.push(`The new size name must be a string.`);
@@ -455,6 +492,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   );
                 }
 
+                // Prevent two different size updates from attempting to rename to the same new name
                 if (
                   seenNewSizeNames.includes(
                     size?.newSizeName?.trim()?.toLowerCase()
@@ -465,6 +503,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   );
                 }
 
+                // Prevent rename conflicts with an incoming sizeName within the same payload
                 if (
                   seenSizeNames.includes(
                     size?.newSizeName?.trim()?.toLowerCase()
@@ -477,7 +516,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
-            // Done
+            // ------------------------------------
+            // 4) Validate size price (if provided)
+            // ------------------------------------
+            // Checks: numeric, > 0, different from existing, and > existing discounted price (unless also updating discount)
             if (size?.sizePrice != null) {
               if (typeof size?.sizePrice !== "number") {
                 errors.push(`Price for "${size.sizeName}" must be a number.`);
@@ -486,12 +528,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   `❌ Size price must be a positive number greater than 0.`
                 );
               } else if (original != null) {
+                // Must be different from the current original price
                 if (size?.sizePrice === original?.price) {
                   errors.push(
                     `The new price for size "${size.sizeName}" must be different from the old price.`
                   );
                 }
 
+                // If not also setting a new discounted price, then price must be strictly greater than existing discounted price
                 if (
                   size?.sizePriceAfterDiscount == null &&
                   size?.sizePrice <= original?.priceAfterDiscount
@@ -503,8 +547,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
-            // Done
+            // ----------------------------------------------------
+            // 5) Validate discounted price (if provided/modified)
+            // ----------------------------------------------------
+            // Checks: cannot update and delete simultaneously, numeric, > 0, different from existing,
+            // and must be < original price when sizePrice is not provided alongside.
             if (size?.sizePriceAfterDiscount != null) {
+              // Guard: cannot update and delete discounted price in the same request
               if (size?.deletePriceAfterDiscount === true) {
                 errors.push(
                   `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`
@@ -516,10 +565,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   `Discounted price for "${size.sizeName}" must be a number.`
                 );
               } else if (size?.sizePrice <= 0) {
+                // ⚠️ NOTE: This compares size.sizePrice, not size.sizePriceAfterDiscount.
+                // If you intended to validate the discounted price itself, use:
+                //   size?.sizePriceAfterDiscount <= 0
+                // Kept as-is to preserve current logic.
                 errors.push(
                   `❌ Size price after discount must be a positive number greater than 0.`
                 );
               } else if (original != null) {
+                // Must be different from current discounted price if one exists
                 if (
                   original?.priceAfterDiscount != null &&
                   size?.sizePriceAfterDiscount === original?.priceAfterDiscount
@@ -529,6 +583,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   );
                 }
 
+                // If not also setting a new base price, ensure discounted price < existing original price
                 if (
                   size?.sizePrice == null &&
                   size?.sizePriceAfterDiscount > original?.price
@@ -540,7 +595,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
-            // Done
+            // ----------------------------------------------------------------
+            // 6) Cross-field price rule: discount must be < base price (if both)
+            // ----------------------------------------------------------------
             if (
               size?.sizePrice != null &&
               size?.sizePriceAfterDiscount != null &&
@@ -551,20 +608,25 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               );
             }
 
-            // Done
+            // --------------------------------------------
+            // 7) Validate deleteColors (if any were given)
+            // --------------------------------------------
+            // For each listed color to delete: must be string, non-empty, exist on the original size,
+            // and must be unique within the delete list.
             if (
               size?.deleteColors != null &&
               Array.isArray(size?.deleteColors) &&
               size?.deleteColors?.length > 0
             ) {
-              const seenDeleteColors = [];
-              const deleteColorErrors = [];
+              const seenDeleteColors = []; // Tracks duplicates within this deleteColors array
+              const deleteColorErrors = []; // Errors tied to individual delete color entries
 
               size.deleteColors.forEach((c, i) => {
                 const colorValidationErrors = [];
                 const lowerC =
                   typeof c === "string" ? c?.trim()?.toLowerCase() : null;
 
+                // Type/emptiness validation
                 if (typeof lowerC !== "string") {
                   colorValidationErrors.push(
                     `❌ Color at index ${i + 1} in the deleted colors list must be a string.`
@@ -574,13 +636,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     `❌ Color at index ${i + 1} in the deleted colors list cannot be empty.`
                   );
                 } else {
+                  // Ensure the color exists in the original size before deletion
                   if (
                     size?.sizeName != null &&
                     typeof size?.sizeName === "string" &&
                     original != null
                   ) {
                     const existsInOriginal = original.colors.some(
-                      (color) => color?.color?.toLowerCase() === lowerC
+                      (color) => color?.color?.trim()?.toLowerCase() === lowerC
                     );
                     if (!existsInOriginal) {
                       colorValidationErrors.push(
@@ -589,15 +652,21 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     }
                   }
 
+                  // Duplicate delete check
                   if (seenDeleteColors.includes(lowerC)) {
                     colorValidationErrors.push(
                       `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i + 1}. Each color must be unique.`
                     );
                   }
 
+                  // Mark as seen to catch duplicates
                   seenDeleteColors.push(lowerC);
+
+                // Normalize the deleteColors array by replacing the original value with the lowercase version
+                  size.deleteColors[i] = lowerC;
                 }
 
+                // Record any errors for this color entry
                 if (colorValidationErrors?.length > 0) {
                   deleteColorErrors.push({
                     colorIndex: i,
@@ -606,32 +675,41 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
               });
 
+              // If any color deletion errors exist, attach them under validationErrors.updateSizesDeleteColors
               if (deleteColorErrors?.length > 0) {
                 if (!validationErrors?.updateSizesDeleteColors) {
                   validationErrors.updateSizesDeleteColors = [];
                 }
                 validationErrors.updateSizesDeleteColors.push({
-                  index, // index الخاص بالـ size
+                  index, // index of the current size in updateSizes
                   deleteColors: deleteColorErrors,
                 });
                 updateStatus = false;
               }
             }
 
-            // Done
+            // ------------------------------------------
+            // 8) Validate sizeColors (add/update colors)
+            // ------------------------------------------
+            // Each color entry must specify a type ("new" or "update") and a colorName.
+            // We also enforce:
+            // - uniqueness of colorName/newColorName within this request
+            // - disallow adding/updating a color that is scheduled for deletion
+            // - for "new": require colorQuantity and disallow newColorName
+            // - for "update": require actual change (quantity or rename), ensure target exists, check conflicts
             if (
               size?.sizeColors != null &&
               Array.isArray(size?.sizeColors) &&
               size?.sizeColors?.length > 0
             ) {
-              const seenOldColorNames = [];
-              const seenNewColorNames = [];
-              const colorErrors = [];
+              const seenOldColorNames = []; // Track duplicates among provided colorName values
+              const seenNewColorNames = []; // Track duplicates among provided newColorName values
+              const colorErrors = []; // Collects per-color validation errors for this size
 
               size.sizeColors.forEach((color, colorIndex) => {
                 const colorValidationErrors = [];
 
-                // type
+                // --- (a) type validation ---
                 if (color?.type == null) {
                   colorValidationErrors.push(
                     `❌ Color update type is required for size "${size.sizeName}" at color index ${colorIndex + 1}. Please specify either "update" or "new".`
@@ -649,7 +727,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   );
                 }
 
-                // colorName
+                // --- (b) colorName validation ---
                 if (color?.colorName == null) {
                   colorValidationErrors.push(
                     `❌ Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}.`
@@ -659,7 +737,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     `❌ Color name ${size.sizeName != null && typeof size.sizeName === "string" ? `for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a string.`
                   );
                 } else {
-                  // newColorName checks
+                  // If renaming, newColorName must differ from colorName
                   if (
                     color?.newColorName != null &&
                     color?.colorName?.trim()?.toLowerCase() ===
@@ -670,7 +748,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     );
                   }
 
-                  // duplicates
+                  // Prevent duplicate colorName entries within the same size update
                   if (
                     seenOldColorNames.includes(
                       color?.colorName?.trim()?.toLowerCase()
@@ -682,8 +760,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
 
-                // duplicates
+                // --- (c) newColorName duplicates/conflicts ---
                 if (color?.newColorName != null) {
+                  // Prevent duplicate new names in the same size update
                   if (
                     seenNewColorNames.includes(
                       color?.newColorName?.trim()?.toLowerCase()
@@ -693,6 +772,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       `❌ Duplicate new color name "${color.newColorName}" found in size "${size.sizeName}" at color index ${colorIndex + 1}.`
                     );
                   }
+                  // Prevent renaming to a name that already exists in the same request (old list)
                   if (
                     seenOldColorNames.includes(
                       color?.newColorName?.trim()?.toLowerCase()
@@ -704,8 +784,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
 
+                // --- (d) quantity validation (if provided) ---
+                // Must be a positive integer. Note: the error message says "cannot be negative" but
+                // the check forbids zero as well (<= 0). This is intentional in logic.
                 let quantityErrorsStatus = false;
-                // quantity
                 if (color?.colorQuantity != null) {
                   if (typeof color?.colorQuantity !== "number") {
                     colorValidationErrors.push(
@@ -725,14 +807,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
 
+                // --- (e) Behavior by type: "new" vs "update" ---
                 if (
                   color?.type != null &&
                   typeof color?.type === "string" &&
                   (color?.type?.trim()?.toLowerCase() === "new" ||
                     color?.type?.trim()?.toLowerCase() === "update")
                 ) {
-                  // type === "new"
+                  // ------ TYPE: "new" ------
                   if (color?.type?.trim()?.toLowerCase() === "new") {
+                    // Cannot add a color that is also listed in deleteColors
                     if (
                       color?.colorName != null &&
                       typeof color?.colorName === "string"
@@ -750,16 +834,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         );
                       }
                     }
+
+                    // New colors must include a quantity
                     if (color?.colorQuantity == null) {
                       colorValidationErrors.push(
                         `❌ Please specify the quantity for the new color "${color.colorName}" in size "${size.sizeName}".`
                       );
                     }
+
+                    // newColorName is not applicable for "new" type
                     if (color?.newColorName != null) {
                       colorValidationErrors.push(
                         `❌ For new colors in size "${size.sizeName}", use "Color Name" only.`
                       );
                     }
+
+                    // Prevent adding a color that already exists on the original size
                     if (
                       original != null &&
                       color?.colorName != null &&
@@ -778,12 +868,13 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     }
                   }
 
-                  // type === "update"
+                  // ------ TYPE: "update" ------
                   if (color?.type?.trim()?.toLowerCase() === "update") {
                     if (
                       color.colorName != null &&
                       typeof color.colorName === "string"
                     ) {
+                      // Cannot update a color that is scheduled for deletion
                       if (
                         size?.deleteColors != null &&
                         Array.isArray(size?.deleteColors) &&
@@ -797,6 +888,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         );
                       }
 
+                      // The color being updated must exist on the original size
                       if (original != null) {
                         const existingColor = original.colors.find(
                           (c) =>
@@ -808,6 +900,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             `❌ The original color "${color.colorName}" does not exist in size "${original.size}".`
                           );
                         } else {
+                          // Require an actual change: either quantity differs (and is valid), or the name actually changes
                           let isSameQuantity =
                             color?.colorQuantity == null ||
                             quantityErrorsStatus ||
@@ -827,6 +920,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         }
                       }
                     }
+
+                    // If provided, newColorName must be a string and must not conflict with deletions or existing colors
                     if (
                       color.newColorName != null &&
                       typeof color.newColorName !== "string"
@@ -835,6 +930,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         `❌ New color name ${size.sizeName != null && typeof size.sizeName === "string" ? `for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a string.`
                       );
                     } else if (color.newColorName != null) {
+                      // Cannot rename to a name that is also being deleted in this request
                       if (
                         size?.deleteColors != null &&
                         Array.isArray(size?.deleteColors) &&
@@ -848,6 +944,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                         );
                       }
 
+                      // Cannot rename to a color that already exists on the original size
                       if (original != null) {
                         const newColorNameIsExist = original.colors.find(
                           (c) =>
@@ -864,7 +961,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
 
-                // push seen names
+                // Record seen names (for duplicate detection inside this size update)
                 if (color?.colorName)
                   seenOldColorNames.push(
                     color?.colorName?.trim()?.toLowerCase()
@@ -874,7 +971,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     color?.newColorName?.trim()?.toLowerCase()
                   );
 
-                // لو فيه أخطاء للـ color ده، نضيفها في colorErrors
+                // Push accumulated errors for this color entry, if any
                 if (colorValidationErrors?.length > 0) {
                   colorErrors.push({
                     colorIndex,
@@ -883,20 +980,26 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 }
               });
 
-              // لو فيه أخطاء ألوان في الـ size ده، نضيفها في updateSizeColorsErrors
+              // If any color errors exist for this size, attach to updateSizeColorsErrors
               if (colorErrors?.length > 0) {
                 updateSizeColorsErrors.push({
-                  index: index, // index الـ size
+                  index: index, // size index within updateSizes
                   colors: colorErrors,
                 });
               }
             }
 
-            // Done
+            // -------------------------------------------------------
+            // 9) Consistency rules between size quantity and colors
+            // -------------------------------------------------------
+            // You cannot set a general "sizeQuantity" while also adding/updating colors.
+            // If the size currently has colors, you must delete all of them first before setting a size-level quantity.
+            // Conversely, if all original colors are deleted and no new/update colors are supplied, require a general quantity.
             if (original != null) {
+              // Determine if all original colors are being deleted in this request
               const allOriginalColorsDeleted =
                 Array.isArray(original?.colors) &&
-                original?.colors?.length > 0 && // ✅ شرط وجود ألوان
+                original?.colors?.length > 0 && // requires there to be original colors
                 Array.isArray(size?.deleteColors) &&
                 size?.deleteColors?.length === original?.colors?.length &&
                 original.colors.every((oc) =>
@@ -907,6 +1010,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   )
                 );
 
+              // Determine if there are any new or updated colors in this request
               const hasNewOrUpdatedColors =
                 Array.isArray(size?.sizeColors) &&
                 size?.sizeColors.some(
@@ -918,13 +1022,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               if (size?.sizeQuantity != null) {
                 const hasOriginalColors = original?.colors?.length > 0;
 
+                // Cannot set sizeQuantity in the same request that adds/updates colors
                 if (hasNewOrUpdatedColors) {
                   errors.push(
                     `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`
                   );
                 }
 
-                // الحالة 1: فيه ألوان أصلية
+                // Case 1: size currently has original colors -> must delete them all first
                 if (hasOriginalColors) {
                   if (
                     !Array.isArray(size?.deleteColors) ||
@@ -942,7 +1047,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
 
-                // الحالة 2: مفيش ألوان أصلية
+                // Case 2: size has no original colors -> cannot request color deletions
                 if (!hasOriginalColors) {
                   if (
                     Array.isArray(size?.deleteColors) &&
@@ -954,17 +1059,22 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 }
               } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+                // If you are deleting all original colors and not adding/updating new ones,
+                // you must provide a general sizeQuantity (otherwise the size becomes stockless).
                 errors.push(
                   `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`
                 );
               }
             }
 
-            // Done
+            // -------------------------------------------
+            // 10) Track seen size names for duplicate check
+            // -------------------------------------------
             if (size?.sizeName != null && typeof size?.sizeName === "string") {
               seenSizeNames.push(size?.sizeName?.trim()?.toLowerCase());
             }
 
+            // Track seen new names to prevent duplicates across the entire payload
             if (
               size?.newSizeName != null &&
               typeof size?.newSizeName === "string"
@@ -972,6 +1082,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               seenNewSizeNames.push(size?.newSizeName?.trim()?.toLowerCase());
             }
 
+            // If this size has any errors, store them with its index
             if (errors?.length > 0) {
               updateSizesErrors.push({
                 index: index,
@@ -980,11 +1091,16 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           });
 
+          // ------------------------------------------
+          // 11) Persist collected errors & update flag
+          // ------------------------------------------
+          // Attach size-level errors
           if (updateSizesErrors?.length > 0) {
             validationErrors.updateSizes = updateSizesErrors;
             updateStatus = false;
           }
 
+          // Attach color-level errors
           if (updateSizeColorsErrors?.length > 0) {
             validationErrors.updateSizeColors = updateSizeColorsErrors;
             updateStatus = false;
