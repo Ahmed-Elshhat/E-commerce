@@ -148,8 +148,10 @@ export type CartState = {
       price: number;
       quantity: number;
       product: {
-        title: string;
+        titleAr: string;
+        titleEn: string;
         imageCover: string;
+        coverImageFull: string
       };
     }[];
   };

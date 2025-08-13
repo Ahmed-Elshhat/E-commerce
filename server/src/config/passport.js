@@ -19,8 +19,15 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       try {
-        let user = await User.findOne({ googleId: profile.id });
+        // let user = await User.findOne({ googleId: profile.id });
+        let user = await User.findOne({
+          $or: [
+            { googleId: profile.id },
+            { email: profile.emails[0].value }, // تأكد إن دا المكان الصح للإيميل في `profile`
+          ],
+        });
         console.log("accessToken : ", accessToken);
+        console.log("user:", user);
         if (!user) {
           user = await User.create({
             googleId: profile.id,
@@ -31,10 +38,25 @@ passport.use(
             accessToken,
           });
         } else {
+          // user = await User.findOneAndUpdate(
+          //   { googleId: profile.id },
+          //   { accessToken },
+          //   { new: true }
+          // );
           user = await User.findOneAndUpdate(
-            { googleId: profile.id },
-            { accessToken },
-            { new: true } 
+            {
+              $or: [
+                { googleId: profile.id },
+                { email: profile.emails[0].value },
+              ],
+            },
+            {
+              $set: {
+                accessToken,
+                googleId: profile.id,
+              },
+            },
+            { new: true }
           );
         }
         return done(null, user);

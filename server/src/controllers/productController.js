@@ -177,14 +177,14 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
 
   let body = { ...req.body };
 
-  const {
+  let {
     sizesIsExist,
     price,
     priceAfterDiscount,
     quantity,
     colors,
-    addGeneralColors,
-    updateGeneralColors,
+    // addGeneralColors,
+    // updateGeneralColors,
     deleteGeneralColors,
     addSizes,
     updateSizes,
@@ -204,6 +204,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         400
       )
     );
+  }
+
+  if (typeof sizesIsExist === "string") {
+    sizesIsExist =
+      sizesIsExist.toLowerCase() === "true"
+        ? true
+        : sizesIsExist.toLowerCase() === "false"
+          ? false
+          : null;
   }
 
   if (typeof sizesIsExist !== "boolean") {
@@ -300,7 +309,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (errors.length > 0) {
               deleteSizesErrors.push({
                 index: i,
-                message: errors
+                message: errors,
               });
             }
 
@@ -320,273 +329,250 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           updateSizes.length > 0
         ) {
           const seenSizeNames = [];
+          const updateSizesErrors = [];
+          const updateSizeColorsErrors = [];
 
-          const hasValidationErrors = updateSizes.some((size) => {
-            if (!size.sizeName) {
-              next(new ApiError("Size name is required for update.", 400));
-              return true;
+          updateSizes.forEach((size, index) => {
+            const errors = [];
+            let normalizedName = null;
+            let original = null;
+
+            // Done
+            if (size.sizeName == null) {
+              errors.push(`Size name is required for update.`);
+            } else if (typeof size.sizeName !== "string") {
+              errors.push(`Size name is required for update.`);
+            } else {
+              normalizedName = size.sizeName.toLowerCase();
+              original = product.sizes.find(
+                (s) => s.size.toLowerCase() === normalizedName
+              );
+
+              if (!original) {
+                errors.push(
+                  `Size "${size.sizeName}" does not exist in the product.`
+                );
+              }
+
+              if (size.newSizeName != null) {
+                if (typeof size.newSizeName !== "string") {
+                  errors.push(`The new size name must be a string.`);
+                } else if (normalizedName === size.newSizeName?.toLowerCase()) {
+                  errors.push(
+                    `The new name for size "${size.sizeName}" matches the old name. It must be different.`
+                  );
+                }
+              }
+
+              if (seenSizeNames.includes(size.sizeName.toLowerCase())) {
+                errors.push(`Only one update per size is allowed.`);
+              }
+
+              if (
+                deleteSizes != null &&
+                Array.isArray(deleteSizes) &&
+                deleteSizes.length > 0
+              ) {
+                const shouldDeleteThisSize = deleteSizes.some(
+                  (s) => s.toLowerCase() === normalizedName
+                );
+
+                if (shouldDeleteThisSize) {
+                  errors.push(
+                    `Size "${size.sizeName}" is marked for deletion and cannot be modified.`
+                  );
+                }
+              }
             }
 
+            // Done
             if (
-              !size.newSizeName &&
+              size.newSizeName == null &&
               size.sizePrice == null &&
               size.sizePriceAfterDiscount == null &&
               size.sizeQuantity == null &&
-              !size.sizeColors?.length &&
-              !size.deleteColors?.length
+              (size.sizeColors == null ||
+                !Array.isArray(size.sizeColors) ||
+                size.sizeColors?.length === 0) &&
+              (size.deleteColors == null ||
+                !Array.isArray(size.deleteColors) ||
+                size.deleteColors?.length === 0)
             ) {
-              next(
-                new ApiError(
-                  `No actual update provided for size "${size.sizeName}". Please specify at least one change.`,
-                  400
-                )
+              errors.push(
+                `No actual update provided for size "${size.sizeName}". Please specify at least one change.`
               );
-              return true;
             }
 
-            const normalizedName = size.sizeName.toLowerCase();
-            const original = product.sizes.find(
-              (s) => s.size.toLowerCase() === normalizedName
-            );
-
-            if (!original) {
-              next(
-                new ApiError(
-                  `Size "${size.sizeName}" does not exist in the product.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (
-              deleteSizes != null &&
-              Array.isArray(deleteSizes) &&
-              deleteSizes.length > 0
-            ) {
-              const shouldDeleteThisSize = deleteSizes.some(
-                (s) => s.toLowerCase() === normalizedName
-              );
-
-              if (shouldDeleteThisSize) {
-                return next(
-                  new ApiError(
-                    `Size "${size.sizeName}" is marked for deletion and cannot be modified.`,
-                    400
-                  )
+            // Done
+            if (size.newSizeName != null) {
+              if (typeof size.newSizeName !== "string") {
+                errors.push(`The new size name must be a string.`);
+              } else {
+                const newNameIsExist = product.sizes.find(
+                  (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
                 );
+
+                if (newNameIsExist) {
+                  errors.push(
+                    `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`
+                  );
+                }
+
+                if (seenNewSizeNames.includes(size.newSizeName.toLowerCase())) {
+                  errors.push(
+                    `Duplicate new size name detected. Each size must have a unique name.`
+                  );
+                }
+
+                if (seenSizeNames.includes(size.newSizeName.toLowerCase())) {
+                  errors.push(
+                    `The new size name "${size.newSizeName}" conflicts with an existing size name. Please choose a different name.`
+                  );
+                }
               }
             }
 
-            if (size.newSizeName) {
-              if (
-                size.sizeName.toLowerCase() === size.newSizeName?.toLowerCase()
-              ) {
-                next(
-                  new ApiError(
-                    `The new name for size "${size.sizeName}" matches the old name. It must be different.`,
-                    400
-                  )
+            // Done
+            if (size.sizePrice != null) {
+              if (typeof size.sizePrice !== "number") {
+                errors.push(`Price for "${size.sizeName}" must be a number.`);
+              } else if (size.sizePrice <= 0) {
+                errors.push(
+                  `❌ Size price must be a positive number greater than 0.`
                 );
-                return true;
-              }
+              } else if (original != null) {
+                if (size.sizePrice === original.price) {
+                  errors.push(
+                    `The new price for size "${size.sizeName}" must be different from the old price.`
+                  );
+                }
 
-              const newNameIsExist = product.sizes.find(
-                (s) => s.size.toLowerCase() === size.newSizeName.toLowerCase()
-              );
-
-              if (newNameIsExist) {
-                next(
-                  new ApiError(
-                    `The new size name "${size.newSizeName}" already exists in the product. Please choose a different name.`,
-                    400
-                  )
-                );
-                return true;
+                if (
+                  size.sizePriceAfterDiscount == null &&
+                  size.sizePrice <= original.priceAfterDiscount
+                ) {
+                  errors.push(
+                    `❌ The price for size "${size.sizeName}" must not be less than or equal to its existing discounted price.`
+                  );
+                }
               }
             }
 
-            if (seenSizeNames.includes(size.sizeName.toLowerCase())) {
-              next(new ApiError("Only one update per size is allowed.", 400));
-              return true;
+            // Done
+            if (size.sizePriceAfterDiscount != null) {
+              if (size.deletePriceAfterDiscount === true) {
+                errors.push(
+                  `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`
+                );
+              }
+
+              if (typeof size.sizePriceAfterDiscount !== "number") {
+                errors.push(
+                  `Discounted price for "${size.sizeName}" must be a number.`
+                );
+              } else if (size.sizePrice <= 0) {
+                errors.push(
+                  `❌ Size price after discount must be a positive number greater than 0.`
+                );
+              } else if (original != null) {
+                if (
+                  original.priceAfterDiscount != null &&
+                  size.sizePriceAfterDiscount === original.priceAfterDiscount
+                ) {
+                  errors.push(
+                    `The new discounted price for size "${size.sizeName}" must be different from the old discounted price.`
+                  );
+                }
+
+                if (
+                  size.sizePrice == null &&
+                  size.sizePriceAfterDiscount > original.price
+                ) {
+                  errors.push(
+                    `Discounted price for "${size.sizeName}" must be less than the original price (${original.price}).`
+                  );
+                }
+              }
             }
 
-            if (
-              size.newSizeName &&
-              seenNewSizeNames.includes(size.newSizeName.toLowerCase())
-            ) {
-              next(
-                new ApiError(
-                  "Duplicate new size name detected. Each size must have a unique name.",
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (
-              size.newSizeName &&
-              seenSizeNames.includes(size.newSizeName.toLowerCase())
-            ) {
-              next(
-                new ApiError(
-                  `The new size name "${size.newSizeName}" conflicts with an existing size name. Please choose a different name.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (size.sizePrice != null && typeof size.sizePrice !== "number") {
-              next(
-                new ApiError(
-                  `Price for "${size.sizeName}" must be a number.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (
-              size.sizePriceAfterDiscount != null &&
-              typeof size.sizePriceAfterDiscount !== "number"
-            ) {
-              next(
-                new ApiError(
-                  `Discounted price for "${size.sizeName}" must be a number.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (
-              size.sizePriceAfterDiscount != null &&
-              size.deletePriceAfterDiscount === true
-            ) {
-              next(
-                new ApiError(
-                  `Cannot update and delete price after discount simultaneously for size "${size.sizeName}".`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            // ✅ تحقق من تكرار السعر الأصلي
-            if (size.sizePrice != null && size.sizePrice === original.price) {
-              next(
-                new ApiError(
-                  `The new price for size "${size.sizeName}" must be different from the old price.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            // ✅ تحقق من تكرار السعر بعد الخصم
-            if (
-              size.sizePriceAfterDiscount != null &&
-              size.sizePriceAfterDiscount === original.priceAfterDiscount
-            ) {
-              next(
-                new ApiError(
-                  `The new discounted price for size "${size.sizeName}" must be different from the old discounted price.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            if (
-              size.sizePrice != null &&
-              size.sizePriceAfterDiscount == null &&
-              size.sizePrice <= original.priceAfterDiscount
-            ) {
-              next(
-                new ApiError(
-                  `❌ The price for size "${size.sizeName}" must not be less than or equal to its existing discounted price.`,
-                  400
-                )
-              );
-              return true;
-            }
-
-            // ✅ تحقق إذا تم إرسال السعر والخصم وكان الخصم أكبر من السعر
+            // Done
             if (
               size.sizePrice != null &&
               size.sizePriceAfterDiscount != null &&
               size.sizePriceAfterDiscount > size.sizePrice
             ) {
-              next(
-                new ApiError(
-                  `Discounted price for "${size.sizeName}" must be less than the original price.`,
-                  400
-                )
+              errors.push(
+                `Discounted price for "${size.sizeName}" must be less than the original price.`
               );
-              return true;
             }
 
-            // ✅ تحقق إذا فقط تم إرسال الخصم وكان أكبر من السعر القديم
-            if (
-              size.sizePrice == null &&
-              size.sizePriceAfterDiscount != null &&
-              size.sizePriceAfterDiscount > original.price
-            ) {
-              next(
-                new ApiError(
-                  `Discounted price for "${size.sizeName}" must be less than the original price (${original.price}).`,
-                  400
-                )
-              );
-              return true;
-            }
-
+            // Done
             if (
               size.deleteColors != null &&
               Array.isArray(size.deleteColors) &&
               size.deleteColors.length > 0
             ) {
               const seenDeleteColors = [];
+              const deleteColorErrors = [];
 
-              const hasValidationDeleteColors = size.deleteColors.some(
-                (c, i) => {
-                  const lowerC = c.toLowerCase();
+              size.deleteColors.forEach((c, i) => {
+                const colorValidationErrors = [];
+                const lowerC = typeof c === "string" ? c.toLowerCase() : null;
 
-                  // ❌ رجع Error فوري لو اللون غير موجود في الأصل
-                  const existsInOriginal = original.colors.some(
-                    (color) => color.color.toLowerCase() === lowerC
+                if (typeof c !== "string") {
+                  colorValidationErrors.push(
+                    `❌ Color at index ${i + 1} in the deleted colors list must be a string.`
                   );
-
-                  if (!existsInOriginal) {
-                    next(
-                      new ApiError(
-                        `❌ Cannot delete color "${c}" in size "${size.sizeName}" because it does not exist in the original color list.`,
-                        400
-                      )
+                } else if (lowerC === "") {
+                  colorValidationErrors.push(
+                    `❌ Color at index ${i + 1} in the deleted colors list cannot be empty.`
+                  );
+                } else {
+                  if (
+                    size.sizeName != null &&
+                    typeof size.sizeName === "string" &&
+                    original != null
+                  ) {
+                    const existsInOriginal = original.colors.some(
+                      (color) => color.color.toLowerCase() === lowerC
                     );
-                    return true;
+                    if (!existsInOriginal) {
+                      colorValidationErrors.push(
+                        `❌ Cannot delete color "${c}" at index ${i + 1} in size "${size.sizeName}" because it does not exist in the original color list.`
+                      );
+                    }
                   }
 
-                  // ❌ رجع Error لو فيه تكرار
                   if (seenDeleteColors.includes(lowerC)) {
-                    next(
-                      new ApiError(
-                        `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i}. Each color must be unique.`,
-                        400
-                      )
+                    colorValidationErrors.push(
+                      `❌ Duplicate color "${c}" found in delete colors list for size "${size.sizeName}" at index ${i + 1}. Each color must be unique.`
                     );
-                    return true;
                   }
 
                   seenDeleteColors.push(lowerC);
-                  return false;
                 }
-              );
 
-              if (hasValidationDeleteColors) return true;
+                if (colorValidationErrors.length > 0) {
+                  deleteColorErrors.push({
+                    colorIndex: i,
+                    message: colorValidationErrors,
+                  });
+                }
+              });
+
+              if (deleteColorErrors.length > 0) {
+                if (!validationErrors.updateSizesDeleteColors) {
+                  validationErrors.updateSizesDeleteColors = [];
+                }
+                validationErrors.updateSizesDeleteColors.push({
+                  index, // index الخاص بالـ size
+                  deleteColors: deleteColorErrors,
+                });
+                updateStatus = false;
+              }
             }
 
+            // Done
             if (
               size.sizeColors != null &&
               Array.isArray(size.sizeColors) &&
@@ -594,347 +580,330 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             ) {
               const seenOldColorNames = [];
               const seenNewColorNames = [];
+              const colorErrors = [];
 
-              const colorValidator = size.sizeColors.some(
-                (color, colorIndex) => {
-                  if (!color.type) {
-                    next(
-                      new ApiError(
-                        `Color update type is required for size "${size.sizeName}" at color index ${colorIndex}. Please specify either "update" or "new".`,
-                        400
-                      )
-                    );
-                    return true;
-                  }
+              size.sizeColors.forEach((color, colorIndex) => {
+                const colorValidationErrors = [];
 
-                  if (color.type !== "new" && color.type !== "update") {
-                    next(
-                      new ApiError(
-                        `Invalid color update type "${color.type}" for size "${size.sizeName}" at color index ${colorIndex}. Expected "new" or "update".`,
-                        400
-                      )
-                    );
-                    return true;
-                  }
+                // type
+                if (color.type == null) {
+                  colorValidationErrors.push(
+                    `❌ Color update type is required for size "${size.sizeName}" at color index ${colorIndex + 1}. Please specify either "update" or "new".`
+                  );
+                } else if (typeof color.type !== "string") {
+                  colorValidationErrors.push(
+                    `❌ Color type ${size.sizeName != null && typeof size.sizeName === "string" ? `for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a string.`
+                  );
+                } else if (color.type !== "new" && color.type !== "update") {
+                  colorValidationErrors.push(
+                    `❌ Invalid color update type "${color.type}" for size "${size.sizeName}" at color index ${colorIndex + 1}. Expected "new" or "update".`
+                  );
+                }
 
-                  if (!color.colorName) {
-                    next(
-                      new ApiError(
-                        `Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}. The "Color name" field is required.`,
-                        400
-                      )
-                    );
-                    return true;
-                  }
-
+                // colorName
+                if (color.colorName == null) {
+                  colorValidationErrors.push(
+                    `❌ Missing color name for size "${size.sizeName}" at color index ${colorIndex + 1}.`
+                  );
+                } else if (typeof color.colorName !== "string") {
+                  colorValidationErrors.push(
+                    `❌ Color name ${size.sizeName != null && typeof size.sizeName === "string" ? `for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a string.`
+                  );
+                } else {
+                  // newColorName checks
                   if (
-                    color.newColorName &&
-                    color.colorName.toLowerCase() ===
-                      color.newColorName.toLowerCase()
+                    color.newColorName != null &&
+                    color.colorName?.toLowerCase() ===
+                      color.newColorName?.toLowerCase()
                   ) {
-                    next(
-                      new ApiError(
-                        `New color name must be different from the old color name for size "${size.sizeName}" at color index ${colorIndex}.`,
-                        400
-                      )
+                    colorValidationErrors.push(
+                      `❌ New color name must be different from the old color name for size "${size.sizeName}" at color index ${colorIndex + 1}.`
                     );
-                    return true;
                   }
 
+                  // duplicates
                   if (
-                    seenOldColorNames.includes(color.colorName.toLowerCase())
+                    seenOldColorNames.includes(color.colorName?.toLowerCase())
                   ) {
-                    next(
-                      new ApiError(
-                        `Duplicate color name "${color.colorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each color name must be unique.`,
-                        400
-                      )
+                    colorValidationErrors.push(
+                      `❌ Duplicate color name "${color.colorName}" found in size "${size.sizeName}" at color index ${colorIndex + 1}.`
                     );
-                    return true;
                   }
+                }
 
+                // duplicates
+                if (color.newColorName != null) {
                   if (
-                    color.newColorName &&
-                    seenNewColorNames.includes(color.newColorName.toLowerCase())
+                    seenNewColorNames.includes(
+                      color.newColorName?.toLowerCase()
+                    )
                   ) {
-                    next(
-                      new ApiError(
-                        `Duplicate new color name "${color.newColorName}" found in size "${size.sizeName}" at color index ${colorIndex}. Each new color name must be unique.`,
-                        400
-                      )
+                    colorValidationErrors.push(
+                      `❌ Duplicate new color name "${color.newColorName}" found in size "${size.sizeName}" at color index ${colorIndex + 1}.`
                     );
-                    return true;
                   }
-
                   if (
-                    color.newColorName &&
-                    seenOldColorNames.includes(color.newColorName.toLowerCase())
+                    seenOldColorNames.includes(
+                      color.newColorName?.toLowerCase()
+                    )
                   ) {
-                    next(
-                      new ApiError(
-                        `The color name "${color.newColorName}" already exists. Please choose a unique name.`,
-                        400
-                      )
+                    colorValidationErrors.push(
+                      `❌ The color name "${color.newColorName}" already exists. Please choose a unique name.`
                     );
-                    return true;
                   }
+                }
 
-                  if (color.colorQuantity != null && color.colorQuantity < 0) {
-                    next(
-                      new ApiError(
-                        `Color quantity for size "${size.sizeName}" at color index ${colorIndex} cannot be negative.`,
-                        400
-                      )
+                let quantityErrorsStatus = false;
+                // quantity
+                if (color.colorQuantity != null) {
+                  if (typeof color.colorQuantity !== "number") {
+                    colorValidationErrors.push(
+                      `❌ Color quantity${size.sizeName != null && typeof size.sizeName === "string" ? ` for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a number.`
                     );
-                    return true;
-                  }
-
-                  if (
-                    color.colorQuantity != null &&
-                    !Number.isInteger(color.colorQuantity)
-                  ) {
-                    next(
-                      new ApiError(
-                        `Color quantity for size "${size.sizeName}" at color index ${colorIndex} must be a whole number (no decimals).`,
-                        400
-                      )
+                    quantityErrorsStatus = true;
+                  } else if (color.colorQuantity <= 0) {
+                    colorValidationErrors.push(
+                      `❌ Color quantity for size "${size.sizeName}" at color index ${colorIndex + 1} cannot be negative.`
                     );
-                    return true;
+                    quantityErrorsStatus = true;
+                  } else if (!Number.isInteger(color.colorQuantity)) {
+                    colorValidationErrors.push(
+                      `❌ Color quantity for size "${size.sizeName}" at color index ${colorIndex + 1} must be an integer.`
+                    );
+                    quantityErrorsStatus = true;
                   }
+                }
 
+                if (color.type != null && typeof color.type === "string" && (color.type === "new" || color.type === "update")) {
+                  // type === "new"
                   if (color.type === "new") {
-                    if (
-                      size.deleteColors &&
-                      size.deleteColors.includes(color.colorName)
-                    ) {
-                      next(
-                        new ApiError(
-                          `Color "${color.colorName}" cannot be added because it is scheduled for deletion.`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    if (color.colorQuantity == null) {
-                      next(
-                        new ApiError(
-                          `Please specify the quantity available for the new color "${color.colorName}" in size "${size.sizeName}".`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    if (color.newColorName) {
-                      next(
-                        new ApiError(
-                          `❌ For new colors in size "${size.sizeName}", use "color Name" only. Do not include "new Color Name".`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    const newColorNameIsExist = original.colors.find(
-                      (c) =>
-                        c.color.toLowerCase() === color.colorName.toLowerCase()
-                    );
-
-                    if (newColorNameIsExist) {
-                      next(
-                        new ApiError(
-                          `❌ The color name "${color.colorName}" already exists in the size "${original.size}". Please choose a different name.`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-                  }
-
-                  if (color.type === "update") {
-                    if (
-                      size.deleteColors &&
-                      size.deleteColors.includes(color.colorName)
-                    ) {
-                      next(
-                        new ApiError(
-                          `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    const existingColor = original.colors.find(
-                      (c) =>
-                        c.color.toLowerCase() === color.colorName.toLowerCase()
-                    );
-
-                    if (!existingColor) {
-                      next(
-                        new ApiError(
-                          `❌ The original color "${color.colorName}" does not exist in size "${original.size}".`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    // ✅ تحقق أنه تم تقديم تغيير فعلي
-                    const isSameQuantity =
-                      color.colorQuantity == null ||
-                      color.colorQuantity === existingColor.quantity;
-
-                    const isSameName =
-                      !color.newColorName ||
-                      color.newColorName.toLowerCase() ===
-                        color.colorName.toLowerCase();
-
-                    if (isSameQuantity && isSameName) {
-                      next(
-                        new ApiError(
-                          `❌ No update provided for the color "${color.colorName}" in size "${original.size}". Please change the name or the quantity.`,
-                          400
-                        )
-                      );
-                      return true;
-                    }
-
-                    if (color.newColorName) {
+                    if (color.colorName != null && typeof color.colorName === "string") {
                       if (
-                        color.newColorName &&
-                        size.deleteColors &&
-                        size.deleteColors.includes(color.newColorName)
+                        size.deleteColors != null &&
+                        Array.isArray(size.deleteColors) &&
+                        size.deleteColors.length > 0 &&
+                        size.deleteColors?.includes(color.colorName)
                       ) {
-                        next(
-                          new ApiError(
-                            `Cannot rename the color to (${color.newColorName}) because it is marked for deletion.`,
-                            400
-                          )
+                        colorValidationErrors.push(
+                          `❌ Color "${color.colorName}" cannot be added because it is scheduled for deletion.`
                         );
-                        return true;
                       }
-
+                    }
+                    if (color.colorQuantity == null) {
+                      colorValidationErrors.push(
+                        `❌ Please specify the quantity for the new color "${color.colorName}" in size "${size.sizeName}".`
+                      );
+                    }
+                    if (color.newColorName != null) {
+                      colorValidationErrors.push(
+                        `❌ For new colors in size "${size.sizeName}", use "Color Name" only.`
+                      );
+                    }
+                    if (original != null && color.colorName != null && typeof color.colorName === "string") {
                       const newColorNameIsExist = original.colors.find(
                         (c) =>
-                          c.color.toLowerCase() ===
-                          color.newColorName.toLowerCase()
+                          c.color.toLowerCase() === color.colorName?.toLowerCase()
                       );
-
                       if (newColorNameIsExist) {
-                        next(
-                          new ApiError(
-                            `❌ The new color name "${color.newColorName}" already exists in the size "${original.size}". Please choose a different name.`,
-                            400
-                          )
+                        colorValidationErrors.push(
+                          `❌ The color name "${color.colorName}" already exists in size "${original.size}".`
                         );
-                        return true;
                       }
                     }
                   }
+  
+                  // type === "update"
+                  if (color.type === "update") {
+                    if (color.colorName != null && typeof color.colorName === "string") {
+                      if (
+                        size.deleteColors != null &&
+                        Array.isArray(size.deleteColors) &&
+                        size.deleteColors.length > 0 &&
+                        size.deleteColors?.includes(color.colorName)
+                      ) {
+                        colorValidationErrors.push(
+                          `❌ Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`
+                        );
+                      }
 
-                  seenOldColorNames.push(color.colorName.toLowerCase());
-                  if (color.newColorName) {
-                    seenNewColorNames.push(color.newColorName.toLowerCase());
+                      if (original != null) {
+                        const existingColor = original.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() === color.colorName?.toLowerCase()
+                        );
+                        if (!existingColor) {
+                          colorValidationErrors.push(
+                            `❌ The original color "${color.colorName}" does not exist in size "${original.size}".`
+                          );
+                        } else {
+
+                            let isSameQuantity =
+                              color.colorQuantity == null || quantityErrorsStatus ||
+                              color.colorQuantity === existingColor.quantity;
+
+                          const isSameName =
+                            color.newColorName == null || 
+                            typeof color.newColorName !== "string" ||
+                            color.newColorName?.toLowerCase() ===
+                              color.colorName?.toLowerCase();
+
+                          if (isSameQuantity && isSameName) {
+                            colorValidationErrors.push(
+                              `❌ No update provided for the color "${color.colorName}" in size "${original.size}".`
+                            );
+                          }
+                        }
+                      }
+                    }
+                    if (color.newColorName != null && typeof color.newColorName !== "string") {
+                      colorValidationErrors.push(
+                        `❌ New color name ${size.sizeName != null && typeof size.sizeName === "string" ? `for size "${size.sizeName}"` : ""} at color index ${colorIndex + 1} must be a string.`
+                      );
+                    } else if (color.newColorName != null) {
+                      if (
+                        size.deleteColors != null &&
+                        Array.isArray(size.deleteColors) &&
+                        size.deleteColors.length > 0 &&
+                        size.deleteColors?.includes(color.newColorName)
+                      ) {
+                        colorValidationErrors.push(
+                          `❌ Cannot rename the color to "${color.newColorName}" because it is marked for deletion.`
+                        );
+                      }
+
+                      if (original != null) {
+                        const newColorNameIsExist = original.colors.find(
+                          (c) =>
+                            c.color.toLowerCase() ===
+                            color.newColorName?.toLowerCase()
+                        );
+                        if (newColorNameIsExist) {
+                          colorValidationErrors.push(
+                            `❌ The new color name "${color.newColorName}" already exists in size "${original.size}".`
+                          );
+                        }
+                      }
+                    }
                   }
-
-                  return false;
                 }
-              );
 
-              if (colorValidator) return true;
+                // push seen names
+                if (color.colorName)
+                  seenOldColorNames.push(color.colorName?.toLowerCase());
+                if (color.newColorName)
+                  seenNewColorNames.push(color.newColorName?.toLowerCase());
+
+                // لو فيه أخطاء للـ color ده، نضيفها في colorErrors
+                if (colorValidationErrors.length > 0) {
+                  colorErrors.push({
+                    colorIndex,
+                    message: colorValidationErrors,
+                  });
+                }
+              });
+
+              // لو فيه أخطاء ألوان في الـ size ده، نضيفها في updateSizeColorsErrors
+              if (colorErrors.length > 0) {
+                updateSizeColorsErrors.push({
+                  index: index, // index الـ size
+                  colors: colorErrors,
+                });
+              }
             }
 
-            const allOriginalColorsDeleted =
-              Array.isArray(original.colors) &&
-              original.colors.length > 0 && // ✅ شرط وجود ألوان
-              Array.isArray(size.deleteColors) &&
-              size.deleteColors.length === original.colors.length &&
-              original.colors.every((oc) =>
-                size.deleteColors.some(
-                  (dc) => dc.toLowerCase() === oc.color.toLowerCase()
-                )
-              );
-
-            const hasNewOrUpdatedColors =
-              Array.isArray(size.sizeColors) &&
-              size.sizeColors.some(
-                (c) => c.type === "new" || c.type === "update"
-              );
-
-            if (size.sizeQuantity != null) {
-              const hasOriginalColors = original.colors.length > 0;
-
-              if (hasNewOrUpdatedColors) {
-                next(
-                  new ApiError(
-                    `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`,
-                    400
+            // Done
+            if (original != null) {
+              const allOriginalColorsDeleted =
+                Array.isArray(original.colors) &&
+                original.colors.length > 0 && // ✅ شرط وجود ألوان
+                Array.isArray(size.deleteColors) &&
+                size.deleteColors.length === original.colors.length &&
+                original.colors.every((oc) =>
+                  size.deleteColors.some(
+                    (dc) => dc.toLowerCase() === oc.color.toLowerCase()
                   )
                 );
-                return true;
-              }
 
-              // الحالة 1: فيه ألوان أصلية
-              if (hasOriginalColors) {
-                if (
-                  !Array.isArray(size.deleteColors) ||
-                  size.deleteColors.length === 0
-                ) {
-                  next(
-                    new ApiError(
-                      `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`,
-                      400
-                    )
+              const hasNewOrUpdatedColors =
+                Array.isArray(size.sizeColors) &&
+                size.sizeColors.some(
+                  (c) => c.type === "new" || c.type === "update"
+                );
+
+              if (size.sizeQuantity != null) {
+                const hasOriginalColors = original.colors.length > 0;
+
+                if (hasNewOrUpdatedColors) {
+                  errors.push(
+                    `❌ Cannot update size quantity for "${size.sizeName}" while adding or updating colors.`
                   );
-                  return true;
                 }
 
-                if (!allOriginalColorsDeleted) {
-                  next(
-                    new ApiError(
-                      `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`,
-                      400
-                    )
-                  );
-                  return true;
-                }
-              }
+                // الحالة 1: فيه ألوان أصلية
+                if (hasOriginalColors) {
+                  if (
+                    !Array.isArray(size.deleteColors) ||
+                    size.deleteColors.length === 0
+                  ) {
+                    errors.push(
+                      `❌ You must delete all colors for size "${size.sizeName}" before adding a new quantity.`
+                    );
+                  }
 
-              // الحالة 2: مفيش ألوان أصلية
-              if (!hasOriginalColors) {
-                if (
-                  Array.isArray(size.deleteColors) &&
-                  size.deleteColors.length > 0
-                ) {
-                  next(
-                    new ApiError(
-                      `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`,
-                      400
-                    )
-                  );
-                  return true;
+                  if (!allOriginalColorsDeleted) {
+                    errors.push(
+                      `❌ Cannot update quantity for size "${size.sizeName}" because it still has existing colors. Please delete them first.`
+                    );
+                  }
                 }
+
+                // الحالة 2: مفيش ألوان أصلية
+                if (!hasOriginalColors) {
+                  if (
+                    Array.isArray(size.deleteColors) &&
+                    size.deleteColors.length > 0
+                  ) {
+                    errors.push(
+                      `❌ Cannot delete colors for "${size.sizeName}" because it has no original colors.`
+                    );
+                  }
+                }
+              } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+                errors.push(
+                  `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`
+                );
               }
-            } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
-              next(
-                new ApiError(
-                  `If you want to delete all colors for size "${size.sizeName}", you must also provide a general quantity for the size.`,
-                  400
-                )
-              );
-              return true;
             }
 
-            seenSizeNames.push(size.sizeName.toLowerCase());
-            if (size.newSizeName != null) {
+            // Done
+            if (size.sizeName != null && typeof size.sizeName === "string") {
+              seenSizeNames.push(size.sizeName.toLowerCase());
+            }
+            
+            if (
+              size.newSizeName != null &&
+              typeof size.newSizeName === "string"
+            ) {
               seenNewSizeNames.push(size.newSizeName.toLowerCase());
             }
-            return false;
+
+            if (errors.length > 0) {
+              updateSizesErrors.push({
+                index: index,
+                message: errors,
+              });
+            }
           });
 
-          if (hasValidationErrors) updateStatus = false;
+          if (updateSizesErrors.length > 0) {
+            validationErrors.updateSizes = updateSizesErrors;
+            updateStatus = false;
+          }
+
+          if (updateSizeColorsErrors.length > 0) {
+            validationErrors.updateSizeColors = updateSizeColorsErrors;
+            updateStatus = false;
+          }
         }
 
         if (
@@ -958,11 +927,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               );
 
               if (sizeIsExist) {
-                errors.push(`❌ Size "${size.size}" already exists in the product.`);
+                errors.push(
+                  `❌ Size "${size.size}" already exists in the product.`
+                );
               }
 
               if (seenNewSizeNames.includes(size.size.toLowerCase())) {
-                errors.push(`❌ Duplicate size "${size.size}" in addSizes at index ${i}.`);
+                errors.push(
+                  `❌ Duplicate size "${size.size}" in addSizes at index ${i}.`
+                );
               }
             }
 
@@ -980,7 +953,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               } else if (size.priceAfterDiscount <= 0) {
                 errors.push(`❌ priceAfterDiscount must be greater than 0.`);
               } else if (size.priceAfterDiscount > size.price) {
-                errors.push(`❌ priceAfterDiscount must be less than or equal to price.`);
+                errors.push(
+                  `❌ priceAfterDiscount must be less than or equal to price.`
+                );
               }
             }
 
@@ -994,7 +969,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
 
               if (size.colors != null) {
-                errors.push(`❌ You can't define both quantity and colors at the same time.`);
+                errors.push(
+                  `❌ You can't define both quantity and colors at the same time.`
+                );
               }
             }
 
@@ -1016,29 +993,43 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   const colorValidationErrors = [];
 
                   if (c.color == null) {
-                    colorValidationErrors.push(`❌ Color name is required in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ Color name is required in colors[${colorIndex}].`
+                    );
                   } else if (typeof c.color !== "string") {
-                    colorValidationErrors.push(`❌ Color must be a string in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ Color must be a string in colors[${colorIndex}].`
+                    );
                   } else if (seenColorNames.includes(c.color.toLowerCase())) {
-                    colorValidationErrors.push(`❌ Duplicate color "${c.color}" in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ Duplicate color "${c.color}" in colors[${colorIndex}].`
+                    );
                   } else {
                     seenColorNames.push(c.color.toLowerCase());
                   }
 
                   if (c.quantity == null) {
-                    colorValidationErrors.push(`❌ quantity is required in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ quantity is required in colors[${colorIndex}].`
+                    );
                   } else if (typeof c.quantity !== "number") {
-                    colorValidationErrors.push(`❌ quantity must be a number in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ quantity must be a number in colors[${colorIndex}].`
+                    );
                   } else if (!Number.isInteger(c.quantity)) {
-                    colorValidationErrors.push(`❌ quantity must be an integer in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ quantity must be an integer in colors[${colorIndex}].`
+                    );
                   } else if (c.quantity <= 0) {
-                    colorValidationErrors.push(`❌ quantity must be greater than 0 in colors[${colorIndex}].`);
+                    colorValidationErrors.push(
+                      `❌ quantity must be greater than 0 in colors[${colorIndex}].`
+                    );
                   }
 
                   if (colorValidationErrors.length > 0) {
                     colorErrors.push({
                       colorIndex,
-                      message: colorValidationErrors
+                      message: colorValidationErrors,
                     });
                   }
                 });
@@ -1046,7 +1037,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 if (colorErrors.length > 0) {
                   addSizeColorsErrors.push({
                     index: i,
-                    colors: colorErrors
+                    colors: colorErrors,
                   });
                 }
               }
@@ -1055,7 +1046,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             if (errors.length > 0) {
               addSizesErrors.push({
                 index: i,
-                message: errors
+                message: errors,
               });
             }
           });
@@ -2433,130 +2424,131 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         product.sizesIsExist = true;
       }
     } else {
-      if (addSizes != null) {
-        return next(
-          new ApiError(
-            "Cannot add sizes when the product is not set to support sizes.",
-            400
-          )
-        );
-      }
+      // if (addSizes != null) {
+      //   return next(
+      //     new ApiError(
+      //       "Cannot add sizes when the product is not set to support sizes.",
+      //       400
+      //     )
+      //   );
+      // }
 
-      if (updateSizes != null) {
-        return next(
-          new ApiError(
-            "Cannot update sizes when the product is not set to support sizes.",
-            400
-          )
-        );
-      }
+      // if (updateSizes != null) {
+      //   return next(
+      //     new ApiError(
+      //       "Cannot update sizes when the product is not set to support sizes.",
+      //       400
+      //     )
+      //   );
+      // }
 
-      if (deleteSizes != null) {
-        return next(
-          new ApiError(
-            "Cannot delete sizes when the product is not set to support sizes.",
-            400
-          )
-        );
-      }
+      // if (deleteSizes != null) {
+      //   return next(
+      //     new ApiError(
+      //       "Cannot delete sizes when the product is not set to support sizes.",
+      //       400
+      //     )
+      //   );
+      // }
 
-      if (product.sizesIsExist) {
-        product.sizes = [];
-      }
+      // if (product.sizesIsExist) {
+      //   product.sizes = [];
+      // }
 
-      if (
-        product.sizesIsExist &&
-        deleteGeneralColors != null &&
-        deleteGeneralColors?.length > 0
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   product.sizesIsExist &&
+      //   deleteGeneralColors != null &&
+      //   deleteGeneralColors?.length > 0
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        !product.sizesIsExist &&
-        deleteGeneralColors != null &&
-        product.colors.length === 0
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   !product.sizesIsExist &&
+      //   deleteGeneralColors != null &&
+      //   product.colors.length === 0
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        product.sizesIsExist &&
-        updateGeneralColors != null &&
-        updateGeneralColors?.length > 0
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   product.sizesIsExist &&
+      //   updateGeneralColors != null &&
+      //   updateGeneralColors?.length > 0
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        !product.sizesIsExist &&
-        updateGeneralColors != null &&
-        updateGeneralColors?.length > 0 &&
-        product.colors.length === 0
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   !product.sizesIsExist &&
+      //   updateGeneralColors != null &&
+      //   updateGeneralColors?.length > 0 &&
+      //   product.colors.length === 0
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (product.sizesIsExist && price == null) {
-        return next(new ApiError("", 400));
-      }
+      // if (product.sizesIsExist && price == null) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        product.sizesIsExist &&
-        (addGeneralColors == null || addGeneralColors?.length === 0) &&
-        quantity == null
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   product.sizesIsExist &&
+      //   (addGeneralColors == null || addGeneralColors?.length === 0) &&
+      //   quantity == null
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (price != null && typeof price !== "number") {
-        return next(new ApiError("", 400));
-      }
+      // if (price != null && typeof price !== "number") {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (price != null && price < 0) {
-        return next(new ApiError("", 400));
-      }
+      // if (price != null && price < 0) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (!product.sizesIsExist && price != null && price === product.price) {
-        return next(new ApiError("", 400));
-      }
+      // if (!product.sizesIsExist && price != null && price === product.price) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        priceAfterDiscount != null &&
-        typeof priceAfterDiscount !== "number"
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   priceAfterDiscount != null &&
+      //   typeof priceAfterDiscount !== "number"
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (priceAfterDiscount != null && priceAfterDiscount < 0) {
-        return next(new ApiError("", 400));
-      }
+      // if (priceAfterDiscount != null && priceAfterDiscount < 0) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        priceAfterDiscount != null &&
-        price != null &&
-        priceAfterDiscount >= price
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   priceAfterDiscount != null &&
+      //   price != null &&
+      //   priceAfterDiscount >= price
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        !product.sizesIsExist &&
-        priceAfterDiscount != null &&
-        price == null &&
-        priceAfterDiscount >= product.price
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   !product.sizesIsExist &&
+      //   priceAfterDiscount != null &&
+      //   price == null &&
+      //   priceAfterDiscount >= product.price
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
-      if (
-        !product.sizesIsExist &&
-        priceAfterDiscount != null &&
-        priceAfterDiscount === product.priceAfterDiscount
-      ) {
-        return next(new ApiError("", 400));
-      }
+      // if (
+      //   !product.sizesIsExist &&
+      //   priceAfterDiscount != null &&
+      //   priceAfterDiscount === product.priceAfterDiscount
+      // ) {
+      //   return next(new ApiError("", 400));
+      // }
 
+      // eslint-disable-next-line no-lonely-if
       if (!product.sizesIsExist) {
         if (price != null) {
           product.price = price;

@@ -319,6 +319,7 @@ exports.updateProductValidator = [
       "category",
       "brand",
       "updateSizes",
+      "sizesIsExist",
     ],
     ["id"]
   ),

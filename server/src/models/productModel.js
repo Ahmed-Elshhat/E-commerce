@@ -144,32 +144,51 @@ productSchema.pre(/^find/, function (next) {
   next();
 });
 
-const setImageURL = (doc) => {
-  if (doc.coverImage) {
-    const imageUrl = `${process.env.BASE_URL}/products/${doc.coverImage}`;
-    doc.coverImage = imageUrl;
-  }
-  if (doc.images) {
-    const imagesList = [];
-    doc.images.forEach((image) => {
-      const imageUrl = {
-        _id: image._id,
-        url: `${process.env.BASE_URL}/products/${image.url}`,
-      };
-      imagesList.push(imageUrl);
-    });
-    doc.images = imagesList;
-  }
-};
+// const setImageURL = (doc) => {
+//   if (doc.coverImage) {
+//     const imageUrl = `${process.env.BASE_URL}/products/${doc.coverImage}`;
+//     doc.coverImage = imageUrl;
+//   }
+//   if (doc.images) {
+//     const imagesList = [];
+//     doc.images.forEach((image) => {
+//       const imageUrl = {
+//         _id: image._id,
+//         url: `${process.env.BASE_URL}/products/${image.url}`,
+//       };
+//       imagesList.push(imageUrl);
+//     });
+//     doc.images = imagesList;
+//   }
+// };
 
-// findOne, findAll and update
-productSchema.post("init", (doc) => {
-  setImageURL(doc);
+// // findOne, findAll and update
+// productSchema.post("init", (doc) => {
+//   setImageURL(doc);
+// });
+
+// // create
+// productSchema.post("save", (doc) => {
+//   setImageURL(doc);
+// });
+
+// Virtual for coverImage full URL
+productSchema.virtual("coverImageFull").get(function () {
+  if (this.coverImage) {
+    return `${process.env.BASE_URL}/products/${this.coverImage}`;
+  }
+  return null;
 });
 
-// create
-productSchema.post("save", (doc) => {
-  setImageURL(doc);
+// Virtual for images full URLs
+productSchema.virtual("imagesFull").get(function () {
+  if (this.images && this.images.length > 0) {
+    return this.images.map(img => ({
+      _id: img._id,
+      url: `${process.env.BASE_URL}/products/${img.url}`
+    }));
+  }
+  return [];
 });
 
 const ProductModel = mongoose.model("Product", productSchema);

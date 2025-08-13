@@ -166,6 +166,8 @@ exports.addProductToCart = asyncHandler(async (req, res, next) => {
   } else {
     // Step 7: Cart exists, check if the same product (with same size/color) is already in the cart
     const productIndex = cart.cartItems.findIndex((item) => {
+      if (item.isAvailable === false || !item.product) return false;
+
       const itemProductId = item.product._id
         ? item.product._id.toString()
         : item.product.toString();
@@ -253,9 +255,11 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res, next) => {
   }
 
   // Step 3: Find the product in the cart by itemId (using req.params.itemId)
-  const productIndex = cart.cartItems.findIndex(
-    (item) => item._id.toString() === req.params.itemId
-  );
+  const productIndex = cart.cartItems.findIndex((item) => {
+    if (item.isAvailable === false || !item.product) return false;
+
+    return item._id.toString() === req.params.itemId;
+  });
 
   if (productIndex === -1) {
     // Error: Product item not found in the cart

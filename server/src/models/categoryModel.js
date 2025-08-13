@@ -19,24 +19,31 @@ const categorySchema = new mongoose.Schema(
     },
     image: String,
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-const setImageURL = (doc) => {
-  if (doc.image) {
-    const imageUrl = `${process.env.BASE_URL}/categories/${doc.image}`;
-    doc.image = imageUrl;
+// const setImageURL = (doc) => {
+//   if (doc.image) {
+//     const imageUrl = `${process.env.BASE_URL}/categories/${doc.image}`;
+//     doc.image = imageUrl;
+//   }
+// };
+
+// // findOne, findAll and update
+// categorySchema.post("init", (doc) => {
+//   setImageURL(doc);
+// });
+
+// // create
+// categorySchema.post("save", (doc) => {
+//   setImageURL(doc);
+// });
+
+categorySchema.virtual("imageFull").get(function () {
+  if (this.image) {
+    return `${process.env.BASE_URL}/categories/${this.image}`;
   }
-};
-
-// findOne, findAll and update
-categorySchema.post("init", (doc) => {
-  setImageURL(doc);
-});
-
-// create
-categorySchema.post("save", (doc) => {
-  setImageURL(doc);
+  return null;
 });
 
 // 2- Create model

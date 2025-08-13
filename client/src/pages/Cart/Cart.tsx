@@ -18,13 +18,14 @@ function Cart() {
     type: "",
     id: "",
   });
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   useEffect(() => {
     async function getCart() {
       setLoading(true);
       try {
         const res = await Axios.get(`${CART}`);
         if (res.status === 200) {
+          console.log(res.data);
           setCart(res.data);
           setLoading(false);
         }
@@ -95,11 +96,15 @@ function Cart() {
                     <div className="item" key={item._id}>
                       <div className="info">
                         <div className="image">
-                          <img src={item.product.imageCover} alt="" />
+                          {item.product != null && (
+                            <img src={item.product.coverImageFull} alt="" />
+                          )}
                         </div>
                         <div className="details">
                           <p className="description">
-                            {item.product.title}
+                            {item.product != null && (
+                              <>{i18n.language == "ar"? item.product.titleAr : item.product.titleEn}</>
+                            )}
                             Iku S3 Dual SIM Mobile Phone – BLACK
                           </p>
                           <div className="price">

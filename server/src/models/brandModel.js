@@ -18,22 +18,29 @@ const brandSchema = new mongoose.Schema(
     },
     image: String,
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
 
-const setImageURL = (doc) => {
-  if (doc.image) {
-    const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
-    doc.image = imageUrl;
+// const setImageURL = (doc) => {
+//   if (doc.image) {
+//     const imageUrl = `${process.env.BASE_URL}/brands/${doc.image}`;
+//     doc.image = imageUrl;
+//   }
+// };
+
+// brandSchema.post("init", (doc) => {
+//   setImageURL(doc);
+// });
+
+// brandSchema.post("save", (doc) => {
+//   setImageURL(doc);
+// });
+
+brandSchema.virtual("imageFull").get(function () {
+  if (this.image) {
+    return `${process.env.BASE_URL}/brands/${this.image}`;
   }
-};
-
-brandSchema.post("init", (doc) => {
-  setImageURL(doc);
-});
-
-brandSchema.post("save", (doc) => {
-  setImageURL(doc);
+  return null;
 });
 
 const BrandModel = mongoose.model("Brand", brandSchema);
