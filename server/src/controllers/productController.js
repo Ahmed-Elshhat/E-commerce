@@ -662,7 +662,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   // Mark as seen to catch duplicates
                   seenDeleteColors.push(lowerC);
 
-                // Normalize the deleteColors array by replacing the original value with the lowercase version
+                  // Normalize the deleteColors array by replacing the original value with the lowercase version
                   size.deleteColors[i] = lowerC;
                 }
 
@@ -1107,22 +1107,40 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
         }
 
+        // ---------------------------------------------------------
+        // ADD SIZES VALIDATION & NORMALIZATION (READ-ONLY COMMENTS)
+        // ---------------------------------------------------------
+        // This block validates a request payload that adds NEW sizes to a product.
+        // It checks:
+        //   - Size name presence, type, and uniqueness (vs product and within the same request)
+        //   - Required price and optional discounted price rules
+        //   - Either a general quantity OR a list of colors must be provided (but not both)
+        //   - Color entries (if provided) must be valid, unique, and have positive integer quantities
+        // ---------------------------------------------------------
+
         if (
           addSizes != null &&
           Array.isArray(addSizes) &&
           addSizes?.length > 0
         ) {
+          // Collect size-level validation errors (per size object)
           const addSizesErrors = [];
+          // Collect color-level validation errors (nested under a given size)
           const addSizeColorsErrors = [];
 
+          // Validate each size candidate in the addSizes array
           addSizes.forEach((size, i) => {
-            const errors = [];
+            const errors = []; // Errors specific to this "size" entry (index i)
 
+            // -----------------------------
+            // 1) Validate size name (size)
+            // -----------------------------
             if (size?.size == null) {
               errors.push(`❌ Size name is required.`);
             } else if (typeof size?.size !== "string") {
               errors.push(`❌ Size name must be a string.`);
             } else {
+              // Check if this size already exists on the product (case-insensitive)
               const sizeIsExist = product.sizes.find(
                 (s) =>
                   s?.size?.trim()?.toLowerCase() ===
@@ -1135,6 +1153,8 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                 );
               }
 
+              // Prevent duplicates within the same addSizes payload
+              // (seenNewSizeNames is assumed to be tracked outside this block for cross-section consistency)
               if (
                 seenNewSizeNames.includes(size?.size?.trim()?.toLowerCase())
               ) {
@@ -1144,6 +1164,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
+            // -----------------------------
+            // 2) Validate required price
+            // -----------------------------
             if (size?.price == null) {
               errors.push(`❌ Price is required.`);
             } else if (typeof size?.price !== "number") {
@@ -1152,6 +1175,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               errors.push(`❌ Price must be greater than 0.`);
             }
 
+            // ---------------------------------------------------
+            // 3) Validate optional priceAfterDiscount (if given)
+            // ---------------------------------------------------
+            // Must be a number > 0, and cannot exceed the base price.
             if (size?.priceAfterDiscount != null) {
               if (typeof size?.priceAfterDiscount !== "number") {
                 errors.push(`❌ priceAfterDiscount must be a number.`);
@@ -1164,6 +1191,12 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
+            // ----------------------------------------------------
+            // 4) Validate quantity vs colors (mutually exclusive)
+            // ----------------------------------------------------
+            // If "quantity" is present:
+            //  - quantity must be a positive integer
+            //  - colors MUST NOT be provided simultaneously
             if (size?.quantity != null) {
               if (typeof size?.quantity !== "number") {
                 errors.push(`❌ quantity must be a number.`);
@@ -1180,23 +1213,31 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
               }
             }
 
+            // Require at least one stock input path: either quantity OR colors
             if (size?.quantity == null && size?.colors == null) {
               errors.push(`❌ You must define either quantity or colors.`);
             }
 
-            // الألوان فقط
+            // ----------------------------------------------------
+            // 5) Colors-only path (no general quantity provided)
+            // ----------------------------------------------------
+            // When quantity is omitted but colors are provided, validate the colors array.
+            // Each color must have:
+            //   - color (string, unique within this size)
+            //   - quantity (positive integer)
             if (size?.quantity == null && size?.colors != null) {
               if (!Array.isArray(size?.colors)) {
                 errors.push(`❌ colors must be an array.`);
               } else if (size?.colors?.length === 0) {
                 errors.push(`❌ colors array must not be empty.`);
               } else {
-                const seenColorNames = [];
-                const colorErrors = [];
+                const seenColorNames = []; // Track duplicate color names within this size payload
+                const colorErrors = []; // Collect per-color validation errors
 
                 size.colors.forEach((c, colorIndex) => {
                   const colorValidationErrors = [];
 
+                  // --- color name checks ---
                   if (c?.color == null) {
                     colorValidationErrors.push(
                       `❌ Color name is required in colors[${colorIndex}].`
@@ -1212,9 +1253,11 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                       `❌ Duplicate color "${c.color}" in colors[${colorIndex}].`
                     );
                   } else {
+                    // Record this color name to catch duplicates in the same size request
                     seenColorNames.push(c?.color?.trim()?.toLowerCase());
                   }
 
+                  // --- quantity checks for each color ---
                   if (c?.quantity == null) {
                     colorValidationErrors.push(
                       `❌ quantity is required in colors[${colorIndex}].`
@@ -1233,6 +1276,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                     );
                   }
 
+                  // Accumulate this color's errors if any
                   if (colorValidationErrors?.length > 0) {
                     colorErrors.push({
                       colorIndex,
@@ -1241,15 +1285,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                   }
                 });
 
+                // If any color-level errors exist for this size, collect them for the global report
                 if (colorErrors?.length > 0) {
                   addSizeColorsErrors.push({
-                    index: i,
+                    index: i, // index of the size in addSizes
                     colors: colorErrors,
                   });
                 }
               }
             }
 
+            // If this size entry has any errors, collect them with its index
             if (errors?.length > 0) {
               addSizesErrors.push({
                 index: i,
@@ -1258,12 +1304,17 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             }
           });
 
+          // ------------------------------------------------
+          // 6) Emit collected errors and flip updateStatus
+          // ------------------------------------------------
           if (addSizesErrors?.length > 0) {
+            // Size-level errors go under validationErrors.addSizes
             validationErrors.addSizes = addSizesErrors;
             updateStatus = false;
           }
 
           if (addSizeColorsErrors?.length > 0) {
+            // Color-level errors for new sizes go under validationErrors.addSizeColors
             validationErrors.addSizeColors = addSizeColorsErrors;
             updateStatus = false;
           }
