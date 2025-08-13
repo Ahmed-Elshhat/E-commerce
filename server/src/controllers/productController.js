@@ -273,9 +273,9 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
         );
       }
 
+      let updateStatus = true;
+      const validationErrors = {};
       if (product.sizesIsExist) {
-        let updateStatus = true;
-        const validationErrors = {};
 
         // Validation
         // Check if deleteSizes is provided, is an array, and contains at least one element
@@ -1320,6 +1320,10 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
         }
 
+        if (!updateStatus) {
+          return next(new ApiError(validationErrors, 400));
+        }
+
         // update product and update carts
         if (updateStatus) {
           if (
@@ -1329,7 +1333,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           ) {
             const deleteSizesPromises = deleteSizes.map(async (s) => {
               product.sizes = product.sizes.filter(
-                (size) => size.size.toLowerCase() !== s.toLowerCase()
+                (size) => size.size.toLowerCase() !== s.trim().toLowerCase()
               );
 
               const cartsToUpdate = await Cart.find({
@@ -1402,7 +1406,7 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
             const updateSizesPromises = updateSizes.map(async (size) => {
               // Find the target size in the product based on the provided size name (case insensitive)
               let productSize = product.sizes.find(
-                (s) => s.size.toLowerCase() === size.sizeName.toLowerCase()
+                (s) => s.size.toLowerCase() === size.sizeName.trim().toLowerCase()
               );
 
               // If the size doesn't exist in the product, abort the operation
@@ -2521,58 +2525,302 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
           }
         }
       } else {
-        product.price = undefined;
-        product.priceAfterDiscount = undefined;
-        product.quantity = undefined;
-        product.colors = undefined;
+        // ---------------------------------------------------------
+        // ADD SIZES VALIDATION & NORMALIZATION (READ-ONLY COMMENTS)
+        // ---------------------------------------------------------
+        // This block validates a request payload that adds NEW sizes to a product.
+        // It checks:
+        //   - Size name presence, type, and uniqueness (vs product and within the same request)
+        //   - Required price and optional discounted price rules
+        //   - Either a general quantity OR a list of colors must be provided (but not both)
+        //   - Color entries (if provided) must be valid, unique, and have positive integer quantities
+        // ---------------------------------------------------------
 
         if (
           addSizes != null &&
           Array.isArray(addSizes) &&
-          addSizes.length > 0
+          addSizes?.length > 0
         ) {
-          const addSizesPromises = addSizes.map(async (size) => {
-            product.sizes.push(size);
+          // Collect size-level validation errors (per size object)
+          const addSizesErrors = [];
+          // Collect color-level validation errors (nested under a given size)
+          const addSizeColorsErrors = [];
 
-            const cartsToUpdate = await Cart.find({
-              "cartItems.product": product._id,
-            }).session(session);
+          // Validate each size candidate in the addSizes array
+          addSizes.forEach((size, i) => {
+            const errors = []; // Errors specific to this "size" entry (index i)
 
-            if (cartsToUpdate.length > 0) {
-              let cartsNeedingUpdate = 0;
+            // -----------------------------
+            // 1) Validate size name (size)
+            // -----------------------------
+            if (size?.size == null) {
+              errors.push(`❌ Size name is required.`);
+            } else if (typeof size?.size !== "string") {
+              errors.push(`❌ Size name must be a string.`);
+            } else {
+              // Check if this size already exists on the product (case-insensitive)
+              const sizeIsExist = product.sizes.find(
+                (s) =>
+                  s?.size?.trim()?.toLowerCase() ===
+                  size?.size?.trim()?.toLowerCase()
+              );
 
-              const updateResults = await Promise.all(
-                cartsToUpdate.map(async (cart) => {
-                  let shouldUpdateCart = false;
-                  const updatedItems = cart.cartItems.map((item) => {
-                    if (
-                      item.product._id.equals(product._id) &&
-                      item.size.toLowerCase() === size.size.toLowerCase()
-                    ) {
+              if (sizeIsExist) {
+                errors.push(
+                  `❌ Size "${size.size}" already exists in the product.`
+                );
+              }
+            }
+
+            // -----------------------------
+            // 2) Validate required price
+            // -----------------------------
+            if (size?.price == null) {
+              errors.push(`❌ Price is required.`);
+            } else if (typeof size?.price !== "number") {
+              errors.push(`❌ Price must be a number.`);
+            } else if (size?.price <= 0) {
+              errors.push(`❌ Price must be greater than 0.`);
+            }
+
+            // ---------------------------------------------------
+            // 3) Validate optional priceAfterDiscount (if given)
+            // ---------------------------------------------------
+            // Must be a number > 0, and cannot exceed the base price.
+            if (size?.priceAfterDiscount != null) {
+              if (typeof size?.priceAfterDiscount !== "number") {
+                errors.push(`❌ priceAfterDiscount must be a number.`);
+              } else if (size?.priceAfterDiscount <= 0) {
+                errors.push(`❌ priceAfterDiscount must be greater than 0.`);
+              } else if (size?.priceAfterDiscount > size?.price) {
+                errors.push(
+                  `❌ priceAfterDiscount must be less than or equal to price.`
+                );
+              }
+            }
+
+            // ----------------------------------------------------
+            // 4) Validate quantity vs colors (mutually exclusive)
+            // ----------------------------------------------------
+            // If "quantity" is present:
+            //  - quantity must be a positive integer
+            //  - colors MUST NOT be provided simultaneously
+            if (size?.quantity != null) {
+              if (typeof size?.quantity !== "number") {
+                errors.push(`❌ quantity must be a number.`);
+              } else if (!Number.isInteger(size?.quantity)) {
+                errors.push(`❌ quantity must be an integer.`);
+              } else if (size?.quantity <= 0) {
+                errors.push(`❌ quantity must be greater than 0.`);
+              }
+
+              if (size?.colors != null) {
+                errors.push(
+                  `❌ You can't define both quantity and colors at the same time.`
+                );
+              }
+            }
+
+            // Require at least one stock input path: either quantity OR colors
+            if (size?.quantity == null && size?.colors == null) {
+              errors.push(`❌ You must define either quantity or colors.`);
+            }
+
+            // ----------------------------------------------------
+            // 5) Colors-only path (no general quantity provided)
+            // ----------------------------------------------------
+            // When quantity is omitted but colors are provided, validate the colors array.
+            // Each color must have:
+            //   - color (string, unique within this size)
+            //   - quantity (positive integer)
+            if (size?.quantity == null && size?.colors != null) {
+              if (!Array.isArray(size?.colors)) {
+                errors.push(`❌ colors must be an array.`);
+              } else if (size?.colors?.length === 0) {
+                errors.push(`❌ colors array must not be empty.`);
+              } else {
+                const seenColorNames = []; // Track duplicate color names within this size payload
+                const colorErrors = []; // Collect per-color validation errors
+
+                size.colors.forEach((c, colorIndex) => {
+                  const colorValidationErrors = [];
+
+                  // --- color name checks ---
+                  if (c?.color == null) {
+                    colorValidationErrors.push(
+                      `❌ Color name is required in colors[${colorIndex}].`
+                    );
+                  } else if (typeof c?.color !== "string") {
+                    colorValidationErrors.push(
+                      `❌ Color must be a string in colors[${colorIndex}].`
+                    );
+                  } else if (
+                    seenColorNames.includes(c?.color?.trim()?.toLowerCase())
+                  ) {
+                    colorValidationErrors.push(
+                      `❌ Duplicate color "${c.color}" in colors[${colorIndex}].`
+                    );
+                  } else {
+                    // Record this color name to catch duplicates in the same size request
+                    seenColorNames.push(c?.color?.trim()?.toLowerCase());
+                  }
+
+                  // --- quantity checks for each color ---
+                  if (c?.quantity == null) {
+                    colorValidationErrors.push(
+                      `❌ quantity is required in colors[${colorIndex}].`
+                    );
+                  } else if (typeof c?.quantity !== "number") {
+                    colorValidationErrors.push(
+                      `❌ quantity must be a number in colors[${colorIndex}].`
+                    );
+                  } else if (!Number.isInteger(c?.quantity)) {
+                    colorValidationErrors.push(
+                      `❌ quantity must be an integer in colors[${colorIndex}].`
+                    );
+                  } else if (c?.quantity <= 0) {
+                    colorValidationErrors.push(
+                      `❌ quantity must be greater than 0 in colors[${colorIndex}].`
+                    );
+                  }
+
+                  // Accumulate this color's errors if any
+                  if (colorValidationErrors?.length > 0) {
+                    colorErrors.push({
+                      colorIndex,
+                      message: colorValidationErrors,
+                    });
+                  }
+                });
+
+                // If any color-level errors exist for this size, collect them for the global report
+                if (colorErrors?.length > 0) {
+                  addSizeColorsErrors.push({
+                    index: i, // index of the size in addSizes
+                    colors: colorErrors,
+                  });
+                }
+              }
+            }
+
+            // If this size entry has any errors, collect them with its index
+            if (errors?.length > 0) {
+              addSizesErrors.push({
+                index: i,
+                message: errors,
+              });
+            }
+          });
+
+          // ------------------------------------------------
+          // 6) Emit collected errors and flip updateStatus
+          // ------------------------------------------------
+          if (addSizesErrors?.length > 0) {
+            // Size-level errors go under validationErrors.addSizes
+            validationErrors.addSizes = addSizesErrors;
+            updateStatus = false;
+          }
+
+          if (addSizeColorsErrors?.length > 0) {
+            // Color-level errors for new sizes go under validationErrors.addSizeColors
+            validationErrors.addSizeColors = addSizeColorsErrors;
+            updateStatus = false;
+          }
+        }
+
+        if (!updateStatus) {
+          return next(new ApiError(validationErrors, 400));
+        }
+
+        if (updateStatus) {
+          product.price = undefined;
+          product.priceAfterDiscount = undefined;
+          product.quantity = undefined;
+          product.colors = undefined;
+
+          if (
+            addSizes != null &&
+            Array.isArray(addSizes) &&
+            addSizes.length > 0
+          ) {
+            const addSizesPromises = addSizes.map(async (size) => {
+              product.sizes.push(size);
+  
+              const cartsToUpdate = await Cart.find({
+                "cartItems.product": product._id,
+              }).session(session);
+  
+              if (cartsToUpdate.length > 0) {
+                let cartsNeedingUpdate = 0;
+  
+                const updateResults = await Promise.all(
+                  cartsToUpdate.map(async (cart) => {
+                    let shouldUpdateCart = false;
+                    const updatedItems = cart.cartItems.map((item) => {
                       if (
-                        item.color != null &&
-                        Array.isArray(size.colors) &&
-                        size.colors.length > 0
+                        item.product._id.equals(product._id) &&
+                        item.size.toLowerCase() === size.size.toLowerCase()
                       ) {
-                        const colorIsExist = size.colors.find(
-                          (c) =>
-                            c.color.toLowerCase() === item.color.toLowerCase()
-                        );
-
-                        if (colorIsExist) {
+                        if (
+                          item.color != null &&
+                          Array.isArray(size.colors) &&
+                          size.colors.length > 0
+                        ) {
+                          const colorIsExist = size.colors.find(
+                            (c) =>
+                              c.color.toLowerCase() === item.color.toLowerCase()
+                          );
+  
+                          if (colorIsExist) {
+                            if (!item.isAvailable) {
+                              item.isAvailable = true;
+                              shouldUpdateCart = true;
+                            }
+  
+                            if (
+                              item.quantity !== colorIsExist.quantity &&
+                              item.quantity > colorIsExist.quantity
+                            ) {
+                              item.quantity = colorIsExist.quantity;
+                              shouldUpdateCart = true;
+                            }
+  
+                            if (
+                              size.priceAfterDiscount != null &&
+                              item.price !== size.priceAfterDiscount
+                            ) {
+                              item.price = size.priceAfterDiscount;
+                              shouldUpdateCart = true;
+                            } else if (
+                              size.price != null &&
+                              item.price !== size.price
+                            ) {
+                              item.price = size.price;
+                              shouldUpdateCart = true;
+                            }
+                          } else if (item.isAvailable) {
+                            item.isAvailable = false;
+                            shouldUpdateCart = true;
+                          }
+                        } else if (
+                          item.color == null &&
+                          Array.isArray(size.colors) &&
+                          size.colors.length === 0
+                        ) {
                           if (!item.isAvailable) {
                             item.isAvailable = true;
                             shouldUpdateCart = true;
                           }
-
+  
                           if (
-                            item.quantity !== colorIsExist.quantity &&
-                            item.quantity > colorIsExist.quantity
+                            size.quantity != null &&
+                            item.quantity !== size.quantity &&
+                            item.quantity > size.quantity
                           ) {
-                            item.quantity = colorIsExist.quantity;
+                            item.quantity = size.quantity;
                             shouldUpdateCart = true;
                           }
-
+  
                           if (
                             size.priceAfterDiscount != null &&
                             item.price !== size.priceAfterDiscount
@@ -2586,100 +2834,65 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
                             item.price = size.price;
                             shouldUpdateCart = true;
                           }
-                        } else if (item.isAvailable) {
+                        }
+                      } else if (
+                        item.product._id.equals(product._id) &&
+                        item.size == null
+                      ) {
+                        if (item.isAvailable) {
                           item.isAvailable = false;
                           shouldUpdateCart = true;
                         }
-                      } else if (
-                        item.color == null &&
-                        Array.isArray(size.colors) &&
-                        size.colors.length === 0
-                      ) {
-                        if (!item.isAvailable) {
-                          item.isAvailable = true;
-                          shouldUpdateCart = true;
-                        }
-
-                        if (
-                          size.quantity != null &&
-                          item.quantity !== size.quantity &&
-                          item.quantity > size.quantity
-                        ) {
-                          item.quantity = size.quantity;
-                          shouldUpdateCart = true;
-                        }
-
-                        if (
-                          size.priceAfterDiscount != null &&
-                          item.price !== size.priceAfterDiscount
-                        ) {
-                          item.price = size.priceAfterDiscount;
-                          shouldUpdateCart = true;
-                        } else if (
-                          size.price != null &&
-                          item.price !== size.price
-                        ) {
-                          item.price = size.price;
-                          shouldUpdateCart = true;
-                        }
                       }
-                    } else if (
-                      item.product._id.equals(product._id) &&
-                      item.size == null
-                    ) {
-                      if (item.isAvailable) {
-                        item.isAvailable = false;
-                        shouldUpdateCart = true;
-                      }
-                    }
-                    return item;
-                  });
-
-                  if (shouldUpdateCart) {
-                    cartsNeedingUpdate++;
-
-                    // Save the updated cart items and recalculate total price
-                    const result = await Cart.updateOne(
-                      { _id: cart._id },
-                      {
-                        $set: {
-                          cartItems: updatedItems,
-                          totalCartPrice: calcTotalCartPrice({
+                      return item;
+                    });
+  
+                    if (shouldUpdateCart) {
+                      cartsNeedingUpdate++;
+  
+                      // Save the updated cart items and recalculate total price
+                      const result = await Cart.updateOne(
+                        { _id: cart._id },
+                        {
+                          $set: {
                             cartItems: updatedItems,
-                          }),
+                            totalCartPrice: calcTotalCartPrice({
+                              cartItems: updatedItems,
+                            }),
+                          },
                         },
-                      },
-                      { session }
-                    );
-
-                    // Return number of modified documents (1 or 0)
-                    return result.modifiedCount;
-                  }
-
-                  return 0;
-                })
-              );
-
-              // Sum up all updated cart counts
-              const modifiedCartsCount = updateResults.reduce(
-                (sum, count) => sum + count,
-                0
-              );
-
-              // Rollback if not all matching carts were updated successfully
-              if (modifiedCartsCount < cartsNeedingUpdate) {
-                throw new ApiError(
-                  `Some carts failed to update. All changes have been rolled back.`,
-                  400
+                        { session }
+                      );
+  
+                      // Return number of modified documents (1 or 0)
+                      return result.modifiedCount;
+                    }
+  
+                    return 0;
+                  })
                 );
+  
+                // Sum up all updated cart counts
+                const modifiedCartsCount = updateResults.reduce(
+                  (sum, count) => sum + count,
+                  0
+                );
+  
+                // Rollback if not all matching carts were updated successfully
+                if (modifiedCartsCount < cartsNeedingUpdate) {
+                  throw new ApiError(
+                    `Some carts failed to update. All changes have been rolled back.`,
+                    400
+                  );
+                }
               }
-            }
-          });
+            });
+  
+            await Promise.all(addSizesPromises);
+          }
 
-          await Promise.all(addSizesPromises);
+          product.sizesIsExist = true;
         }
-
-        product.sizesIsExist = true;
       }
     } else {
       // if (addSizes != null) {
