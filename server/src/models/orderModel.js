@@ -2,7 +2,6 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    id: String,
     user: {
       type: mongoose.Schema.ObjectId,
       ref: "User",
@@ -25,7 +24,6 @@ const orderSchema = new mongoose.Schema(
         price: Number,
       },
     ],
-
     taxPrice: {
       type: Number,
       default: 0,
