@@ -1,0 +1,42 @@
+[{
+  "_id": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "nameAr": "test cart(1)",
+  "nameEn": "test cart(1)",
+  "image": "category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745497123654"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745497123654"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a2c33662d9661df208865"
+  },
+  "nameAr": "test cart(2)",
+  "nameEn": "test cart(2)",
+  "image": "category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745497139942"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745497139942"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+}]

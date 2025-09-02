@@ -35,6 +35,7 @@ folders.forEach((folder) => {
 
 // Routes
 const mountRoutes = require("./routes");
+const UserModel = require("./models/userModel");
 // Connect With DB
 dbConnection();
 
@@ -125,6 +126,122 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 
 // Mount Routes
 mountRoutes(app);
+
+// async function o() {
+  // await UserModel.findOneAndDelete({ role: "user" });
+
+  // UserModel.create({
+  //   name: "Ahmed",
+  //   email: "a7medelshhat@gmail.com",
+  //   password: "pass123",
+  //   role: "admin",
+  // });
+
+//   await UserModel.insertMany([
+//     {
+//       name: "manar mohamed",
+//       email: "manar@gmail.com",
+//       password: "pass123",
+//       role: "employee",
+//       startShift: {
+//         hour: 11,
+//         minutes: 5,
+//       },
+//       endShift: {
+//         hour: 9,
+//         minutes: 4,
+//       },
+//     },
+//     {
+//       name: "ahmed",
+//       email: "a7med1@gmail.com",
+//       password: "pass123",
+//       role: "user",
+//       startShift: {
+//         hour: 10,
+//         minutes: 6,
+//       },
+//       endShift: {
+//         hour: 9,
+//         minutes: 5,
+//       },
+//       phone: "01123579361",
+//     },
+//     {
+//       name: "ahmed mohamed2",
+//       email: "a7med2@gmail.com",
+//       password: "pass123",
+//       role: "user",
+//       startShift: {
+//         hour: 10,
+//         minutes: 9,
+//       },
+//       endShift: {
+//         hour: 8,
+//         minutes: 8,
+//       },
+//       phone: "01123579361",
+//     },
+//     {
+//       name: "mohamed",
+//       email: "mohamed@gmail.com",
+//       password: "pass123",
+//       role: "employee",
+//       startShift: {
+//         hour: 12,
+//         minutes: 0,
+//       },
+//       endShift: {
+//         hour: 1,
+//         minutes: 2,
+//       },
+//       phone: "01123579361",
+//     },
+//     {
+//       name: "kalid mohamed",
+//       email: "kalid@gmail.com",
+//       password: "pass123",
+//       role: "user",
+//     },
+//     {
+//       accessToken:
+//         "ya29.A0AS3H6Ny3pXZtAe3f1svIBnfRLEVwsXNAM3-bRKMlbYEcsmlCFkaLkDxlSz9LprrzaDUTlFfQqaEkyUYz49KpnZiwhr6Zr6_O-SV7MUfTGGeGK08Y-rZxcJz3No7QtyjcggPBlmCZ9sljfdz1SIhKz50AZSeZnNV2YydDJNGvR0MshYhxIbksEDh4HdUNQoY-UOK6WkkaCgYKATUSARYSFQHGX2MiI8YBKGj8EuXkXItwqH9wuA0206",
+//       googleId: "101139685235643250003",
+//       name: "Ahmed Mohamed",
+//       email: "am01158168611@gmail.com",
+//       password: "pass123",
+//       role: "user",
+//     },
+//     {
+//       accessToken:
+//         "ya29.A0AS3H6Nzl6UB3viwMMGjCSY4oeKw3O9l0fN_EyfdeJCTW5GECObrLqYENjjTn8e5CGycj8Tt8TlvaNNG6E9nYuW15YXD1TERZuwFhyykwQOtbn92Rq3xXS_TZtT5P-I4GLaf9mCjuaUEe9i__RsqLRaTGESWvZ3RLtJIVFYY1d22pYGsgmDcPV3gA6a-_q4TBSzfFZ0waCgYKAW0SARcSFQHGX2Mim0rCSdtS5N30YPYWawGpwA0206",
+//       googleId: "105291596743922200437",
+//       name: "Ahmed Mohamed",
+//       email: "aalshhat5@gmail.com",
+//       password: "pass123",
+//       role: "user",
+//     },
+//     {
+//       name: "asdfsdaf",
+//       email: "ahmed@gmail.com",
+//       password: "pass123",
+//       role: "employee",
+//       startShift: {
+//         hour: 13,
+//         minutes: 14,
+//       },
+//       endShift: {
+//         hour: 16,
+//         minutes: 14,
+//       },
+//     },
+//   ]);
+
+//   const data = await UserModel.find();
+//   console.log(data);
+// }
+
+// o();
 
 app.all("*", (req, res, next) => {
   // Create error and send it to error handling middleware

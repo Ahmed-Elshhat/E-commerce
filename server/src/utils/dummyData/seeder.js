@@ -15,17 +15,17 @@ dotenv.config({ path: "../../../config.env" });
 dbConnection();
 
 // Read data
-// const categories = JSON.parse(fs.readFileSync("./categories.json"));
+const categories = JSON.parse(fs.readFileSync("./categories.json"));
 // const subCategories = JSON.parse(fs.readFileSync('./subCategories.json'));
-// const brands = JSON.parse(fs.readFileSync('./brands.json'));
+const brands = JSON.parse(fs.readFileSync('./brands.json'));
 const products = JSON.parse(fs.readFileSync('./products.json'));
 
 // Insert data into DB
 const insertData = async () => {
   try {
-    // await Category.create(categories);
+    await Category.create(categories);
     // await SubCategory.create(subCategories);
-    // await Brand.create(brands);
+    await Brand.create(brands);
     await Product.create(products);
 
     console.log("Data Inserted".green.inverse);
@@ -38,9 +38,9 @@ const insertData = async () => {
 // Delete data from DB
 const destroyData = async () => {
   try {
-    // await Category.deleteMany();
+    await Category.deleteMany();
     // await SubCategory.deleteMany();
-    // await Brand.deleteMany();
+    await Brand.deleteMany();
     await Product.deleteMany();
     console.log("Data Destroyed".red.inverse);
     process.exit();

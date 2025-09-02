@@ -1,42 +1,8 @@
 [
   {
-    "name": "Apple",
-    "image": "apple.jpg"
-  },
-  {
-    "name": "Samsung",
-    "image": "samsung.jpg"
-  },
-  {
-    "name": "Nike",
-    "image": "nike.jpg"
-  },
-  {
-    "name": "Adidas",
-    "image": "adidas.jpg"
-  },
-  {
-    "name": "Sony",
-    "image": "sony.jpg"
-  },
-  {
-    "name": "Dell",
-    "image": "dell.jpg"
-  },
-  {
-    "name": "HP",
-    "image": "hp.jpg"
-  },
-  {
-    "name": "LG",
-    "image": "lg.jpg"
-  },
-  {
-    "name": "Puma",
-    "image": "puma.jpg"
-  },
-  {
-    "name": "Asus",
-    "image": "asus.jpg"
+    "_id":"687c292f6424950d8995a787",
+    "nameAr": "اتش بي",
+    "nameEn": "HP",
+    "image": "brand-c1a514ab-2379-43e0-a31f-6ff0895b8273-1752967471737.jpeg"
   }
 ]

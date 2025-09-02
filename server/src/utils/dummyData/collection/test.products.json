@@ -1,0 +1,691 @@
+[{
+  "_id": {
+    "$oid": "680a4196e5ba39954c341d33"
+  },
+  "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+  "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+  "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+  "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "10"
+  },
+  "price": {
+    "$numberInt": "20"
+  },
+  "colors": [],
+  "sizes": [
+    {
+      "size": "s",
+      "quantity": {
+        "$numberInt": "0"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d34"
+      }
+    },
+    {
+      "size": "m",
+      "quantity": {
+        "$numberInt": "5"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [
+        {
+          "color": "#ff5c34",
+          "quantity": {
+            "$numberInt": "2"
+          },
+          "_id": {
+            "$oid": "680a4196e5ba39954c341d36"
+          }
+        },
+        {
+          "color": "#ff5c34",
+          "quantity": {
+            "$numberInt": "3"
+          },
+          "_id": {
+            "$oid": "680a4196e5ba39954c341d37"
+          }
+        }
+      ],
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d35"
+      }
+    },
+    {
+      "size": "l",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d38"
+      }
+    },
+    {
+      "size": "xl",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "priceAfterDiscount": {
+        "$numberInt": "5"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d39"
+      }
+    }
+  ],
+  "coverImage": "product-574c7885-c951-4eb8-a1ff-bd506f046bf9-1745502613318-cover.jpeg",
+  "images": [
+    {
+      "url": "product-0c0e74b5-654c-485c-9e16-9f2d189e7de1-1745502613450-3.jpeg",
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d3a"
+      }
+    },
+    {
+      "url": "product-d47991f2-b907-4c05-accc-5d64304b40e3-1745502613451-5.jpeg",
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d3b"
+      }
+    },
+    {
+      "url": "product-871ca3c6-f428-4cb1-925e-d3c11f85ebdb-1745502613448-1.jpeg",
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d3c"
+      }
+    },
+    {
+      "url": "product-b686c7aa-a302-45ee-9dc9-189e6e965688-1745502613449-2.jpeg",
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d3d"
+      }
+    },
+    {
+      "url": "product-7e154098-a691-4a9d-a1cf-ee57e9afbe6b-1745502613450-4.jpeg",
+      "_id": {
+        "$oid": "680a4196e5ba39954c341d3e"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745502614105"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745502614105"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a39f0e4b05039ea2f27e1"
+  },
+  "titleEn": "Scenario 4 - No Sizes No Colors(Cart Test)",
+  "titleAr": "سيناريو 4 - بدون مقاسات وبدون ألوان(Cart Test)",
+  "descriptionEn": "Product without sizes and without any colors.",
+  "descriptionAr": "منتج بدون مقاسات وبدون أي ألوان.",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "100"
+  },
+  "price": {
+    "$numberInt": "150"
+  },
+  "colors": [],
+  "sizes": [],
+  "coverImage": "scene4.jpeg",
+  "images": [
+    {
+      "url": "scene4.jpeg",
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27e2"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c33662d9661df208865"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a39f0e4b05039ea2f27d9"
+  },
+  "titleEn": "Scenario 2 - Sizes only(Cart Test)",
+  "titleAr": "سيناريو 2 - مقاسات فقط(Cart Test)",
+  "descriptionEn": "Product with sizes but no colors in sizes or globally.",
+  "descriptionAr": "منتج يحتوي على مقاسات فقط، بدون ألوان سواء داخل المقاسات أو بشكل عام.",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "100"
+  },
+  "price": {
+    "$numberInt": "300"
+  },
+  "colors": [],
+  "sizes": [
+    {
+      "size": "S",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "300"
+      },
+      "priceAfterDiscount": {
+        "$numberInt": "270"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27da"
+      }
+    },
+    {
+      "size": "XL",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "300"
+      },
+      "priceAfterDiscount": {
+        "$numberInt": "270"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27db"
+      }
+    }
+  ],
+  "coverImage": "scene2.jpeg",
+  "images": [
+    {
+      "url": "scene2.jpeg",
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27dc"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c33662d9661df208865"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a39f0e4b05039ea2f27dd"
+  },
+  "titleEn": "Scenario 3 - Colors only(Cart Test)",
+  "titleAr": "سيناريو 3 - ألوان فقط(Cart Test)",
+  "descriptionEn": "Product without sizes but has global colors.",
+  "descriptionAr": "منتج بدون مقاسات ولكنه يحتوي على ألوان عامة.",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "100"
+  },
+  "price": {
+    "$numberInt": "200"
+  },
+  "colors": [
+    {
+      "color": "black",
+      "quantity": {
+        "$numberInt": "50"
+      },
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27de"
+      }
+    },
+    {
+      "color": "white",
+      "quantity": {
+        "$numberInt": "50"
+      },
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27df"
+      }
+    }
+  ],
+  "sizes": [],
+  "coverImage": "scene3.jpeg",
+  "images": [
+    {
+      "url": "scene3.jpeg",
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27e0"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a3ead2e806910110d0e8e"
+  },
+  "titleEn": "ahmedahmedahmedahmedahmedahmed(Cart Test)",
+  "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد(Cart Test)",
+  "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+  "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "0"
+  },
+  "price": {
+    "$numberInt": "20"
+  },
+  "colors": [],
+  "sizes": [
+    {
+      "size": "s",
+      "quantity": {
+        "$numberInt": "0"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e8f"
+      }
+    },
+    {
+      "size": "m",
+      "quantity": {
+        "$numberInt": "5"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [
+        {
+          "color": "#ff5c34",
+          "quantity": {
+            "$numberInt": "2"
+          },
+          "_id": {
+            "$oid": "680a3ead2e806910110d0e91"
+          }
+        },
+        {
+          "color": "#ff5c34",
+          "quantity": {
+            "$numberInt": "3"
+          },
+          "_id": {
+            "$oid": "680a3ead2e806910110d0e92"
+          }
+        }
+      ],
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e90"
+      }
+    },
+    {
+      "size": "l",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e93"
+      }
+    },
+    {
+      "size": "xl",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "20"
+      },
+      "priceAfterDiscount": {
+        "$numberInt": "5"
+      },
+      "colors": [],
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e94"
+      }
+    }
+  ],
+  "coverImage": "product-913c4c01-f352-42f8-a3f5-abe5422c143a-1745501868291-cover.jpeg",
+  "images": [
+    {
+      "url": "product-816f5ba0-8431-4ab2-ba8b-690914640ed5-1745501868450-1.jpeg",
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e95"
+      }
+    },
+    {
+      "url": "product-022ca90c-bc2d-4622-8cf9-4be6c5a8109e-1745501868452-3.jpeg",
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e96"
+      }
+    },
+    {
+      "url": "product-6d2ff3a7-e72f-4389-9ea8-3826c187f662-1745501868451-2.jpeg",
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e97"
+      }
+    },
+    {
+      "url": "product-7440356d-beef-4ab1-8ea5-aa4f2ff58141-1745501868452-5.jpeg",
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e98"
+      }
+    },
+    {
+      "url": "product-df578845-a865-4dce-ae91-76c8cecec9fc-1745501868452-4.jpeg",
+      "_id": {
+        "$oid": "680a3ead2e806910110d0e99"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745501869186"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745501869186"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "680a39f0e4b05039ea2f27d1"
+  },
+  "titleEn": "Scenario 1 - Sizes with Colors(Cart Test)",
+  "titleAr": "السيناريو 1 - المقاسات مع الألوان (Cart Test)",
+  "descriptionEn": "Product with sizes and each size has its own colors.",
+  "descriptionAr": "منتج يحتوي على مقاسات، ولكل مقاس ألوانه الخاصة.",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "quantity": {
+    "$numberInt": "100"
+  },
+  "price": {
+    "$numberInt": "500"
+  },
+  "colors": [],
+  "sizes": [
+    {
+      "size": "M",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "500"
+      },
+      "priceAfterDiscount": {
+        "$numberInt": "450"
+      },
+      "colors": [
+        {
+          "color": "red",
+          "quantity": {
+            "$numberInt": "5"
+          },
+          "_id": {
+            "$oid": "680a39f0e4b05039ea2f27d3"
+          }
+        },
+        {
+          "color": "blue",
+          "quantity": {
+            "$numberInt": "5"
+          },
+          "_id": {
+            "$oid": "680a39f0e4b05039ea2f27d4"
+          }
+        }
+      ],
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27d2"
+      }
+    },
+    {
+      "size": "L",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "price": {
+        "$numberInt": "500"
+      },
+      "colors": [
+        {
+          "color": "green",
+          "quantity": {
+            "$numberInt": "5"
+          },
+          "_id": {
+            "$oid": "680a39f0e4b05039ea2f27d6"
+          }
+        },
+        {
+          "color": "yellow",
+          "quantity": {
+            "$numberInt": "5"
+          },
+          "_id": {
+            "$oid": "680a39f0e4b05039ea2f27d7"
+          }
+        }
+      ],
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27d5"
+      }
+    }
+  ],
+  "coverImage": "scene1.jpeg",
+  "images": [
+    {
+      "url": "scene1.jpeg",
+      "_id": {
+        "$oid": "680a39f0e4b05039ea2f27d8"
+      }
+    }
+  ],
+  "category": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1745500656145"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "68a11dd941adde6cf6142195"
+  },
+  "titleEn": "ahmedahmedahmedahmedahmedahmed",
+  "titleAr": "احمداحمداحمداحمداحمداحمداحمداحمداحمداحمد",
+  "descriptionEn": "descriptionEndescriptionEndescriptionEn",
+  "descriptionAr": "descriptionArdescriptionArdescriptionAr",
+  "sizesIsExist": false,
+  "sold": {
+    "$numberInt": "0"
+  },
+  "price": {
+    "$numberInt": "21"
+  },
+  "coverImage": "product-1525e8aa-83c3-4637-b62b-35b357dd74ab-1755389401463-cover.jpeg",
+  "category": {
+    "$oid": "680a2c23662d9661df208862"
+  },
+  "ratingsQuantity": {
+    "$numberInt": "0"
+  },
+  "colors": [
+    {
+      "color": "#ffddcc",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "_id": {
+        "$oid": "68a1bc0aea0230c1b5abb69e"
+      }
+    },
+    {
+      "color": "#ffggcc",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "_id": {
+        "$oid": "68a1bc6c9aa4b7f788cea5e3"
+      }
+    },
+    {
+      "color": "#feggcc",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "_id": {
+        "$oid": "68a1ce7b4fea3e777862a026"
+      }
+    },
+    {
+      "color": "#fegwcc",
+      "quantity": {
+        "$numberInt": "10"
+      },
+      "_id": {
+        "$oid": "68a1ce7b4fea3e777862a027"
+      }
+    }
+  ],
+  "sizes": [],
+  "images": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1755389401697"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1755434619621"
+    }
+  },
+  "__v": {
+    "$numberInt": "3"
+  },
+  "priceAfterDiscount": {
+    "$numberInt": "10"
+  }
+}]

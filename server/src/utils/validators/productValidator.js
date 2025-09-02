@@ -320,6 +320,8 @@ exports.updateProductValidator = [
       "brand",
       "updateSizes",
       "sizesIsExist",
+      "deletePriceAfterDiscount",
+      "deleteGeneralColors",
     ],
     ["id"]
   ),
@@ -364,36 +366,35 @@ exports.updateProductValidator = [
     .withMessage(
       "Product description in Arabic must not exceed 2000 characters."
     ),
-  check("quantity")
-    .optional()
-    .optional()
-    .isNumeric()
-    .withMessage("Product quantity must be a number")
-    .isInt({ gt: 0 })
-    .withMessage("Product quantity must be a positive integer")
-    .toInt(),
-  check("price")
-    .optional()
-    .optional()
-    .isNumeric()
-    .withMessage("Product price must be a number")
-    .isFloat({ gt: 0 })
-    .withMessage("Product price must be a positive number")
-    .toFloat(),
-  check("priceAfterDiscount")
-    .optional()
-    .optional()
-    .isNumeric()
-    .withMessage("Product price after discount must be a number")
-    .isFloat({ gt: 0 })
-    .withMessage("Product price after discount must be a positive number")
-    .toFloat()
-    .custom((value, { req }) => {
-      if (req.body.price <= value) {
-        throw new Error("price after discount must be lower than price");
-      }
-      return true;
-    }),
+  // check("quantity")
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("Product quantity must be a number")
+  //   .isInt({ gt: 0 })
+  //   .withMessage("Product quantity must be a positive integer")
+  //   .toInt(),
+  // check("price")
+  //   .optional()
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("Product price must be a number")
+  //   .isFloat({ gt: 0 })
+  //   .withMessage("Product price must be a positive number")
+  //   .toFloat(),
+  // check("priceAfterDiscount")
+  //   .optional()
+  //   .optional()
+  //   .isNumeric()
+  //   .withMessage("Product price after discount must be a number")
+  //   .isFloat({ gt: 0 })
+  //   .withMessage("Product price after discount must be a positive number")
+  //   .toFloat()
+  //   .custom((value, { req }) => {
+  //     if (req.body.price <= value) {
+  //       throw new Error("price after discount must be lower than price");
+  //     }
+  //     return true;
+  //   }),
   check("colors")
     .optional()
     .optional()

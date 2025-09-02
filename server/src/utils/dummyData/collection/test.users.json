@@ -1,0 +1,307 @@
+[{
+  "_id": {
+    "$oid": "6844fc29fa3e0fc791b6e0d1"
+  },
+  "name": "Ahmed Elshhat",
+  "email": "a7medelshhat@gmail.com",
+  "password": "$2a$12$AvXLi8L4uJlcGI/ZQMs5neQxY9TNyYKVrmplL8LsEUqWiG8NYtO.q",
+  "role": "admin",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1749351465286"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1755388907299"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  },
+  "accessToken": "ya29.a0AS3H6NyUH6dCl5FIWjjzTXGp4NE_l7FABfB2upWlx3jiSI3fIfoO2w0QUc6t-mJrPzn_PB-0XLRuUMOULrTGu_JSHnUw8jNTQbYXd9-0iyQXUh0A7gxFyKQ4HCTa-zLr5c2RfumRV3T7xPZQ0jxxsIivLbNxvmB32azYH5RpaCgYKAbMSARcSFQHGX2MiCC-l8USH19iE40Sd7rBNwQ0175",
+  "googleId": "103265024919445783156"
+},
+{
+  "_id": {
+    "$oid": "6844fcebf5dfef59481f5081"
+  },
+  "name": "manar mohamed",
+  "email": "manar@gmail.com",
+  "password": "$2a$12$hSogj50h8i45qwjCUFTmz.gMI39MbolMOxfLLGWrnw2LPJ/bF/Xea",
+  "phone": "01154861753",
+  "startShift": {
+    "hour": {
+      "$numberInt": "11"
+    },
+    "minutes": {
+      "$numberInt": "5"
+    }
+  },
+  "endShift": {
+    "hour": {
+      "$numberInt": "9"
+    },
+    "minutes": {
+      "$numberInt": "4"
+    }
+  },
+  "role": "employee",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1749351659892"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1749351659892"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "6844fd58f5dfef59481f508b"
+  },
+  "name": "ahmed",
+  "email": "a7med1@gmail.com",
+  "password": "$2a$12$u/Cy/TeAcmi9LCIBx0xETOb1D/O15aZYa3kj1ChrSRl1m/bM7cfjS",
+  "phone": "01123579361",
+  "startShift": {
+    "hour": {
+      "$numberInt": "10"
+    },
+    "minutes": {
+      "$numberInt": "6"
+    }
+  },
+  "endShift": {
+    "hour": {
+      "$numberInt": "9"
+    },
+    "minutes": {
+      "$numberInt": "6"
+    }
+  },
+  "role": "user",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1749351768708"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1749351768708"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "6844fe17f5dfef59481f5095"
+  },
+  "name": "ahmed mohamed2",
+  "email": "a7med2@gmail.com",
+  "password": "$2a$12$9G.1ZhIuk8LFJ07f2wS2yumy2QpeGTz15DrFZMW7fN9L.BCg6ugMm",
+  "phone": "01123579361",
+  "startShift": {
+    "hour": {
+      "$numberInt": "10"
+    },
+    "minutes": {
+      "$numberInt": "9"
+    }
+  },
+  "endShift": {
+    "hour": {
+      "$numberInt": "8"
+    },
+    "minutes": {
+      "$numberInt": "8"
+    }
+  },
+  "role": "user",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1749351959600"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1749351959600"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "6845e7cd76d66de2a3cf0dae"
+  },
+  "name": "mohamed",
+  "email": "mohamed@gmail.com",
+  "password": "$2a$12$Po/EVUL//isLx4a4oz04fexCDMNBRBwR8dwMdHuDh/e.w5hSmFtgi",
+  "phone": "01123579361",
+  "startShift": {
+    "hour": {
+      "$numberInt": "12"
+    },
+    "minutes": {
+      "$numberInt": "0"
+    }
+  },
+  "endShift": {
+    "hour": {
+      "$numberInt": "1"
+    },
+    "minutes": {
+      "$numberInt": "2"
+    }
+  },
+  "role": "employee",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1749411789508"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1749411789508"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "68948230fce7e8bc5dcc9967"
+  },
+  "name": "kalid mohamed",
+  "email": "kalid@gmail.com",
+  "password": "$2a$12$w1UPzIb6reT7s1fRvRpB0.hzsfiG6NoREW..otmeM2BPiFDxmSE7W",
+  "role": "user",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1754563120539"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1754563120539"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "6894825cfce7e8bc5dcc9c42"
+  },
+  "accessToken": "ya29.A0AS3H6Ny3pXZtAe3f1svIBnfRLEVwsXNAM3-bRKMlbYEcsmlCFkaLkDxlSz9LprrzaDUTlFfQqaEkyUYz49KpnZiwhr6Zr6_O-SV7MUfTGGeGK08Y-rZxcJz3No7QtyjcggPBlmCZ9sljfdz1SIhKz50AZSeZnNV2YydDJNGvR0MshYhxIbksEDh4HdUNQoY-UOK6WkkaCgYKATUSARYSFQHGX2MiI8YBKGj8EuXkXItwqH9wuA0206",
+  "googleId": "101139685235643250003",
+  "name": "Ahmed Mohamed",
+  "email": "am01158168611@gmail.com",
+  "password": "$2a$12$c.ROHkUJE8knlDXfpi59kOSZ9KSLuQRNzeN/UpQctDaG7myO89bAa",
+  "role": "user",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1754563164662"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1754999445858"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "68948287fce7e8bc5dcc9d37"
+  },
+  "accessToken": "ya29.A0AS3H6Nzl6UB3viwMMGjCSY4oeKw3O9l0fN_EyfdeJCTW5GECObrLqYENjjTn8e5CGycj8Tt8TlvaNNG6E9nYuW15YXD1TERZuwFhyykwQOtbn92Rq3xXS_TZtT5P-I4GLaf9mCjuaUEe9i__RsqLRaTGESWvZ3RLtJIVFYY1d22pYGsgmDcPV3gA6a-_q4TBSzfFZ0waCgYKAW0SARcSFQHGX2Mim0rCSdtS5N30YPYWawGpwA0206",
+  "googleId": "105291596743922200437",
+  "name": "Ahmed Mohmed",
+  "email": "aalshhat5@gmail.com",
+  "password": "$2a$12$K.Pb1iGPWgE1kOK1QJveqelByeMMMeToC2eMCnyb/b05tsb8fIc1S",
+  "role": "user",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1754563207097"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1754999398159"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+},
+{
+  "_id": {
+    "$oid": "689b142335a8bff93656077e"
+  },
+  "name": "asdfsdaf",
+  "email": "ahmed@gmail.com",
+  "password": "$2a$12$4sYa6tYbOv4EZaIob3xd.u45jHvZuQifczHbjAR/Nd4fFEgXowmke",
+  "phone": "01123579361",
+  "startShift": {
+    "hour": {
+      "$numberInt": "13"
+    },
+    "minutes": {
+      "$numberInt": "14"
+    }
+  },
+  "endShift": {
+    "hour": {
+      "$numberInt": "16"
+    },
+    "minutes": {
+      "$numberInt": "14"
+    }
+  },
+  "role": "employee",
+  "active": true,
+  "addresses": [],
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1754993699054"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1754993699054"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+}]

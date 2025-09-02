@@ -895,3 +895,579 @@ if (
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// ---- GLOBAL FLAGS ----
+let allOriginalColorsDeleted = false;
+let hasNewOrUpdatedColors = false;
+
+// ---- HELPERS ----
+// Helper: parse number
+function isAllowedNumber(val) {
+  const numericRegex = /^-?\d+(\.\d+)?$/;
+  if (typeof val === "number") return Number.isFinite(val);
+  if (typeof val === "string") return numericRegex.test(val.trim());
+  return false;
+}
+
+// Helper: parse boolean string
+function parseBoolean(str) {
+  if (typeof str !== "string") return null;
+  const val = str.trim().toLowerCase();
+  if (val === "true") return true;
+  if (val === "false") return false;
+  if (val === true) return true;
+  if (val === false) return false;
+  return null;
+}
+
+// Helper: push error (always array)
+function addError(obj, key, message) {
+  if (!obj[key]) obj[key] = [];
+  obj[key].push(message);
+}
+
+// ---- VALIDATION FUNCTIONS ----
+// Price validation
+function validatePrice({ price, priceAfterDiscount, product }) {
+  const errors = [];
+
+  if (!isAllowedNumber(price)) {
+    errors.push(`Price must be a number.`);
+  } else if (+price <= 0) {
+    errors.push(`❌ Size price must be a positive number greater than 0.`);
+  } else {
+    // Must be different from the current original price
+    if (+price === product?.price) {
+      errors.push(`The new price must be different from the old price.`);
+    }
+
+    // If not also setting a new discounted price, then price must be strictly greater than existing discounted price
+    if (priceAfterDiscount == null && +price <= product?.priceAfterDiscount) {
+      errors.push(
+        `❌ The price must not be less than or equal to its existing discounted price.`
+      );
+    }
+  }
+
+  return errors; // ممكن يرجع مصفوفة فارغة لو مفيش errors
+}
+
+// Delete price after discount validation
+function validateDeletePriceAfterDiscount(deletePriceAfterDiscount) {
+  const parsed = parseBoolean(deletePriceAfterDiscount);
+  if (deletePriceAfterDiscount != null && parsed == null) {
+    return {
+      parsed,
+      errors: [
+        `"Delete price after discount" must be a boolean (true or false).`,
+      ],
+    };
+  }
+  return { parsed, errors: [] };
+}
+
+// Price after discount validation
+function validatePriceAfterDiscount({ 
+  priceAfterDiscount, 
+  price, 
+  product, 
+  deletePriceAfterDiscountValidation 
+}) {
+  const errors = [];
+
+  if (deletePriceAfterDiscountValidation) {
+    errors.push(
+      `Cannot update and delete price after discount simultaneously.`
+    );
+  }
+
+  if (!isAllowedNumber(priceAfterDiscount)) {
+    errors.push(`Discounted price must be a number.`);
+  } else if (+priceAfterDiscount <= 0) {
+    errors.push(`❌ price after discount must be a positive number greater than 0.`);
+  } else {
+    // Must be different from current discounted price if one exists
+    if (
+      product?.priceAfterDiscount != null &&
+      +priceAfterDiscount === product?.priceAfterDiscount
+    ) {
+      errors.push(
+        `The new discounted price must be different from the old discounted price.`
+      );
+    }
+
+    // If not also setting a new base price, ensure discounted price < existing original price
+    if (price == null && +priceAfterDiscount > product?.price) {
+      errors.push(
+        `Discounted price must be less than the original price (${product?.price}).`
+      );
+    }
+  }
+
+  return errors;
+}
+
+// Price and price after discount relation validation
+function validatePriceAndDiscountRelation(price, priceAfterDiscount) {
+  // لو واحد منهم مش موجود => ما نطبقش الشرط
+  if (price == null || priceAfterDiscount == null) return [];
+
+  // لو واحد منهم مش رقم صالح => ما نطبقش الشرط
+  if (!isAllowedNumber(price) || !isAllowedNumber(priceAfterDiscount)) return [];
+
+  // لو واحد منهم <= 0 => ما نطبقش الشرط
+  if (+price <= 0 || +priceAfterDiscount <= 0) return [];
+
+  // لو كل الشروط فوق متحققة نطبق المقارنة كما هي
+  if (+priceAfterDiscount > +price) {
+    return ["Discounted price must be less than the original price."];
+  }
+
+  return [];
+}
+
+// Delete general colors validation
+function validateDeleteGeneralColors(deleteGeneralColors, product) {
+  const errors = [];
+
+  if (deleteGeneralColors == null) {
+    return errors; // no errors, skip
+  }
+
+  if (!Array.isArray(deleteGeneralColors)) {
+    errors.push(`"Delete general color" field must be an array.`);
+    return errors;
+  }
+
+  if (deleteGeneralColors.length === 0) {
+    errors.push(`"Delete general color" array cannot be empty.`); // Add message here
+    return errors;
+  }
+
+  if (product.colors.length === 0) {
+    errors.push("You cannot delete colors because this product has no colors.");
+    return errors;
+  }
+
+  const seenDeleteColors = [];
+  const deleteColorErrors = [];
+
+  deleteGeneralColors.forEach((c, i) => {
+    const colorValidationErrors = [];
+    const lowerC = typeof c === "string" ? c?.trim()?.toLowerCase() : null;
+
+    // Type/emptiness validation
+    if (typeof lowerC !== "string") {
+      colorValidationErrors.push(
+        `❌ Color at index ${i + 1} in the deleted colors list must be a string.`
+      );
+    } else if (lowerC === "") {
+      colorValidationErrors.push(
+        `❌ Color at index ${i + 1} in the deleted colors list cannot be empty.`
+      );
+    } else {
+      // Ensure the color exists in the original size before deletion
+      const existsInOriginal = product.colors.some(
+        (color) => color?.color?.trim()?.toLowerCase() === lowerC
+      );
+
+      if (!existsInOriginal) {
+        colorValidationErrors.push(
+          `❌ Cannot delete color "${c}" at index ${i + 1} because it does not exist in the original color list.`
+        );
+      }
+
+      // Duplicate delete check
+      if (seenDeleteColors.includes(lowerC)) {
+        colorValidationErrors.push(
+          `❌ Duplicate color "${c}" found in delete colors list at index ${i + 1}. Each color must be unique.`
+        );
+      }
+
+      // Mark as seen to catch duplicates
+      seenDeleteColors.push(lowerC);
+
+      // Normalize array inplace
+      deleteGeneralColors[i] = lowerC;
+    }
+
+    if (colorValidationErrors.length > 0) {
+      deleteColorErrors.push({
+        colorIndex: i,
+        message: colorValidationErrors,
+      });
+    }
+  });
+
+  if (deleteColorErrors.length > 0) {
+    errors.push(...deleteColorErrors);
+  }
+
+  return errors;
+}
+
+// Colors validation
+function validateColors(colors, product, deleteGeneralColors) {
+  const errors = [];
+
+  if (colors == null) return errors;
+  if (!Array.isArray(colors)) {
+    errors.push(`"Colors" field must be an array.`);
+    return errors;
+  }
+  if (colors.length === 0) {
+    errors.push(`"Colors" array cannot be empty.`);
+    return errors;
+  }
+
+  const seenOldColorNames = [];
+  const seenNewColorNames = [];
+  const colorErrors = [];
+
+  colors.forEach((color, colorIndex) => {
+    const colorValidationErrors = [];
+
+    // --- (a) type validation ---
+    if (color?.type == null) {
+      colorValidationErrors.push(
+        `Color update type is required at color index ${colorIndex + 1}. Please specify either "update" or "new".`
+      );
+    } else if (typeof color?.type !== "string") {
+      colorValidationErrors.push(
+        `Color type at color index ${colorIndex + 1} must be a string.`
+      );
+    } else if (
+      color?.type?.trim()?.toLowerCase() !== "new" &&
+      color?.type?.trim()?.toLowerCase() !== "update"
+    ) {
+      colorValidationErrors.push(
+        `Invalid color update type "${color.type}" at color index ${colorIndex + 1}. Expected "new" or "update".`
+      );
+    }
+
+    // --- (b) colorName validation ---
+    if (color?.colorName == null) {
+      colorValidationErrors.push(
+        `Missing color name at color index ${colorIndex + 1}.`
+      );
+    } else if (typeof color?.colorName !== "string") {
+      colorValidationErrors.push(
+        `Color name at color index ${colorIndex + 1} must be a string.`
+      );
+    } else {
+      // If renaming, newColorName must differ from colorName
+      if (
+        color?.newColorName != null &&
+        typeof color?.newColorName === "string" &&
+        color?.colorName?.trim()?.toLowerCase() ===
+          color?.newColorName?.trim()?.toLowerCase()
+      ) {
+        colorValidationErrors.push(
+          `New color name must be different from the old color name at color index ${colorIndex + 1}.`
+        );
+      }
+
+      // Prevent duplicate colorName entries
+      if (
+        seenOldColorNames.includes(color?.colorName?.trim()?.toLowerCase())
+      ) {
+        colorValidationErrors.push(
+          `Duplicate color name "${color.colorName}" found at color index ${colorIndex + 1}.`
+        );
+      }
+    }
+
+    // --- (c) newColorName duplicates/conflicts ---
+    if (color?.newColorName != null) {
+      if (typeof color?.newColorName !== "string") {
+        colorValidationErrors.push(
+          `New color name at color index ${colorIndex + 1} must be a string.`
+        );
+      } else {
+        if (
+          seenNewColorNames.includes(
+            color?.newColorName?.trim()?.toLowerCase()
+          )
+        ) {
+          colorValidationErrors.push(
+            `Duplicate new color name "${color.newColorName}" found at color index ${colorIndex + 1}.`
+          );
+        }
+        if (
+          seenOldColorNames.includes(
+            color?.newColorName?.trim()?.toLowerCase()
+          )
+        ) {
+          colorValidationErrors.push(
+            `The new color name "${color.newColorName}" is duplicated in the update list.`
+          );
+        }
+      }
+    }
+
+    // --- (d) quantity validation ---
+    let quantityErrorsStatus = false;
+    if (color?.colorQuantity != null) {
+      if (!isAllowedNumber(color?.colorQuantity)) {
+        colorValidationErrors.push(
+          `Color quantity at color index ${colorIndex + 1} must be a number.`
+        );
+        quantityErrorsStatus = true;
+      } else if (Number(color?.colorQuantity) <= 0) {
+        colorValidationErrors.push(
+          `Color quantity at color index ${colorIndex + 1} cannot be negative.`
+        );
+        quantityErrorsStatus = true;
+      } else if (!Number.isInteger(Number(color?.colorQuantity))) {
+        colorValidationErrors.push(
+          `Color quantity at color index ${colorIndex + 1} must be an integer.`
+        );
+        quantityErrorsStatus = true;
+      }
+    }
+
+    // --- (e) Behavior by type ---
+    if (
+      color?.type != null &&
+      typeof color?.type === "string" &&
+      (color?.type?.trim()?.toLowerCase() === "new" ||
+        color?.type?.trim()?.toLowerCase() === "update")
+    ) {
+      if (color?.type?.trim()?.toLowerCase() === "new") {
+        // New color cannot already exist
+        if (
+          color?.colorName != null &&
+          typeof color?.colorName === "string"
+        ) {
+          const newColorNameIsExist = product.colors.find(
+            (c) =>
+              c.color.toLowerCase() ===
+              color.colorName?.trim()?.toLowerCase()
+          );
+
+          if (newColorNameIsExist) {
+            colorValidationErrors.push(
+              `The color name "${color.colorName}" already exists.`
+            );
+          }
+        }
+        if (color?.colorQuantity == null) {
+          colorValidationErrors.push(
+            `Please specify the quantity for the new color "${color.colorName}".`
+          );
+        }
+        if (color?.newColorName != null) {
+          colorValidationErrors.push(`For new colors, use "Color Name" only.`);
+        }
+      }
+
+      if (color?.type?.trim()?.toLowerCase() === "update") {
+        if (
+          color.colorName != null &&
+          typeof color.colorName === "string"
+        ) {
+          // Cannot update if scheduled for deletion
+          if (
+            deleteGeneralColors != null &&
+            Array.isArray(deleteGeneralColors) &&
+            deleteGeneralColors?.length > 0 &&
+            deleteGeneralColors?.includes(
+              color?.colorName?.trim()?.toLowerCase()
+            )
+          ) {
+            colorValidationErrors.push(
+              `Color "${color.colorName}" cannot be updated because it is scheduled for deletion.`
+            );
+          }
+
+          // Must exist originally
+          const existingColor = product.colors.find(
+            (c) =>
+              c.color.toLowerCase() === color?.colorName?.trim()?.toLowerCase()
+          );
+          if (!existingColor) {
+            colorValidationErrors.push(
+              `The original color "${color.colorName}" does not exist.`
+            );
+          } else {
+            if (color?.colorQuantity === existingColor?.quantity) {
+              colorValidationErrors.push(
+                `The new quantity for color "${color.colorName}" cannot be the same as the old quantity (${existingColor.quantity}).`
+              );
+            }
+
+            const isSameQuantity =
+              color?.colorQuantity == null ||
+              quantityErrorsStatus ||
+              color?.colorQuantity === existingColor?.quantity;
+
+            const isSameName =
+              color?.newColorName == null ||
+              typeof color?.newColorName !== "string" ||
+              color?.newColorName?.trim()?.toLowerCase() ===
+                color?.colorName?.trim()?.toLowerCase();
+
+            if (isSameQuantity && isSameName) {
+              colorValidationErrors.push(
+                `No update provided for the color "${color.colorName}".`
+              );
+            }
+          }
+        }
+
+        // NewColorName conflicts
+        if (color?.newColorName != null && typeof color?.newColorName === "string") {
+          const newColorNameIsExist = product.colors.find(
+            (c) =>
+              c.color.toLowerCase() === color?.newColorName?.trim()?.toLowerCase()
+          );
+          if (newColorNameIsExist) {
+            colorValidationErrors.push(
+              `The new color name "${color.newColorName}" already exists.`
+            );
+          }
+        }
+      }
+    }
+
+    // Record seen names
+    if (color?.colorName != null && typeof color?.colorName === "string")
+      seenOldColorNames.push(color?.colorName?.trim()?.toLowerCase());
+    if (color?.newColorName != null && typeof color?.newColorName === "string")
+      seenNewColorNames.push(color?.newColorName?.trim()?.toLowerCase());
+
+    // Push accumulated errors
+    if (colorValidationErrors.length > 0) {
+      colorErrors.push({ colorIndex, message: colorValidationErrors });
+    }
+  });
+
+  if (colorErrors.length > 0) errors.push(...colorErrors);
+  return errors;
+}
+
+// Quantity validation
+function validateQuantity({ quantity, product, colors, deleteGeneralColors }) {
+  const errors = [];
+
+  // Determine if all original colors are being deleted
+  allOriginalColorsDeleted =
+    Array.isArray(product?.colors) &&
+    product?.colors?.length > 0 &&
+    Array.isArray(deleteGeneralColors) &&
+    deleteGeneralColors?.length === product?.colors?.length &&
+    product.colors.every((oc) =>
+      deleteGeneralColors.some(
+        (dc) =>
+          dc?.trim()?.toLowerCase() === oc?.color?.trim()?.toLowerCase()
+      )
+    );
+
+  // Determine if there are any new or updated colors
+  hasNewOrUpdatedColors =
+    Array.isArray(colors) &&
+    colors.some((c) => {
+      if (typeof c?.type === "string") {
+        return (
+          c?.type?.trim()?.toLowerCase() === "new" ||
+          c?.type?.trim()?.toLowerCase() === "update"
+        );
+      }
+      return false;
+    });
+
+  if (quantity != null) {
+    if (!isAllowedNumber(quantity)) {
+      errors.push(`The quantity must be a number.`);
+    } else if (!Number.isInteger(+quantity)) {
+      errors.push(`Quantity must be an integer.`);
+    } else if (+quantity <= 0) {
+      errors.push(`Quantity must be greater than 0.`);
+    }
+
+    const hasOriginalColors = product?.colors?.length > 0;
+
+    // Cannot set sizeQuantity in the same request that adds/updates colors
+    if (hasNewOrUpdatedColors) {
+      errors.push(
+        `Cannot add or update quantity while adding or updating colors.`
+      );
+    }
+
+    // Case 1: size currently has original colors -> must delete them all first
+    if (hasOriginalColors && !allOriginalColorsDeleted) {
+      errors.push(
+        `Cannot add or update quantity because the product still has existing colors. Please delete them first.`
+      );
+    }
+  } else if (allOriginalColorsDeleted && !hasNewOrUpdatedColors) {
+    // If deleting all original colors and not adding/updating new ones, general quantity is required
+    errors.push(
+      `If you want to delete all colors, you must also provide a general quantity for the size.`
+    );
+  }
+
+  return errors;
+}
+
+// ---- MAIN VALIDATION HANDLER ----
+// Price
+if (price != null) {
+  const priceErrors = validatePrice({ price, priceAfterDiscount, product });
+  if (priceErrors.length > 0) {
+    validationErrors.price = priceErrors;
+    updateStatus = false;
+  }
+}
+
+// Delete price after discount
+const { parsed: deletePAD, errors: deletePADerrors } =
+  validateDeletePriceAfterDiscount(deletePriceAfterDiscount);
+
+if (deletePADerrors.length > 0) {
+  validationErrors.deletePriceAfterDiscount = deletePADerrors;
+  updateStatus = false;
+}
+
+// Price after discount
+if (priceAfterDiscount != null) {
+  const padErrors = validatePriceAfterDiscount({
+    priceAfterDiscount,
+    price,
+    product,
+    deletePriceAfterDiscountValidation: deletePAD,
+  });
+
+  if (padErrors.length > 0) {
+    validationErrors.priceAfterDiscount = padErrors;
+    updateStatus = false;
+  }
+}
+
+// Relation between price & price after discount
+const relationErrors = validatePriceAndDiscountRelation(price, priceAfterDiscount);
+if (relationErrors.length > 0) {
+  validationErrors.priceAndDiscountedPrice = relationErrors;
+  updateStatus = false;
+}
+
+// Delete general colors
+const deleteGeneralColorsErrors = validateDeleteGeneralColors(deleteGeneralColors, product);
+if (deleteGeneralColorsErrors.length > 0) {
+  validationErrors.deleteGeneralColors = deleteGeneralColorsErrors;
+  updateStatus = false;
+}
+
+// Add and update colors
+const colorsErrors = validateColors(colors, product, deleteGeneralColors);
+if (colorsErrors.length > 0) {
+  validationErrors.updateGeneralColors = colorsErrors;
+  updateStatus = false;
+}
+
+// Quantity
+const quantityErrors = validateQuantity({ quantity, product, colors, deleteGeneralColors });
+if (quantityErrors.length > 0) {
+  validationErrors.quantity = quantityErrors;
+  updateStatus = false;
+}

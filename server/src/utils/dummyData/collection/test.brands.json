@@ -1,0 +1,21 @@
+[{
+  "_id": {
+    "$oid": "687c292f6424950d8995a787"
+  },
+  "nameAr": "اتش بي",
+  "nameEn": "HP",
+  "image": "brand-c1a514ab-2379-43e0-a31f-6ff0895b8273-1752967471737.jpeg",
+  "createdAt": {
+    "$date": {
+      "$numberLong": "1752967471885"
+    }
+  },
+  "updatedAt": {
+    "$date": {
+      "$numberLong": "1752967471885"
+    }
+  },
+  "__v": {
+    "$numberInt": "0"
+  }
+}]

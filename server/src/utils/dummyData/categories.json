@@ -1,42 +1,14 @@
 [
   {
-    "name": "Electronics",
-    "image": "electronics.jpg"
+    "_id": "680a2c23662d9661df208862",
+    "nameAr": "test cart(1)",
+    "nameEn": "test cart(1)",
+    "image": "category-37c19ada-7b90-44e4-8fe0-21f343863db1-1745497123624.jpeg"
   },
   {
-    "name": "Fashion",
-    "image": "fashion.jpg"
-  },
-  {
-    "name": "Books",
-    "image": "books.jpg"
-  },
-  {
-    "name": "Home Appliances",
-    "image": "home-appliances.jpg"
-  },
-  {
-    "name": "Sports",
-    "image": "sports.jpg"
-  },
-  {
-    "name": "Toys",
-    "image": "toys.jpg"
-  },
-  {
-    "name": "Health & Beauty",
-    "image": "health-beauty.jpg"
-  },
-  {
-    "name": "Groceries",
-    "image": "groceries.jpg"
-  },
-  {
-    "name": "Automotive",
-    "image": "automotive.jpg"
-  },
-  {
-    "name": "Gaming",
-    "image": "gaming.jpg"
+    "_id": "680a2c33662d9661df208865",
+    "nameAr": "test cart(2)",
+    "nameEn": "test cart(2)",
+    "image": "category-c84663ff-5b60-41e4-8fa3-c22706b637c1-1745497139918.jpeg"
   }
 ]

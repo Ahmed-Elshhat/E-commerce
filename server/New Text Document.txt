@@ -1,0 +1,24 @@
+mongod --dbpath "C:\data\db" --replSet rs0
+
+mongosh
+
+rs.initiate()
+
+rs.status()
+
+mongodb://127.0.0.1:27017/?replicaSet=rs0
+
+use admin
+db.createUser({
+  user: "admin",
+  pwd: "mypassword",
+  roles: [ { role: "root", db: "admin" } ]
+})
+
+mongod --auth --replSet rs0 --dbpath "C:\data\db"
+
+mongodb://admin:mypassword@127.0.0.1:27017/?replicaSet=rs0&authSource=admin
+
+
+
+
